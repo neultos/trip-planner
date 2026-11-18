@@ -29,7 +29,7 @@
   #results li { cursor:pointer; }
   .pin { background:var(--accent); color:#fff; border-radius:50%; width:26px; height:26px; display:grid; place-items:center; font:600 13px system-ui; border:2px solid #fff; box-shadow:0 1px 4px #0006; }
   .muted { color:var(--muted); font-size:14px; }
-  @media (min-width:800px) { body { flex-direction:row; flex-wrap:wrap; } header { width:100%; } #panel { width:380px; height:auto; flex:none; order:-1; } #map { height:auto; } }
+  @media (min-width:800px) { body { display:grid; grid-template-columns:380px 1fr; grid-template-rows:auto minmax(0,1fr); } header { grid-column:1/-1; } #panel { height:auto; } #map { min-height:0; } }
 </style>
 </head>
 <body>
