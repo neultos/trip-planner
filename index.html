@@ -1770,37 +1770,9 @@ $('fileJson').onchange = async e => {
 };
 
 /* ---------- 프로필 (이 기기에 저장, 참여한 여행의 멤버 목록에 복사됨) ---------- */
-// 기본 프로필 8종 — 대표가 준 캐릭터 그림을 보고 SVG로 다시 그림
-// shortcut: 원본 PNG를 받으면 이미지 파일로 교체
-const SK = '#f9d2b4', HR = '#4b3426', EY = '#2b1d14';
-const EYES = {
-  dot: `<circle cx="43" cy="48" r="2.6" fill="${EY}"/><circle cx="57" cy="48" r="2.6" fill="${EY}"/>`,
-  wink: `<circle cx="43" cy="48" r="2.6" fill="${EY}"/><path d="M54 49q3-4 6 0" stroke="${EY}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
-  happy: `<path d="M40 49q3-4 6 0M54 49q3-4 6 0" stroke="${EY}" stroke-width="2" fill="none" stroke-linecap="round"/>`
-};
-const MOUTH = {
-  smile: `<path d="M45 56q5 4 10 0" stroke="${EY}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
-  open: `<path d="M45 55h10q0 7-5 7t-5-7z" fill="#e8705f"/>`
-};
-const GLASSES = `<g fill="none" stroke="${HR}" stroke-width="1.8"><circle cx="43" cy="48" r="5.6"/><circle cx="57" cy="48" r="5.6"/><path d="M48.6 48h2.8M37.4 47l-5-1M62.6 47l5-1"/></g>`;
-const dots = l => `<g fill="${HR}">${l.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('')}</g>`;
-function face(bg, shirt, back, front, eyes, mouth, extra = '') {
-  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="${bg}"/>
-    <g transform="translate(50 60) scale(1.22) translate(-50 -58)">${back}
-    <path d="M18 100c4-17 16-25 32-25s28 8 32 25z" fill="${shirt}"/><rect x="44" y="63" width="12" height="13" rx="4" fill="${SK}"/>
-    <circle cx="30.5" cy="50" r="6" fill="${SK}"/><circle cx="69.5" cy="50" r="6" fill="${SK}"/><ellipse cx="50" cy="48" rx="19" ry="21" fill="${SK}"/>
-    ${front}${eyes}${mouth}${extra}</g></svg>`;
-}
-const AV = [
-  face('#c3dcf7', '#1f6fd6', '', `<path d="M30 47c-3-19 9-30 23-30 13 0 20 9 18 26-5-7-11-11-17-12-7 7-15 12-24 16z" fill="${HR}"/>`, EYES.dot, MOUTH.open),
-  face('#fbdcd0', '#f07c22', '', dots([[32, 40, 6], [34, 31, 7], [41, 25, 7], [50, 23, 8], [59, 25, 7], [66, 31, 7], [68, 40, 6], [50, 31, 7]]), EYES.dot, MOUTH.smile, GLASSES),
-  face('#c9eedf', '#3f9a4f', '', `<path d="M31 44q3 6 7 3 3 4 7 1 3 3 6 0" fill="${HR}"/><path d="M30 41c0-15 9-24 21-24s21 9 21 23z" fill="#2350b8"/><path d="M21 42c7-7 17-9 29-6-9 4-20 6-29 6z" fill="#1d3f94"/>`, EYES.wink, MOUTH.open),
-  face('#e2d8f6', '#f8c22e', '', dots([[31, 46, 6], [31, 37, 6], [35, 29, 6], [42, 24, 6], [50, 22, 7], [58, 24, 6], [65, 29, 6], [69, 37, 6], [69, 46, 6], [45, 31, 6], [55, 31, 6]]), EYES.dot, MOUTH.smile),
-  face('#fbdcd0', '#f0609a', `<path d="M26 50c-2-22 9-32 24-32s26 10 24 32l1 20H25z" fill="${HR}"/>`, `<path d="M31 44c2-14 10-20 20-20 7 4 13 10 18 18-10-1-18-6-22-12-4 6-9 11-16 14z" fill="${HR}"/>`, EYES.happy, MOUTH.open),
-  face('#c9eedf', '#9b59c6', `<path d="M26 48c-2-22 10-31 24-31s26 9 24 31c2 12 6 20 2 34H24c-4-14 0-22 2-34z" fill="${HR}"/>`, `<path d="M31 46c0-14 9-22 19-22 10 0 18 8 19 20-8-3-14-8-17-15-4 8-12 14-21 17z" fill="${HR}"/>`, EYES.dot, MOUTH.smile),
-  face('#e2d8f6', '#19b3c1', `<circle cx="64" cy="20" r="9" fill="${HR}"/>`, `<path d="M30 46c-1-16 9-26 21-26s21 9 20 26c-6-8-14-13-22-14-6 6-12 11-19 14z" fill="${HR}"/>`, EYES.dot, MOUTH.open, GLASSES),
-  face('#c3dcf7', '#e5514d', dots([[25, 52, 10], [27, 67, 10], [75, 52, 10], [73, 67, 10], [30, 35, 10], [41, 25, 10], [55, 23, 10], [68, 31, 10]]), `<path d="M32 42c4-10 10-15 18-15 6 3 10 9 12 14-8-1-14-5-17-9-3 5-7 8-13 10z" fill="${HR}"/>`, EYES.wink, MOUTH.open)
-];
+// 기본 프로필 8종 (대표가 준 이미지 파일, avatars/ 폴더). 순서가 곧 저장값 p0~p7이라 바꾸면 안 됨
+const AV = ['male-01', 'male-02', 'male-03', 'male-04', 'female-01', 'female-02', 'female-03', 'female-04']
+  .map(n => `<img src="avatars/hariple-${n}.png" alt="" loading="lazy" decoding="async">`);
 const AV_RE = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
 function me() { try { const p = JSON.parse(readLocal('profile')); return p?.id && p.name ? p : null; } catch { return null; } }
 const memberOf = p => ({ id: p.id, name: p.name, av: p.av });
