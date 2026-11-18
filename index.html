@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#62b2e6">
 <title>hariple · 여행 일정 지도</title>
+<meta name="description" content="여행마다 일정을 날짜별로 짜고, 지도로 보고, 친구와 함께 고치는 여행 플래너">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="hariple">
+<meta property="og:title" content="hariple · 친구와 함께 짜는 여행 일정">
+<meta property="og:description" content="날짜별 일정을 지도로 보고, 링크 하나로 친구를 초대해 같이 고쳐요. 항공편·예약 서류·알람까지 한곳에.">
+<meta property="og:image" content="https://neultos.github.io/trip-planner/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://neultos.github.io/trip-planner/">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -43,7 +54,8 @@
   .top { position:fixed; top:calc(var(--safe-t) + 12px); left:12px; right:12px; z-index:500; display:flex; gap:8px; }
   .chip-btn { height:44px; border-radius:22px; background:var(--bg); box-shadow:0 2px 12px rgba(0,0,0,.15); display:flex; align-items:center; gap:6px; padding:0 16px; font-weight:600; }
   #titleBtn { flex:1; min-width:0; justify-content:flex-start; }
-  #titleBtn span:first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #titleText { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #titleBtn .badge { flex:none; }
   .round { width:44px; padding:0; justify-content:center; flex:none; }
   #shareBtn { background:var(--accent); color:#fff; }
 
@@ -241,18 +253,38 @@
   .brand { flex:1; display:flex; align-items:center; gap:8px; }
   .brand b { font-size:24px; font-weight:800; letter-spacing:-.03em; color:var(--navy); }
   @media (prefers-color-scheme: dark) { .brand b { color:var(--fg); } }
-  #home h1 { font-size:26px; margin:0 4px; }
-  #home .sub { color:var(--muted); font-size:14px; margin:4px 4px 20px; }
-  #tripCards { list-style:none; padding:0; }
-  .tcard { display:flex; align-items:stretch; background:var(--bg); border-radius:18px; margin-bottom:12px; box-shadow:0 2px 10px rgba(0,0,0,.05); overflow:hidden; }
-  .tcard .open { flex:1; min-width:0; text-align:left; padding:16px 0 16px 18px; }
-  .tcard .cv { height:110px; margin:-16px 0 12px -18px; width:calc(100% + 66px); background:center/cover; }
-  .tcard b { display:block; font-size:18px; margin:8px 0 4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .tcard small { display:block; color:var(--muted); font-size:13px; }
-  .tcard .more { width:48px; color:var(--muted); font-size:20px; align-self:flex-end; height:56px; }
-  .tcard.ended { opacity:.6; }
-  .ended .badge:first-child { background:var(--bg2); color:var(--muted); }
-  .home-empty { text-align:center; color:var(--muted); padding:48px 0; line-height:1.7; }
+  .hero { display:flex; align-items:center; gap:4px; background:linear-gradient(135deg,#62b2e6,#3a8fd8); color:#fff; border-radius:24px; padding:18px 10px 18px 22px; margin-bottom:26px; box-shadow:0 12px 26px rgba(98,178,230,.35); overflow:hidden; position:relative; }
+  .hero::after { content:''; position:absolute; right:-40px; top:-40px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.12); }
+  .hero-t { flex:1; min-width:0; position:relative; z-index:1; }
+  .hero small { font-size:14px; font-weight:600; opacity:.92; }
+  .hero b { display:block; font-size:21px; line-height:1.4; margin-top:6px; word-break:keep-all; }
+  .hero em { font-style:normal; display:inline-block; margin-top:8px; background:#fff; color:#2b7fc0; border-radius:12px; padding:3px 12px; font-size:20px; font-weight:800; }
+  .hero-m { flex:none; position:relative; z-index:1; }
+  .hero-m svg { display:block; filter:drop-shadow(0 6px 8px rgba(27,47,85,.2)); }
+  .sec { display:flex; align-items:baseline; justify-content:space-between; font-size:18px; font-weight:800; margin:4px 4px 12px; }
+  .sec small { color:var(--muted); font-size:13px; font-weight:600; }
+  #tripCards ul { list-style:none; padding:0; margin:0 0 22px; }
+  .tcard { position:relative; background:var(--bg); border-radius:22px; margin-bottom:16px; box-shadow:0 4px 16px rgba(27,47,85,.08); overflow:hidden; }
+  .tcard .open { display:block; width:100%; text-align:left; }
+  .tcard .open:active, .prow .open:active { transform:scale(.99); }
+  .tcard .cv { height:132px; background:center/cover; position:relative; display:grid; place-items:center; }
+  .cv-e { font-size:46px; filter:drop-shadow(0 4px 6px rgba(0,0,0,.15)); }
+  .tcard .dd { position:absolute; left:14px; top:14px; background:#fff; color:#2b7fc0; font-weight:800; font-size:13px; padding:5px 11px; border-radius:999px; box-shadow:0 2px 6px rgba(0,0,0,.12); }
+  .tcard .rg { position:absolute; left:14px; bottom:12px; background:rgba(27,47,85,.55); color:#fff; font-size:12px; font-weight:700; padding:3px 8px; border-radius:6px; }
+  .tcard .ti { padding:14px 16px 16px; }
+  .tcard b { display:block; font-size:19px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tcard small { display:block; color:var(--muted); font-size:13px; margin-top:4px; }
+  .row2 { display:flex; align-items:center; justify-content:space-between; margin-top:12px; min-height:26px; }
+  .cnt { font-size:12px; color:var(--muted); font-weight:700; background:var(--bg2); border-radius:8px; padding:4px 8px; }
+  .tcard .more { position:absolute; right:10px; top:10px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.92); color:#1b2f55; font-size:18px; }
+  .prow { display:flex; align-items:center; background:var(--bg); border-radius:16px; margin-bottom:10px; padding:10px; }
+  .prow .open { flex:1; min-width:0; display:flex; gap:12px; align-items:center; text-align:left; }
+  .pthumb { width:52px; height:52px; border-radius:12px; background:center/cover; flex:none; display:grid; place-items:center; font-size:22px; filter:grayscale(.3); }
+  .prow .open span:last-child { min-width:0; }
+  .prow b { display:block; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .prow small { color:var(--muted); font-size:12px; }
+  .prow .more { width:36px; height:36px; color:var(--muted); font-size:18px; }
+  .home-empty { text-align:center; color:var(--muted); padding:20px 0 40px; line-height:1.7; }
   .home-empty b { color:var(--fg); font-size:17px; }
   .home-foot { text-align:center; }
   .home-foot button { color:var(--muted); font-size:14px; padding:10px; text-decoration:underline; }
@@ -301,9 +333,8 @@
     <button class="mini" id="homeHelp">사용법</button>
     <button id="meBtn" aria-label="내 프로필"></button>
   </div>
-  <h1>내 여행</h1>
-  <p class="sub">여행마다 일정을 따로 짜고, 링크로 친구와 함께 고쳐요.</p>
-  <ul id="tripCards"></ul>
+  <div class="hero" id="hero"></div>
+  <div id="tripCards"></div>
   <div class="home-foot"><button id="homeImport">백업 파일 불러오기</button></div>
 </section>
 <button class="fab" id="newTripBtn">+ 새 여행 만들기</button>
@@ -312,7 +343,7 @@
   <button class="chip-btn round" id="backBtn" aria-label="내 여행 목록으로">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
   </button>
-  <button class="chip-btn" id="titleBtn" aria-label="여행 메뉴"><span id="titleText"></span><span class="badge" id="titleDday"></span><span class="stack" id="titleMembers"></span></button>
+  <button class="chip-btn" id="titleBtn" aria-label="여행 메뉴"><span class="badge" id="titleDday"></span><span id="titleText"></span><span class="stack" id="titleMembers"></span></button>
   <button class="chip-btn round" id="menuBtn" aria-label="여행 메뉴">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
   </button>
@@ -469,6 +500,20 @@
     <button class="text-link" id="invBack">내 여행 목록으로</button>
   </div>
 </section>
+
+<!-- 여행 목록의 ⋯ 더보기 -->
+<dialog id="tripAct">
+  <form method="dialog">
+    <h3 id="taTitle"></h3>
+    <div class="menu-list">
+      <button type="button" data-ta="open">📂 여행 열기</button>
+      <button type="button" data-ta="link">🔗 초대 링크 복사</button>
+      <button type="button" data-ta="remove" style="color:#e5484d">🗑️ 내 목록에서 빼기</button>
+    </div>
+    <p class="note">목록에서 빼도 친구와 함께 쓰는 일정은 지워지지 않아요. 초대 링크로 다시 열 수 있어요.</p>
+    <div class="row"><button class="btn" value="cancel">닫기</button></div>
+  </form>
+</dialog>
 
 <!-- 여행 메뉴(설정) -->
 <dialog id="menu">
@@ -710,30 +755,52 @@ function showHome() {
   document.body.classList.add('at-home'); $('invite').classList.remove('on'); renderMe();
   const ended = x => x.end && span(today(), x.end) < 0;
   // 다가오는·진행 중인 여행이 위, 끝난 여행은 아래(최근 것부터)
-  const l = recents().sort((x, y) => ended(x) - ended(y) || (ended(x) ? -1 : 1) * (x.start || '').localeCompare(y.start || ''));
-  $('tripCards').innerHTML = l.length ? l.map(x => {
-    const s = x.start && new Date(x.start + 'T00:00'), e = x.end && new Date(x.end + 'T00:00'), n = x.start && x.end ? span(x.start, x.end) : 0;
-    const cover = COVER_RE.test(x.cover || '') ? `<div class="cv" style="background-image:url('${x.cover}')"></div>` : '';
-    return `<li class="tcard${ended(x) ? ' ended' : ''}">
-      <button class="open" data-id="${esc(x.id)}">${cover}
-        ${x.start ? `<span class="badge">${dday(x)}</span>` : ''}<span class="badge region">${x.abroad ? '해외' : '국내'}</span>
-        <b>${esc(x.title || '나의 여행')}</b>
-        <small>${s ? `${md(s)} (${WD[s.getDay()]}) – ${md(e)} (${WD[e.getDay()]}) · ${n ? `${n}박 ${n + 1}일` : '당일'}` : ''}${x.note ? ' · ' + esc(x.note) : ''}${x.count != null ? ` · 일정 ${x.count}개` : ''}</small>
-        ${x.members?.length ? `<span class="stack" style="margin-top:10px">${x.members.map(m => avHtml(m, 26)).join('')}</span>` : ''}
-      </button>
-      <button class="more" data-del="${esc(x.id)}" aria-label="${esc(x.title)} 목록에서 빼기">⋯</button>
-    </li>`;
-  }).join('') : `<li class="home-empty"><b>아직 여행이 없어요</b><br>아래 버튼으로 첫 여행을 만들어 보세요.</li>`;
+  const all = recents(), up = all.filter(x => !ended(x)).sort((x, y) => (x.start || '').localeCompare(y.start || ''));
+  const past = all.filter(ended).sort((x, y) => y.start.localeCompare(x.start));
+  const GR = ['#62b2e6,#2f7ad6', '#7fd0f0,#3a8fd8', '#8fc6f2,#4f7fd6', '#6fd1c9,#3a8fd8'];
+  const bg = (x, i) => COVER_RE.test(x.cover || '') ? `background-image:url('${x.cover}')` : `background:linear-gradient(135deg,${GR[i % GR.length]})`;
+  const when = x => { if (!x.start) return ''; const s = new Date(x.start + 'T00:00'), e = new Date(x.end + 'T00:00'), n = span(x.start, x.end);
+    return `${md(s)} (${WD[s.getDay()]}) – ${md(e)} (${WD[e.getDay()]}) · ${n ? `${n}박 ${n + 1}일` : '당일'}`; };
+  const more = x => `<button class="more" data-del="${esc(x.id)}" aria-label="${esc(x.title)} 더보기">⋯</button>`;
+
+  // 맨 위: 인사 + 가장 가까운 여행까지 남은 날
+  const p = me(), next = up[0];
+  $('hero').innerHTML = `<div class="hero-t"><small>${p ? esc(p.name) + '님, ' : ''}안녕하세요 👋</small>
+    <b>${!next ? '어디로 떠나 볼까요?<br>새 여행을 만들어 보세요' : span(today(), next.start) <= 0 ? `'${esc(next.title)}'<br>즐거운 여행 중이에요!` : `'${esc(next.title)}'까지<br><em>${dday(next)}</em>`}</b></div>
+    <div class="hero-m">${mascot('stand', true, 96)}</div>`;
+
+  $('tripCards').innerHTML = (up.length ? `<div class="sec">다가오는 여행<small>${up.length}개</small></div><ul>${up.map((x, i) => `<li class="tcard">
+      <button class="open" data-id="${esc(x.id)}">
+        <div class="cv" style="${bg(x, i)}">${COVER_RE.test(x.cover || '') ? '' : `<span class="cv-e">${x.abroad ? '✈️' : '🧳'}</span>`}
+          ${x.start ? `<span class="dd">${dday(x)}</span>` : ''}<span class="rg">${x.abroad ? '해외' : '국내'}</span></div>
+        <div class="ti"><b>${esc(x.title || '나의 여행')}</b><small>${when(x)}${x.note ? ' · ' + esc(x.note) : ''}</small>
+          <div class="row2"><span class="stack">${(x.members || []).map(m => avHtml(m, 26)).join('')}</span>${x.count != null ? `<span class="cnt">일정 ${x.count}개</span>` : ''}</div></div>
+      </button>${more(x)}</li>`).join('')}</ul>`
+    : `<div class="home-empty"><b>아직 다가오는 여행이 없어요</b><br>아래 버튼으로 새 여행을 만들고 친구를 초대해 보세요.</div>`)
+    + (past.length ? `<div class="sec">지난 여행<small>${past.length}개</small></div><ul>${past.map((x, i) => `<li class="prow">
+      <button class="open" data-id="${esc(x.id)}"><span class="pthumb" style="${bg(x, i)}">${COVER_RE.test(x.cover || '') ? '' : x.abroad ? '✈️' : '🧳'}</span>
+        <span><b>${esc(x.title || '나의 여행')}</b><small>${when(x)}</small></span></button>${more(x)}</li>`).join('')}</ul>` : '');
 }
 $('tripCards').onclick = e => {
   const o = e.target.closest('[data-id]'), d = e.target.closest('[data-del]');
-  if (o) location.hash = 't=' + o.dataset.id;
-  if (d) {
-    const x = recents().find(r => r.id === d.dataset.del);
-    if (!confirm(`'${x?.title || '이 여행'}'을 내 목록에서 뺄까요?\n함께 쓰는 친구의 일정은 지워지지 않고, 링크로 다시 열 수 있어요.`)) return;
-    writeLocal('trips', JSON.stringify(recents().filter(r => r.id !== d.dataset.del)));
-    showHome(); toast('목록에서 뺐어요');
+  if (d) { taId = d.dataset.del; $('taTitle').textContent = recents().find(r => r.id === taId)?.title || '여행'; $('tripAct').showModal(); }
+  else if (o) location.hash = 't=' + o.dataset.id;
+};
+// 팝업을 닫자마자 주소를 바꾸면 팝업 기록 정리(back)와 겹치므로, 정리가 끝난 뒤에 이동
+function go(hash) { const f = () => pendingBack ? setTimeout(f, 30) : (location.hash = hash); setTimeout(f, 0); }
+let taId = null;
+$('tripAct').onclick = async e => {
+  const a = e.target.closest('[data-ta]')?.dataset.ta; if (!a) return;
+  const id = taId, title = $('taTitle').textContent;
+  if (a === 'remove' && !confirm(`'${title}'을 내 목록에서 뺄까요?`)) return;
+  $('tripAct').close();
+  if (a === 'open') go('t=' + id);
+  if (a === 'link') {
+    const url = `${location.origin}${location.pathname}#t=${id}`;
+    try { await navigator.clipboard.writeText(`'${title}' 여행에 함께해요! 링크를 열고 [참여하기]를 눌러 주세요\n${url}`); toast('초대 링크를 복사했어요'); }
+    catch { prompt('이 링크를 복사해서 보내 주세요', url); }
   }
+  if (a === 'remove') { writeLocal('trips', JSON.stringify(recents().filter(r => r.id !== id))); showHome(); toast('목록에서 뺐어요'); }
 };
 
 // 주소(#t=여행ID)로 화면을 정함 → 폰의 뒤로가기도 자연스럽게 동작
@@ -912,7 +979,7 @@ function drawMap(fitIt = true) {
   }
   list.forEach((p, i) => mPin(p, i + 1, touring && i > tIdx ? '#9aa1ab' : c,
     touring ? `${p.time ? p.time + ' ' : ''}${p.name}` : '', () => pinTap(p)));
-  if (touring && list.length) { if (!anim) setChar(P(list[tIdx]), SPR.walk[0]); } else removeChar();
+  if (touring && list.length) { if (!anim) setChar(P(list[tIdx]), SPR.stand[0]); } else removeChar();
   if (fitIt && (!touring || needFit)) { fit(list); needFit = false; }
   fetchMissing(list);
 }
@@ -926,28 +993,33 @@ function px(rows) {
   }));
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 12 12" width="44" height="44" shape-rendering="crispEdges">${r}</svg>`;
 }
+// hariple 백팩 캐릭터 (frame: stand | a | b 걷기 2프레임, wave: 손 흔들기)
+// shortcut: 대표가 준 캐릭터 그림을 보고 SVG로 다시 그린 것 — 원본 PNG를 받으면 이미지로 교체
+function mascot(frame = 'stand', wave = false, size = 52) {
+  const N = '#1b2f55', feet = { stand: [[38, 93], [62, 93]], a: [[31, 91], [66, 94]], b: [[36, 94], [60, 90]] }[frame];
+  const bob = frame === 'b' ? -2 : 0;
+  const foot = ([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="9" ry="5.5" fill="#26407a" stroke="${N}" stroke-width="3.5"/>`;
+  const armR = wave
+    ? `<path d="M80 60c6-4 9-12 12-19" fill="none" stroke="${N}" stroke-width="13" stroke-linecap="round"/><path d="M80 60c6-4 9-12 12-19" fill="none" stroke="#5bb8f5" stroke-width="6.5" stroke-linecap="round"/><path d="M90 26l2-7M97 31l5-5" stroke="#f2b632" stroke-width="3.5" stroke-linecap="round"/>`
+    : `<ellipse cx="83" cy="63" rx="7" ry="9" fill="#5bb8f5" stroke="${N}" stroke-width="4"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 104" width="${size}" height="${size}">
+    ${feet.map(foot).join('')}
+    <g transform="translate(0 ${bob})">
+      <path d="M37 25c0-9 6-15 13-15s13 6 13 15" fill="none" stroke="${N}" stroke-width="14" stroke-linecap="round"/>
+      <path d="M37 25c0-9 6-15 13-15s13 6 13 15" fill="none" stroke="#3d7fd9" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="17" cy="63" rx="7" ry="9" fill="#5bb8f5" stroke="${N}" stroke-width="4"/>
+      ${armR}
+      <rect x="18" y="20" width="64" height="68" rx="26" fill="#5bb8f5" stroke="${N}" stroke-width="4"/>
+      <ellipse cx="40" cy="45" rx="3.4" ry="4.4" fill="${N}"/><ellipse cx="60" cy="45" rx="3.4" ry="4.4" fill="${N}"/>
+      <path d="M44 52q6 6 12 0" fill="none" stroke="${N}" stroke-width="3.5" stroke-linecap="round"/>
+      <rect x="29" y="60" width="44" height="24" rx="9" fill="#2f7ad6" stroke="${N}" stroke-width="4"/>
+      <path d="M46 66v13M46 74q0-5 5-5t5 5v5" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M67 62h4l1 6q-3 3.5-6 0z" fill="#f2b632" stroke="${N}" stroke-width="1.6"/>
+    </g></svg>`;
+}
 const SPR = {
-  walk: [px(`
-    ....hh....
-    ...hhhh...
-    ...ssss...
-    ...ssss...
-    ..bbbbbb..
-    ..sbbbbs..
-    ...bbbb...
-    ...p..p...
-    ..p....p..
-    ..k....k..`), px(`
-    ....hh....
-    ...hhhh...
-    ...ssss...
-    ...ssss...
-    ..bbbbbb..
-    ..sbbbbs..
-    ...bbbb...
-    ....pp....
-    ....pp....
-    ....kk....`)],
+  walk: [mascot('a'), mascot('b')],
+  stand: [mascot('stand')],
   car: [px(`
     ..........
     ..........
@@ -998,14 +1070,14 @@ const spriteFor = m => ({ 택시: 'car', 버스: 'car', 지하철: 'train', 기�
 let charObj = null;
 function setChar(pos, svg) {
   if (useGoogle()) {
-    const icon = { url: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg), scaledSize: new google.maps.Size(44, 44), anchor: new google.maps.Point(22, 40) };
+    const icon = { url: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg), scaledSize: new google.maps.Size(52, 52), anchor: new google.maps.Point(26, 48) };
     if (charObj?.g !== 'g') { removeChar(); charObj = { g: 'g', svg, m: new google.maps.Marker({ map: gmap, position: G(pos), icon, zIndex: 999, clickable: false }) }; }
     else { charObj.m.setPosition(G(pos)); if (charObj.svg !== svg) { charObj.m.setIcon(icon); charObj.svg = svg; } }
     return;
   }
   if (charObj?.g !== 'l') {
     removeChar();
-    charObj = { g: 'l', svg, m: L.marker(pos, { icon: L.divIcon({ className: 'char', html: svg, iconSize: [44, 44], iconAnchor: [22, 40] }), zIndexOffset: 1000, interactive: false }).addTo(map) };
+    charObj = { g: 'l', svg, m: L.marker(pos, { icon: L.divIcon({ className: 'char', html: svg, iconSize: [52, 52], iconAnchor: [26, 48] }), zIndexOffset: 1000, interactive: false }).addTo(map) };
   } else { charObj.m.setLatLng(pos); if (charObj.svg !== svg) { charObj.m.getElement().innerHTML = svg; charObj.svg = svg; } }
 }
 function removeChar() { if (!charObj) return; charObj.g === 'g' ? charObj.m.setMap(null) : charObj.m.remove(); charObj = null; }
@@ -1272,9 +1344,15 @@ $('results').onclick = e => {
 };
 function openSearch() {
   $('searchView').classList.add('on'); $('q').value = ''; syncSub(); runSearch();
+  pushLayer(); // 뒤로가기로 닫히게
   setTimeout(() => $('q').focus(), 50);
 }
-function closeSearch() { $('searchView').classList.remove('on'); fit(dayItems(cur).filter(hasPos)); }
+function closeSearch() {
+  if (!$('searchView').classList.contains('on')) return;
+  $('searchView').classList.remove('on'); fit(dayItems(cur).filter(hasPos));
+  if ($('searchView').dataset.popped) delete $('searchView').dataset.popped;
+  else dropLayer();
+}
 $('closeSearch').onclick = closeSearch;
 addEventListener('keydown', e => { if (e.key === 'Escape' && $('searchView').classList.contains('on')) closeSearch(); });
 
@@ -1736,6 +1814,35 @@ async function invite() {
 $('shareBtn').onclick = invite;
 
 let tt;
+/* ---------- 폰 뒤로가기로 팝업·검색 화면 닫기 ---------- */
+// 팝업을 열 때 기록을 하나 쌓고, 뒤로가기(popstate)가 오면 맨 위 팝업만 닫음.
+// 버튼으로 닫을 땐 쌓은 기록을 history.back()으로 정리하는데, 그게 끝나기 전에 다음 팝업이 열리면
+// (예: 메뉴 → 항공편) 새 기록이 같이 지워지지 않도록 back이 끝난 뒤에 쌓음.
+let pendingBack = 0, queuedPush = 0;
+function pushLayer() { if (pendingBack) queuedPush++; else history.pushState({ layer: 1 }, ''); }
+function dropLayer() {
+  if (queuedPush) { queuedPush--; return; }
+  if (history.state?.layer) { pendingBack++; history.back(); }
+}
+const _showModal = HTMLDialogElement.prototype.showModal;
+HTMLDialogElement.prototype.showModal = function () {
+  _showModal.call(this);
+  pushLayer();
+  this.addEventListener('close', () => {
+    if (this.dataset.popped) delete this.dataset.popped; // 뒤로가기로 닫힘: 기록은 이미 빠짐
+    else dropLayer();                                    // 버튼으로 닫힘: 쌓은 기록 정리
+  }, { once: true });
+};
+addEventListener('popstate', () => {
+  if (pendingBack) { // 우리가 부른 back: 기다리던 기록을 이제 쌓음
+    if (!--pendingBack) for (; queuedPush; queuedPush--) history.pushState({ layer: 1 }, '');
+    return;
+  }
+  const top = [...document.querySelectorAll('dialog[open]')].pop();
+  if (top) { top.dataset.popped = '1'; top.close(); return; }
+  if ($('searchView').classList.contains('on')) { $('searchView').dataset.popped = '1'; closeSearch(); }
+});
+
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2200); }
 
 renderMe();
