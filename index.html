@@ -32,6 +32,7 @@
   [hidden] { display:none !important; }
 
   #map, #gmap { position:fixed; inset:0; z-index:0; background:var(--bg2); }
+  #gmap { position:fixed !important; } /* 구글 지도가 position:relative를 직접 넣어 높이가 0이 되는 것 막기 */
   .seg { display:inline-flex; background:var(--bg2); border-radius:10px; padding:3px; flex:none; }
   .seg button { padding:6px 14px; border-radius:8px; font-size:13px; font-weight:600; color:var(--muted); }
   .seg button[aria-checked="true"] { background:var(--bg); color:var(--fg); box-shadow:0 1px 3px rgba(0,0,0,.12); }
