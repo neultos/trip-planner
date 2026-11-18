@@ -274,7 +274,7 @@ async function init() {
       import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
       import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
     ]);
-    fs = f; db = f.getFirestore(initializeApp(FIREBASE_CONFIG));
+    fs = f; db = f.getFirestore(initializeApp(FIREBASE_CONFIG), 'default'); // 콘솔에서 만든 DB 이름이 '(default)'가 아닌 'default'
     let id = h.startsWith('t=') ? h.slice(2) : null, seed = null;
     if (!id && h) try { seed = fix(dec(h)); } catch {}          // 예전 형식 공유 링크 → 새 공유 일정으로
     if (!id && !seed) id = recents()[0]?.id;                     // 마지막으로 보던 여행
