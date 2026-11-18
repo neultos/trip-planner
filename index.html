@@ -17,11 +17,11 @@
 <style>
   :root {
     --bg:#ffffff; --bg2:#f4f5f7; --fg:#1a1c20; --muted:#8a8f98; --line:#eceef1;
-    --accent:#62b2e6; --accent-ink:#2b7fc0; --navy:#253445; --shadow:0 -6px 24px rgba(0,0,0,.10);
+    --accent:#62b2e6; --accent-ink:#2b7fc0; --accent-soft:#e3f1fb; --navy:#253445; --shadow:0 -6px 24px rgba(0,0,0,.10);
     --sheet:40dvh; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg:#17191d; --bg2:#22252b; --fg:#f1f2f4; --muted:#8d929b; --line:#2b2f36; --shadow:0 -6px 24px rgba(0,0,0,.5); --accent-ink:#7cc3ef; }
+    :root { --bg:#17191d; --bg2:#22252b; --fg:#f1f2f4; --muted:#8d929b; --line:#2b2f36; --shadow:0 -6px 24px rgba(0,0,0,.5); --accent-ink:#7cc3ef; --accent-soft:rgba(98,178,230,.2); }
   }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { margin:0; height:100%; overflow:hidden; }
@@ -152,7 +152,63 @@
   .chips { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 16px; }
   .chip { padding:8px 12px; border-radius:999px; background:var(--bg2); font-size:14px; font-weight:600; }
   .chip[aria-pressed="true"] { background:var(--fg); color:var(--bg); }
-  #fSpan { font-size:13px; color:var(--muted); margin:-6px 0 14px; }
+  .datefield { display:flex; align-items:center; gap:8px; width:100%; min-height:50px; border-radius:12px; background:var(--bg2); padding:0 14px; font-size:16px; font-weight:600; margin:6px 0 16px; text-align:left; }
+  .dt { display:flex; gap:8px; margin-bottom:14px; }
+  .dt .datefield { flex:1.4; margin:0; }
+  .dt input { flex:1; width:auto; margin:0; }
+
+  /* 커스텀 캘린더 */
+  .cal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .cal-head b { font-size:17px; }
+  .cal-head button { width:40px; height:40px; border-radius:50%; background:var(--bg2); font-size:18px; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); row-gap:4px; text-align:center; }
+  .cal-grid .wd { font-size:12px; color:var(--muted); padding:6px 0; }
+  .cal-grid .wd:first-child, .cal-d.sun { color:#e5484d; }
+  .cal-grid .wd:nth-child(7), .cal-d.sat { color:#3b82f6; }
+  .cal-d { height:44px; font-size:15px; font-weight:600; }
+  .cal-d:active { transform:none; }
+  .cal-d span { display:inline-grid; place-items:center; width:40px; height:40px; border-radius:50%; }
+  .cal-d.today span { box-shadow:inset 0 0 0 1.5px var(--accent); }
+  .cal-d.in { background:var(--accent-soft); }
+  .cal-d.s.has-e { background:linear-gradient(90deg, transparent 50%, var(--accent-soft) 50%); }
+  .cal-d.e { background:linear-gradient(90deg, var(--accent-soft) 50%, transparent 50%); }
+  .cal-d.s span, .cal-d.e span { background:var(--accent); color:#fff; }
+  .cal-d.past { opacity:.35; }
+  .cal-sum { text-align:center; font-weight:700; margin:14px 0 6px; min-height:22px; }
+
+  /* 일정 추가 선택 */
+  .pick button { display:flex; gap:14px; align-items:center; width:100%; padding:16px; border-radius:16px; background:var(--bg2); margin-bottom:10px; text-align:left; }
+  .pick .ic { font-size:28px; width:40px; text-align:center; }
+  .pick b { display:block; font-size:16px; }
+  .pick small { color:var(--muted); font-size:13px; }
+
+  /* 프로필 · 참여 */
+  .av { display:inline-grid; place-items:center; border-radius:50%; overflow:hidden; flex:none; width:var(--s); height:var(--s); font-size:calc(var(--s) * .56); line-height:1; box-shadow:0 0 0 2px var(--bg); color:var(--fg); font-weight:700; }
+  .av img { width:100%; height:100%; object-fit:cover; }
+  .stack { display:inline-flex; align-items:center; flex:none; }
+  .stack .av + .av { margin-left:-7px; }
+  .avgrid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:8px 0 18px; }
+  .avgrid button { aspect-ratio:1; border-radius:50%; font-size:26px; overflow:hidden; background:var(--bg2); }
+  .avgrid button[aria-pressed="true"] { box-shadow:0 0 0 3px var(--accent); }
+  .avgrid img { width:100%; height:100%; object-fit:cover; }
+  .pv { text-align:center; margin-bottom:12px; }
+  #meBtn { border-radius:50%; }
+  #invite { position:fixed; inset:0; z-index:950; background:var(--bg2); display:none; align-items:center; justify-content:center; padding:24px 16px calc(24px + var(--safe-b)); }
+  #invite.on { display:flex; }
+  .inv-card { width:100%; max-width:420px; background:var(--bg); border-radius:24px; padding:0 0 22px; text-align:center; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+  .inv-cover { height:150px; background:linear-gradient(135deg,#62b2e6,#253445) center/cover; display:grid; place-items:center; font-size:46px; }
+  .inv-card .stack { margin-top:-24px; }
+  .inv-card .stack .av { box-shadow:0 0 0 3px var(--bg); }
+  .inv-from { color:var(--accent-ink); font-weight:700; font-size:14px; margin:12px 0 4px; }
+  .inv-card h2 { margin:0 20px 6px; font-size:22px; }
+  .inv-card p.muted { color:var(--muted); font-size:14px; margin:0 20px 18px; }
+  .inv-card .btn { margin:0 20px; width:calc(100% - 40px); }
+  .text-link { display:block; margin:12px auto 0; color:var(--muted); font-size:14px; text-decoration:underline; }
+  .mem { display:flex; flex-wrap:wrap; gap:12px; padding:6px 2px 14px; border-bottom:1px solid var(--line); }
+  .mem span.m { display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; width:52px; text-align:center; overflow:hidden; }
+  .mem .inv { display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; color:var(--accent-ink); font-weight:700; }
+  .mem .inv i { width:40px; height:40px; border-radius:50%; border:1.5px dashed var(--accent); display:grid; place-items:center; font-style:normal; font-size:20px; }
+  .acts .by { margin-left:auto; align-self:center; }
   .row { display:flex; gap:8px; margin-top:6px; }
   .btn { flex:1; min-height:48px; border-radius:12px; background:var(--bg2); font-weight:600; }
   .btn.primary { background:var(--accent); color:#fff; }
@@ -243,6 +299,7 @@
       <b>hariple</b>
     </span>
     <button class="mini" id="homeHelp">사용법</button>
+    <button id="meBtn" aria-label="내 프로필"></button>
   </div>
   <h1>내 여행</h1>
   <p class="sub">여행마다 일정을 따로 짜고, 링크로 친구와 함께 고쳐요.</p>
@@ -255,11 +312,11 @@
   <button class="chip-btn round" id="backBtn" aria-label="내 여행 목록으로">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
   </button>
-  <button class="chip-btn" id="titleBtn" aria-label="여행 메뉴"><span id="titleText"></span><span class="badge" id="titleDday"></span></button>
+  <button class="chip-btn" id="titleBtn" aria-label="여행 메뉴"><span id="titleText"></span><span class="badge" id="titleDday"></span><span class="stack" id="titleMembers"></span></button>
   <button class="chip-btn round" id="menuBtn" aria-label="여행 메뉴">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
   </button>
-  <button class="chip-btn round" id="shareBtn" aria-label="일정 공유">
+  <button class="chip-btn round" id="shareBtn" aria-label="친구 초대하기">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
   </button>
 </div>
@@ -269,7 +326,7 @@
   <nav id="days" aria-label="일차 선택"></nav>
   <div class="list-head">
     <h2 id="dayTitle"></h2>
-    <button class="mini" id="cityBtn">📍 도시</button>
+    <button class="mini" id="cityBtn"></button>
     <button class="mini accent" id="tourBtn">▶ 여정 보기</button>
   </div>
   <div id="scroll">
@@ -300,11 +357,9 @@
   <form method="dialog">
     <h3 id="fHead">여행 정보</h3>
     <label>여행 이름<input id="fTitle" maxlength="40" placeholder="예: 도쿄 먹방 여행"></label>
-    <div class="dates">
-      <label>가는 날<input id="fStart" type="date" required></label>
-      <label>오는 날<input id="fEnd" type="date" required></label>
-    </div>
-    <div id="fSpan"></div>
+    <label style="margin-bottom:0">여행 날짜</label>
+    <button type="button" class="datefield" id="fDates"></button>
+    <input type="hidden" id="fStart"><input type="hidden" id="fEnd">
     <label>함께 가는 사람<input id="fNote" maxlength="30" placeholder="예: 2인, 가족 여행"></label>
     <label style="margin-bottom:0">여행지</label>
     <div class="seg" id="fAbroad" role="radiogroup" aria-label="여행지">
@@ -317,7 +372,7 @@
 <!-- 일정 편집 -->
 <dialog id="itemForm">
   <form method="dialog">
-    <h3>일정 편집</h3>
+    <h3 id="iHead">일정 편집</h3>
     <label style="margin-bottom:0">카테고리</label>
     <div class="chips" id="iType"></div>
     <div class="dates">
@@ -340,28 +395,91 @@
 <dialog id="flightForm">
   <form method="dialog">
     <h3>✈️ 항공편</h3>
-    <label>편명<input id="flNo" maxlength="12" placeholder="예: KE703"></label>
+    <label>편명<input id="flNo" maxlength="12" placeholder="예: KE703" autocomplete="off"></label>
     <div class="dates">
       <label>출발 공항<input id="flFrom" maxlength="4" placeholder="ICN" style="text-transform:uppercase"></label>
       <label>출발 도시<input id="flFromCity" maxlength="20" placeholder="인천"></label>
     </div>
-    <label>출발 시각<input id="flDep" type="datetime-local" required></label>
+    <label style="margin-bottom:6px">출발 날짜 · 시각</label>
+    <div class="dt"><button type="button" class="datefield" id="flDepD"></button><input id="flDepT" type="time" aria-label="출발 시각"></div>
     <div class="dates">
       <label>도착 공항<input id="flTo" maxlength="4" placeholder="NRT" style="text-transform:uppercase"></label>
       <label>도착 도시<input id="flToCity" maxlength="20" placeholder="도쿄"></label>
     </div>
-    <label>도착 시각 (현지 시각)<input id="flArr" type="datetime-local"></label>
+    <label style="margin-bottom:6px">도착 날짜 · 시각 (현지 시각)</label>
+    <div class="dt"><button type="button" class="datefield" id="flArrD"></button><input id="flArrT" type="time" aria-label="도착 시각"></div>
     <div class="row"><button class="btn danger" type="button" id="flDel">삭제</button><button class="btn" value="cancel" formnovalidate>취소</button><button class="btn primary" value="ok">저장</button></div>
   </form>
 </dialog>
+
+<!-- 일정 추가: 무엇을 넣을지 먼저 고름 -->
+<dialog id="addDlg">
+  <form method="dialog">
+    <h3 id="addHead">일정 추가</h3>
+    <div class="pick">
+      <button type="button" data-add="place"><span class="ic">📍</span><span><b>장소 검색해서 추가</b><small>식당·숙소·명소·카페를 지도에서 찾아요</small></span></button>
+      <button type="button" data-add="flight"><span class="ic">✈️</span><span><b>항공편 추가</b><small>편명, 출발·도착 공항과 시간을 적어요</small></span></button>
+      <button type="button" data-add="memo"><span class="ic">✏️</span><span><b>직접 입력</b><small>이동·휴식·메모처럼 검색 없이 적어요</small></span></button>
+    </div>
+    <div class="row"><button class="btn" value="cancel">취소</button></div>
+  </form>
+</dialog>
+
+<!-- 일차 정보(도시) -->
+<dialog id="dayDlg">
+  <form method="dialog">
+    <h3 id="dayHead"></h3>
+    <label>머무는 도시<input id="dCity" maxlength="20" placeholder="예: 도쿄, 하코네"></label>
+    <p class="note">날짜 탭과 이 날 일정 위에 표시돼요. 비우면 지워져요.</p>
+    <div class="row"><button class="btn" value="cancel" formnovalidate>취소</button><button class="btn primary" value="ok">저장</button></div>
+  </form>
+</dialog>
+
+<!-- 커스텀 캘린더 -->
+<dialog id="calDlg">
+  <form method="dialog">
+    <div class="cal-head"><button type="button" id="calPrev" aria-label="이전 달">‹</button><b id="calTitle"></b><button type="button" id="calNext" aria-label="다음 달">›</button></div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-sum" id="calSum"></div>
+    <div class="row"><button class="btn" value="cancel">취소</button><button class="btn primary" id="calOk" value="ok">확인</button></div>
+  </form>
+</dialog>
+
+<!-- 내 프로필 -->
+<dialog id="profileDlg">
+  <form method="dialog">
+    <h3 id="pHead">내 프로필</h3>
+    <div class="pv" id="pPreview"></div>
+    <label>이름<input id="pName" maxlength="12" required placeholder="친구들에게 보일 이름"></label>
+    <label style="margin-bottom:0">프로필 사진</label>
+    <div class="avgrid" id="pAv"></div>
+    <div class="row"><button class="btn" value="cancel" formnovalidate>취소</button><button class="btn primary" value="ok">저장</button></div>
+  </form>
+</dialog>
+
+<!-- 초대받은 여행: 참여하기 -->
+<section id="invite" aria-label="여행 초대">
+  <div class="inv-card">
+    <div class="inv-cover" id="invCover">✈️</div>
+    <div class="stack" id="invMembers"></div>
+    <p class="inv-from" id="invFrom"></p>
+    <h2 id="invTitle"></h2>
+    <p class="muted" id="invDates"></p>
+    <button class="btn primary" id="joinBtn">참여하기</button>
+    <button class="text-link" id="invBack">내 여행 목록으로</button>
+  </div>
+</section>
 
 <!-- 여행 메뉴(설정) -->
 <dialog id="menu">
   <form method="dialog">
     <div class="menu-cover" id="mCover">대표 사진 없음</div>
     <h3 id="mTitle"></h3>
+    <label style="margin-bottom:6px">함께하는 사람</label>
+    <div class="mem" id="mMembers"></div>
     <div class="menu-list">
       <button type="button" data-m="edit">✏️ 여행 정보 수정</button>
+      <button type="button" data-m="profile">🙂 내 프로필 수정</button>
       <button type="button" data-m="flight">✈️ 항공편 추가</button>
       <button type="button" data-m="docs">📎 예약 서류함 <small id="mDocs"></small></button>
       <button type="button" data-m="cover">🖼️ 대표 사진 바꾸기</button>
@@ -402,10 +520,10 @@
     <h4>이렇게 써요</h4>
     <ul>
       <li><b>새 여행 만들기</b>로 이름·날짜·국내/해외를 정해요.</li>
-      <li>일차를 고르고 <b>+ 일정 추가</b>로 장소를 검색해 넣어요. 검색에 없으면 '직접 추가'.</li>
+      <li>일차를 고르고 <b>+ 일정 추가</b>에서 장소 검색 · 항공편 · 직접 입력 중 하나를 골라요.</li>
       <li>일정 카드의 <b>편집</b>에서 시간·카테고리·이동 방법·알람·메모를 적어요. 시간 순서로 자동 정렬돼요.</li>
       <li><b>▶ 여정 보기</b>에서 [다음]을 누르면 캐릭터가 다음 장소로 이동해요. [지금]은 현재 시각의 일정으로 가요.</li>
-      <li>위쪽 <b>공유</b> 버튼으로 링크를 보내면 친구도 같은 일정을 고칠 수 있어요.</li>
+      <li>위쪽 <b>초대</b> 버튼으로 링크를 보내면, 친구가 <b>참여하기</b>를 누르고 프로필을 만들어 함께 일정을 고쳐요.</li>
       <li><b>⋯ 메뉴</b>에서 항공편·예약 서류·대표 사진·캘린더·백업을 관리해요.</li>
     </ul>
     <h4>홈 화면에 앱으로 추가</h4>
@@ -428,6 +546,7 @@
 <input type="file" id="fileDoc" accept="application/pdf,image/*" multiple hidden>
 <input type="file" id="fileCover" accept="image/*" hidden>
 <input type="file" id="fileJson" accept="application/json,.json" hidden>
+<input type="file" id="fileAv" accept="image/*" hidden>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -498,6 +617,7 @@ const fix = t => {
   if (!t.end) t.end = addDays(t.start, t.days.length - 1); // 예전 일정(오는 날 없음)
   if (!Array.isArray(t.flights)) t.flights = [];
   if (!Array.isArray(t.cities)) t.cities = [];
+  if (!Array.isArray(t.members)) t.members = [];
   return t;
 };
 // 백업 파일·예전 링크처럼 밖에서 들어온 일정은 아는 필드만, 길이 제한해서 받음
@@ -529,8 +649,9 @@ let db = null, fs = null, tripId = null, unsub = null, loaded = false;
 
 // 모든 수정은 change()로: 화면엔 바로 반영하고, 파이어베이스에는 '최신본에 같은 수정을 다시 적용'해서
 // 친구와 동시에 고쳐도 서로의 수정이 덮어써지지 않게 함.
-function change(fn) {
+function change(fn, join = false) {
   if (!tripId) return toast('일정을 불러오는 중이에요');
+  if (loaded && !join && !isMember()) return showInvite(); // 참여해야 고칠 수 있음
   fn(trip); render();
   const ref = fs.doc(db, 'trips', tripId), mine = JSON.stringify(trip);
   fs.runTransaction(db, async tx => {
@@ -578,13 +699,15 @@ function remember() {
   if (!tripId || !loaded) return;
   const l = recents().filter(x => x.id !== tripId);
   l.unshift({ id: tripId, title: trip.title, start: trip.start, end: trip.end, abroad: !!trip.abroad, note: trip.note || '',
-    cover: COVER_RE.test(trip.cover || '') ? trip.cover : '', count: trip.days.reduce((n, d) => n + d.length, 0) });
+    cover: COVER_RE.test(trip.cover || '') ? trip.cover : '', count: trip.days.reduce((n, d) => n + d.length, 0),
+    // 목록용이라 사진은 빼고(기기 저장 공간) 이름·기본 캐릭터만
+    members: trip.members.slice(0, 5).map(m => ({ name: m.name, av: /^p\d+$/.test(m.av) ? m.av : '' })) });
   writeLocal('trips', JSON.stringify(l.slice(0, 50)));
 }
 
 function showHome() {
   unsub?.(); unsub = null; tripId = null; loaded = false; stopTour();
-  document.body.classList.add('at-home');
+  document.body.classList.add('at-home'); $('invite').classList.remove('on'); renderMe();
   const ended = x => x.end && span(today(), x.end) < 0;
   // 다가오는·진행 중인 여행이 위, 끝난 여행은 아래(최근 것부터)
   const l = recents().sort((x, y) => ended(x) - ended(y) || (ended(x) ? -1 : 1) * (x.start || '').localeCompare(y.start || ''));
@@ -596,6 +719,7 @@ function showHome() {
         ${x.start ? `<span class="badge">${dday(x)}</span>` : ''}<span class="badge region">${x.abroad ? '해외' : '국내'}</span>
         <b>${esc(x.title || '나의 여행')}</b>
         <small>${s ? `${md(s)} (${WD[s.getDay()]}) – ${md(e)} (${WD[e.getDay()]}) · ${n ? `${n}박 ${n + 1}일` : '당일'}` : ''}${x.note ? ' · ' + esc(x.note) : ''}${x.count != null ? ` · 일정 ${x.count}개` : ''}</small>
+        ${x.members?.length ? `<span class="stack" style="margin-top:10px">${x.members.map(m => avHtml(m, 26)).join('')}</span>` : ''}
       </button>
       <button class="more" data-del="${esc(x.id)}" aria-label="${esc(x.title)} 목록에서 빼기">⋯</button>
     </li>`;
@@ -624,7 +748,8 @@ $('backBtn').onclick = () => { location.hash = ''; };
 
 async function createTrip(t) {
   // 추측할 수 없는 32자 주소 = 링크 가진 사람만 편집
-  const id = newId() + newId();
+  const id = newId() + newId(), p = me();
+  if (p && !t.members?.length) t.members = [memberOf(p)]; // 만든 사람은 바로 참여
   await fs.setDoc(fs.doc(db, 'trips', id), { data: JSON.stringify(t), updated: fs.serverTimestamp() });
   return id;
 }
@@ -640,7 +765,7 @@ function openTrip(id) {
     if (cur === 0 && span(trip.start, today()) > 0 && span(today(), trip.end) >= 0 && !openTrip.jumped) {
       cur = span(trip.start, today()); openTrip.jumped = true; // 여행 중이면 오늘 일차부터
     }
-    render(); remember();
+    render(); remember(); showInvite();
   }, () => toast('일정을 불러오지 못했어요'));
   openTrip.jumped = false;
 }
@@ -980,14 +1105,16 @@ function render() {
   $('titleText').textContent = trip.title || '나의 여행';
   $('titleDday').textContent = loaded ? dday(trip) : '';
   $('titleDday').hidden = !loaded;
+  $('titleMembers').innerHTML = trip.members.slice(0, 3).map(m => avHtml(m, 22)).join('');
 
   $('days').innerHTML = trip.days.map((_, i) => { const d = dayDate(i), city = trip.cities[i];
     return `<button class="day${i === cur ? ' on' : ''}" data-i="${i}" aria-pressed="${i === cur}">${i + 1}일차<small>${md(d)} ${WD[d.getDay()]}${city ? ' · ' + esc(city) : ''}</small></button>`;
   }).join('');
 
   const d = dayDate(cur), items = dayItems(cur);
-  $('dayTitle').innerHTML = `${cur + 1}일차<small>${md(d)} (${WD[d.getDay()]})${trip.cities[cur] ? ' · ' + esc(trip.cities[cur]) : ''}</small>`;
-  $('cityBtn').textContent = trip.cities[cur] ? '📍 도시 수정' : '📍 도시';
+  $('dayTitle').innerHTML = `${cur + 1}일차<small>${md(d)} (${WD[d.getDay()]})</small>`;
+  $('cityBtn').textContent = trip.cities[cur] ? `📍 ${trip.cities[cur]} ✏️` : '📍 도시 입력';
+  $('cityBtn').setAttribute('aria-label', `${cur + 1}일차 도시 ${trip.cities[cur] ? '수정' : '입력'}`);
 
   $('flights').innerHTML = trip.flights.filter(f => flightDay(f) === cur).map(f => {
     const dt = s => s ? s.slice(11, 16) : '--:--', plus = f.arr && f.dep && f.arr.slice(0, 10) > f.dep.slice(0, 10) ? '<sup>+1</sup>' : '';
@@ -1000,6 +1127,7 @@ function render() {
   let n = 0;
   $('stops').innerHTML = items.length ? items.map(p => {
     const T = typeOf(p), cnt = docs.filter(x => x.item === key(p)).length, num = hasPos(p) ? ++n : 0;
+    const by = trip.members.length > 1 && trip.members.find(m => m.id === p.by); // 2명 이상일 때 누가 넣었는지
     return `<li class="stop" data-k="${esc(key(p))}">
       <span class="num${num ? '' : ' off'}" style="background:${color(cur)}">${num || '·'}</span>
       <div class="card">
@@ -1017,6 +1145,7 @@ function render() {
           <button data-act="ics">캘린더</button>
           <button data-act="docs">첨부${cnt ? ' ' + cnt : ''}</button>
           <button data-act="edit">편집</button>
+          ${by ? `<span class="by" title="${esc(by.name)}님이 추가">${avHtml(by, 22)}</span>` : ''}
         </div>
       </div>
     </li>`;
@@ -1041,11 +1170,35 @@ $('stops').onclick = e => {
   else if (act === 'docs') openDocs(p, cur);
   else if (act === 'focus') focusCard(p);
 };
+/* ---------- 일차 정보(도시) 팝업 ---------- */
+let dayEdit = 0;
 $('cityBtn').onclick = () => {
-  const v = prompt(`${cur + 1}일차에 머무는 도시`, trip.cities[cur] || '');
-  if (v === null) return;
-  const d = cur, c = v.trim().slice(0, 20);
+  dayEdit = cur;
+  const d = dayDate(cur);
+  $('dayHead').textContent = `${cur + 1}일차 · ${md(d)} (${WD[d.getDay()]})`;
+  $('dCity').value = trip.cities[cur] || '';
+  $('dayDlg').returnValue = '';
+  $('dayDlg').showModal();
+};
+$('dayDlg').onclose = () => {
+  if ($('dayDlg').returnValue !== 'ok') return;
+  const d = dayEdit, c = $('dCity').value.trim().slice(0, 20);
   change(t => { t.cities[d] = c; });
+  toast(c ? `${d + 1}일차 도시: ${c}` : '도시를 지웠어요');
+};
+
+/* ---------- 일정 추가: 장소 / 항공편 / 직접 입력 ---------- */
+$('addPlace').onclick = () => {
+  if (loaded && !isMember()) return showInvite();
+  $('addHead').textContent = `${cur + 1}일차에 추가`;
+  $('addDlg').showModal();
+};
+$('addDlg').onclick = e => {
+  const a = e.target.closest('[data-add]')?.dataset.add; if (!a) return;
+  $('addDlg').close();
+  if (a === 'place') openSearch();
+  if (a === 'flight') openFlight(null);
+  if (a === 'memo') openItem({ type: '기타' }, cur, true);
 };
 
 /* ---------- 바텀시트 (모바일) ---------- */
@@ -1108,12 +1261,11 @@ $('q').onkeydown = e => { if (e.key === 'Enter') { clearTimeout(timer); runSearc
 $('results').onclick = e => {
   const d = cur;
   if (e.target.closest('[data-direct]')) {
-    const p = { id: newId(), name: $('q').value.trim().slice(0, 60), type: '기타' };
-    change(t => { (t.days[d] ??= []).push(p); });
-    closeSearch(); openItem(p, d); return;
+    const name = $('q').value.trim().slice(0, 60);
+    closeSearch(); openItem({ name, type: '기타' }, d, true); return;
   }
   const b = e.target.closest('button[data-i]'); if (!b || b.classList.contains('done')) return;
-  const f = found[+b.dataset.i], p = { ...f, id: newId(), type: guessType(f.cat + ' ' + f.name) };
+  const f = found[+b.dataset.i], p = { ...f, id: newId(), type: guessType(f.cat + ' ' + f.name), by: me()?.id };
   change(t => { (t.days[d] ??= []).push(p); });
   b.textContent = '추가됨'; b.classList.add('done');
   toast(`${d + 1}일차에 추가했어요 · 편집에서 시간을 정하세요`);
@@ -1123,7 +1275,6 @@ function openSearch() {
   setTimeout(() => $('q').focus(), 50);
 }
 function closeSearch() { $('searchView').classList.remove('on'); fit(dayItems(cur).filter(hasPos)); }
-$('addPlace').onclick = openSearch;
 $('closeSearch').onclick = closeSearch;
 addEventListener('keydown', e => { if (e.key === 'Escape' && $('searchView').classList.contains('on')) closeSearch(); });
 
@@ -1139,8 +1290,10 @@ for (const id of ['iType', 'iMove']) $(id).onclick = e => {
   if (!on || id === 'iType') b.setAttribute('aria-pressed', 'true'); // 이동 방법은 다시 누르면 해제
 };
 let itemEdit = null;
-function openItem(p, day) {
-  itemEdit = { k: key(p), day, p };
+function openItem(p, day, isNew = false) {
+  itemEdit = { k: isNew ? null : key(p), day, p, isNew };
+  $('iHead').textContent = isNew ? '✏️ 직접 입력' : '일정 편집';
+  $('iDel').hidden = $('iDocs').hidden = isNew; // 저장한 다음에 첨부·삭제 가능
   chipPick($('iType'), Object.keys(TYPES), p.type || '기타');
   chipPick($('iMove'), MOVES, p.move || '');
   $('iTime').value = p.time || ''; $('iName').value = p.name || '';
@@ -1157,6 +1310,12 @@ $('itemForm').onclose = () => {
   const vals = { type: chipVal($('iType')) || '기타', time: $('iTime').value, name: $('iName').value.trim().slice(0, 60) || '이름 없음',
     place: $('iPlace').value.trim().slice(0, 120), mapUrl: safeUrl(url), move: chipVal($('iMove')),
     alarm: $('iAlarm').value, memo: $('iMemo').value.trim().slice(0, 500) };
+  if (itemEdit.isNew) {
+    const p = { ...vals, id: newId(), by: me()?.id };
+    change(t => { (t.days[nd] ??= []).push(p); });
+    if (nd !== cur) { cur = nd; needFit = true; render(); }
+    return toast('추가했어요');
+  }
   const id = findItem(day, k)?.id || newId();
   if (k !== id) reKeyDocs(k, id); // 예전 항목에 id를 붙이면 첨부 파일도 따라감
   change(t => {
@@ -1179,12 +1338,21 @@ $('iDocs').onclick = () => openDocs(itemEdit.p, itemEdit.day);
 /* ---------- 항공편 ---------- */
 // 출발일이 여행 기간 밖이면 첫날/마지막 날에 보여 줌
 const flightDay = f => Math.max(0, Math.min(trip.days.length - 1, span(trip.start, (f.dep || trip.start).slice(0, 10))));
-let flightEdit = null;
+let flightEdit = null, fl = { dep: '', arr: '' };
+function flDates() {
+  $('flDepD').textContent = '📅 ' + fmtDate(fl.dep);
+  $('flArrD').textContent = '📅 ' + fmtDate(fl.arr);
+}
+$('flDepD').onclick = () => openCal('single', fl.dep, null, d => { if (fl.arr < d || fl.arr === fl.dep) fl.arr = d; fl.dep = d; flDates(); });
+$('flArrD').onclick = () => openCal('single', fl.arr || fl.dep, null, d => { fl.arr = d; flDates(); });
 function openFlight(f) {
+  if (loaded && !isMember()) return showInvite();
   flightEdit = f?.id || null;
   $('flNo').value = f?.no || ''; $('flFrom').value = f?.from || ''; $('flFromCity').value = f?.fromCity || '';
   $('flTo').value = f?.to || ''; $('flToCity').value = f?.toCity || '';
-  $('flDep').value = f?.dep || `${trip.start}T09:00`; $('flArr').value = f?.arr || '';
+  fl.dep = f?.dep?.slice(0, 10) || iso(dayDate(cur)); fl.arr = f?.arr?.slice(0, 10) || fl.dep;
+  $('flDepT').value = f?.dep?.slice(11, 16) || '09:00'; $('flArrT').value = f?.arr?.slice(11, 16) || '';
+  flDates();
   $('flDel').hidden = !f;
   $('flightForm').returnValue = '';
   $('flightForm').showModal();
@@ -1194,7 +1362,8 @@ $('flightForm').onclose = () => {
   if ($('flightForm').returnValue !== 'ok') return;
   const up = s => s.trim().toUpperCase().slice(0, 4);
   const f = { id: flightEdit || newId(), no: $('flNo').value.trim().toUpperCase().slice(0, 12), from: up($('flFrom').value), fromCity: $('flFromCity').value.trim().slice(0, 20),
-    to: up($('flTo').value), toCity: $('flToCity').value.trim().slice(0, 20), dep: $('flDep').value, arr: $('flArr').value };
+    to: up($('flTo').value), toCity: $('flToCity').value.trim().slice(0, 20),
+    dep: `${fl.dep}T${$('flDepT').value || '00:00'}`, arr: $('flArrT').value ? `${fl.arr}T${$('flArrT').value}` : '' };
   change(t => { const i = t.flights.findIndex(x => x.id === f.id); i >= 0 ? (t.flights[i] = f) : t.flights.push(f); });
   cur = flightDay(f); render(); toast('항공편을 저장했어요');
 };
@@ -1338,15 +1507,55 @@ let formMode = 'edit';
 const formAbroad = () => $('fAbroad').querySelector('[aria-checked="true"]')?.dataset.ab === '1';
 function setFormAbroad(v) { $('fAbroad').querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String((b.dataset.ab === '1') === v))); }
 $('fAbroad').onclick = e => { const b = e.target.closest('button'); if (b) setFormAbroad(b.dataset.ab === '1'); };
-function syncSpan() {
-  const s = $('fStart').value, e = $('fEnd').value;
-  $('fEnd').min = s;
-  if (s && e && e < s) $('fEnd').value = s;
-  const n = s && $('fEnd').value ? span(s, $('fEnd').value) : -1;
-  $('fSpan').textContent = n < 0 ? '' : n + 1 > MAX_DAYS ? `최대 ${MAX_DAYS}일까지 짤 수 있어요` : n ? `${n}박 ${n + 1}일` : '당일치기';
+function syncSpan() { $('fDates').textContent = '📅 ' + rangeText($('fStart').value, $('fEnd').value); }
+$('fDates').onclick = () => openCal('range', $('fStart').value, $('fEnd').value, (s, e) => { $('fStart').value = s; $('fEnd').value = e; syncSpan(); });
+
+/* ---------- 커스텀 캘린더 (range: 가는 날~오는 날, single: 하루) ---------- */
+function fmtDate(s) { if (!s) return '날짜 선택'; const d = new Date(s + 'T00:00'); return `${d.getMonth() + 1}월 ${d.getDate()}일 (${WD[d.getDay()]})`; }
+function rangeText(a, b) {
+  if (!a) return '날짜 선택';
+  if (!b) return fmtDate(a);
+  const n = span(a, b);
+  return `${fmtDate(a)} – ${fmtDate(b)} · ${n ? `${n}박 ${n + 1}일` : '당일치기'}`;
 }
-$('fStart').onchange = () => { if (!$('fEnd').value) $('fEnd').value = $('fStart').value; syncSpan(); };
-$('fEnd').onchange = syncSpan;
+let cal = null;
+function openCal(mode, start, end, done) {
+  cal = { mode, start: start || '', end: mode === 'range' ? end || '' : '', done };
+  const base = new Date((cal.start || today()) + 'T00:00');
+  cal.y = base.getFullYear(); cal.m = base.getMonth();
+  drawCal();
+  $('calDlg').returnValue = '';
+  $('calDlg').showModal();
+}
+function drawCal() {
+  const { y, m } = cal, first = new Date(y, m, 1).getDay(), n = new Date(y, m + 1, 0).getDate(), t = today();
+  $('calTitle').textContent = `${y}년 ${m + 1}월`;
+  let h = [...WD].map(w => `<span class="wd">${w}</span>`).join('') + '<span></span>'.repeat(first);
+  for (let d = 1; d <= n; d++) {
+    const s = iso(new Date(y, m, d)), wd = (first + d - 1) % 7;
+    const c = ['cal-d', wd === 0 ? 'sun' : wd === 6 ? 'sat' : '', s === t ? 'today' : '', s < t ? 'past' : '',
+      s === cal.start ? 's' : '', s === cal.end ? 'e' : '', cal.end && s > cal.start && s < cal.end ? 'in' : '',
+      s === cal.start && cal.end && cal.end !== cal.start ? 'has-e' : ''].filter(Boolean).join(' ');
+    h += `<button type="button" class="${c}" data-d="${s}" aria-label="${fmtDate(s)}"><span>${d}</span></button>`;
+  }
+  $('calGrid').innerHTML = h;
+  $('calSum').textContent = cal.mode === 'range'
+    ? (!cal.start ? '가는 날을 눌러 주세요' : !cal.end ? `${fmtDate(cal.start)} – 오는 날을 눌러 주세요` : rangeText(cal.start, cal.end))
+    : fmtDate(cal.start);
+  $('calOk').disabled = !cal.start || (cal.mode === 'range' && !cal.end);
+}
+$('calGrid').onclick = e => {
+  const b = e.target.closest('[data-d]'); if (!b) return;
+  const d = b.dataset.d;
+  if (cal.mode === 'single') cal.start = d;
+  else if (!cal.start || cal.end || d < cal.start) { cal.start = d; cal.end = ''; } // 새로 고르기
+  else if (span(cal.start, d) + 1 > MAX_DAYS) return toast(`최대 ${MAX_DAYS}일까지 고를 수 있어요`);
+  else cal.end = d;
+  drawCal();
+};
+$('calPrev').onclick = () => { if (--cal.m < 0) { cal.m = 11; cal.y--; } drawCal(); };
+$('calNext').onclick = () => { if (++cal.m > 11) { cal.m = 0; cal.y++; } drawCal(); };
+$('calDlg').onclose = () => { if ($('calDlg').returnValue === 'ok' && cal?.start) cal.done(cal.start, cal.end || cal.start); };
 function openForm(mode) {
   formMode = mode;
   const t = mode === 'new' ? blank() : trip;
@@ -1366,6 +1575,7 @@ $('settings').onclose = async () => {
   const title = $('fTitle').value.trim() || '나의 여행', abroad = formAbroad(), note = $('fNote').value.trim().slice(0, 30);
   const start = $('fStart').value, end = addDays(start, Math.min(MAX_DAYS - 1, span(start, $('fEnd').value)));
   if (formMode === 'new') {
+    if (!me() && !(await editProfile(true))) return toast('프로필을 만들어야 여행을 만들 수 있어요');
     const t = blank(); t.title = title; t.abroad = abroad; t.note = note; setDates(t, start, end);
     try { location.hash = 't=' + await createTrip(t); toast('새 여행을 만들었어요'); }
     catch { toast('만들지 못했어요. 인터넷 연결을 확인해 주세요'); }
@@ -1387,6 +1597,9 @@ function openMenu() {
   $('mCover').textContent = ok ? '' : '대표 사진 없음';
   $('mDocs').textContent = docs.length ? `${docs.length}개` : '';
   $('mNotify').textContent = !window.Notification ? '지원 안 됨' : Notification.permission === 'granted' ? '허용됨' : '';
+  const myId = me()?.id;
+  $('mMembers').innerHTML = trip.members.map(m => `<span class="m">${avHtml(m, 40)}${esc(m.name)}${m.id === myId ? ' (나)' : ''}</span>`).join('')
+    + `<button type="button" class="inv" data-m="invite"><i>＋</i>초대</button>`;
   $('menu').showModal();
 }
 $('menuBtn').onclick = openMenu;
@@ -1395,6 +1608,8 @@ $('menu').onclick = async e => {
   const m = e.target.closest('[data-m]')?.dataset.m; if (!m) return;
   $('menu').close();
   if (m === 'edit') openForm('edit');
+  if (m === 'profile') editProfile(false);
+  if (m === 'invite') invite();
   if (m === 'flight') openFlight(null);
   if (m === 'docs') openDocs(null);
   if (m === 'cover') $('fileCover').click();
@@ -1435,18 +1650,95 @@ $('fileJson').onchange = async e => {
   } catch { toast('백업 파일을 읽을 수 없어요'); }
 };
 
-/* ---------- 공유 ---------- */
-$('shareBtn').onclick = async () => {
-  const url = location.href;
-  const text = `"${trip.title}" 같이 짜요! 링크로 들어오면 함께 수정할 수 있어요`;
-  if (navigator.share) { try { await navigator.share({ title: trip.title, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
-  try { await navigator.clipboard.writeText(url); toast('링크를 복사했어요. 받은 사람도 함께 수정할 수 있어요'); }
-  catch { prompt('이 링크를 복사해서 보내 주세요', url); }
+/* ---------- 프로필 (이 기기에 저장, 참여한 여행의 멤버 목록에 복사됨) ---------- */
+// shortcut: 기본 프로필은 동물 이모지 — 대표가 프로필 사진을 주면 이미지 파일로 교체
+const AV = [{ e: '🐻', c: '#f6dcc2' }, { e: '🐰', c: '#fde2e4' }, { e: '🦊', c: '#ffe2c6' }, { e: '🐱', c: '#e2ecf7' },
+  { e: '🐶', c: '#efe3d2' }, { e: '🐼', c: '#e9e9e9' }, { e: '🐸', c: '#dcf2d8' }, { e: '🐧', c: '#dbeefa' }, { e: '🐯', c: '#fff0c9' }];
+const AV_RE = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
+function me() { try { const p = JSON.parse(readLocal('profile')); return p?.id && p.name ? p : null; } catch { return null; } }
+const memberOf = p => ({ id: p.id, name: p.name, av: p.av });
+const isMember = () => { const p = me(); return !!p && trip.members.some(m => m.id === p.id); };
+function avHtml(m, s = 28) {
+  const a = m?.av || '', pre = /^p\d+$/.test(a) && AV[+a.slice(1)];
+  const inner = AV_RE.test(a) && a.length < 60000 ? `<img src="${a}" alt="">` : pre ? pre.e : esc((m?.name || '?').slice(0, 1));
+  return `<span class="av" style="--s:${s}px;background:${pre ? pre.c : 'var(--bg2)'}" title="${esc(m?.name)}">${inner}</span>`;
+}
+function renderMe() { const p = me(); $('meBtn').innerHTML = p ? avHtml(p, 36) : avHtml({ name: '?' }, 36); $('meBtn').title = p ? p.name : '프로필 만들기'; }
+let profileWait = null, pAvSel = 'p0';
+function drawAvGrid() {
+  $('pAv').innerHTML = AV.map((a, i) => `<button type="button" data-av="p${i}" aria-pressed="${pAvSel === 'p' + i}" style="background:${a.c}" aria-label="캐릭터 ${i + 1}">${a.e}</button>`).join('')
+    + `<button type="button" data-av="up" aria-pressed="${AV_RE.test(pAvSel)}" aria-label="내 사진 올리기">${AV_RE.test(pAvSel) ? `<img src="${pAvSel}" alt="">` : '📷'}</button>`;
+  $('pPreview').innerHTML = avHtml({ name: $('pName').value || '?', av: pAvSel }, 76);
+}
+function editProfile(forJoin) {
+  const p = me() || { id: newId() + newId(), name: '', av: 'p' + Math.floor(Math.random() * AV.length) };
+  pAvSel = p.av; $('pName').value = p.name;
+  $('pHead').textContent = forJoin ? '함께할 프로필을 만들어 주세요' : '내 프로필';
+  drawAvGrid();
+  $('profileDlg').returnValue = '';
+  $('profileDlg').showModal();
+  return new Promise(res => { profileWait = { res, p }; });
+}
+$('pAv').onclick = e => {
+  const b = e.target.closest('[data-av]'); if (!b) return;
+  if (b.dataset.av === 'up') return $('fileAv').click();
+  pAvSel = b.dataset.av; drawAvGrid();
 };
+$('pName').oninput = () => { $('pPreview').innerHTML = avHtml({ name: $('pName').value || '?', av: pAvSel }, 76); };
+$('fileAv').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const bmp = await createImageBitmap(f), S = 160, c = document.createElement('canvas');
+    c.width = c.height = S;
+    const s = Math.max(S / bmp.width, S / bmp.height);
+    c.getContext('2d').drawImage(bmp, (S - bmp.width * s) / 2, (S - bmp.height * s) / 2, bmp.width * s, bmp.height * s);
+    pAvSel = c.toDataURL('image/jpeg', .8); drawAvGrid();
+  } catch { toast('이 사진은 쓸 수 없어요'); }
+};
+$('profileDlg').onclose = () => {
+  const w = profileWait; profileWait = null; if (!w) return;
+  if ($('profileDlg').returnValue !== 'ok') return w.res(null);
+  const p = { id: w.p.id, name: $('pName').value.trim().slice(0, 12) || '여행자', av: pAvSel };
+  writeLocal('profile', JSON.stringify(p)); renderMe();
+  if (tripId && isMember()) change(t => { const m = t.members.find(x => x.id === p.id); if (m) Object.assign(m, memberOf(p)); });
+  w.res(p);
+};
+$('meBtn').onclick = () => editProfile(false);
+
+/* ---------- 초대 · 참여하기 ---------- */
+function showInvite() {
+  const on = loaded && !isMember();
+  $('invite').classList.toggle('on', on);
+  if (!on) return;
+  const host = trip.members[0], ok = COVER_RE.test(trip.cover || '');
+  $('invCover').style.backgroundImage = ok ? `url('${trip.cover}')` : '';
+  $('invCover').textContent = ok ? '' : trip.abroad ? '✈️' : '🧳';
+  $('invMembers').innerHTML = trip.members.slice(0, 6).map(m => avHtml(m, 48)).join('');
+  $('invFrom').textContent = host ? `${host.name}님이 함께 가자고 초대했어요` : '여행에 초대받았어요';
+  $('invTitle').textContent = trip.title;
+  $('invDates').textContent = `${rangeText(trip.start, trip.end)}${trip.members.length ? ` · ${trip.members.length}명 참여 중` : ''}`;
+}
+$('joinBtn').onclick = async () => {
+  const p = me() || await editProfile(true);
+  if (!p) return;
+  change(t => { if (!t.members.some(m => m.id === p.id)) t.members.push(memberOf(p)); }, true);
+  showInvite(); toast(`참여했어요! 함께 일정을 짜요`);
+};
+$('invBack').onclick = () => { location.hash = ''; };
+
+async function invite() {
+  const url = location.href;
+  const text = `'${trip.title}' 여행에 함께해요! 링크를 열고 [참여하기]를 눌러 주세요`;
+  if (navigator.share) { try { await navigator.share({ title: trip.title, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(`${text}\n${url}`); toast('초대 링크를 복사했어요. 친구에게 보내 주세요'); }
+  catch { prompt('이 링크를 복사해서 보내 주세요', url); }
+}
+$('shareBtn').onclick = invite;
 
 let tt;
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2200); }
 
+renderMe();
 init();
 </script>
 </body>
