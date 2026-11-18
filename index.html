@@ -261,6 +261,17 @@
   .hero em { font-style:normal; display:inline-block; margin-top:8px; background:#fff; color:#2b7fc0; border-radius:12px; padding:3px 12px; font-size:20px; font-weight:800; }
   .hero-m { flex:none; position:relative; z-index:1; }
   .hero-m svg { display:block; filter:drop-shadow(0 6px 8px rgba(27,47,85,.2)); }
+  .install { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:var(--bg); border-radius:18px; padding:14px 16px; margin:-12px 0 24px; box-shadow:0 4px 14px rgba(27,47,85,.06); }
+  .install .ic { font-size:26px; }
+  .install b { display:block; font-size:15px; }
+  .install small { color:var(--muted); font-size:13px; }
+  .install span:nth-child(2) { flex:1; }
+  .install i { font-style:normal; font-size:22px; color:var(--muted); }
+  .inv-mine { margin:18px 20px 0; padding-top:16px; border-top:1px solid var(--line); }
+  .inv-mine p { font-size:13px; color:var(--muted); margin:0 0 10px; line-height:1.5; }
+  .inv-mine div { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .inv-mine button { display:flex; align-items:center; gap:6px; padding:4px 12px 4px 4px; border-radius:999px; background:var(--bg2); font-size:14px; font-weight:600; }
+  .mem button.m { display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; width:56px; text-align:center; overflow:hidden; }
   .sec { display:flex; align-items:baseline; justify-content:space-between; font-size:18px; font-weight:800; margin:4px 4px 12px; }
   .sec small { color:var(--muted); font-size:13px; font-weight:600; }
   #tripCards ul { list-style:none; padding:0; margin:0 0 22px; }
@@ -334,6 +345,7 @@
     <button id="meBtn" aria-label="내 프로필"></button>
   </div>
   <div class="hero" id="hero"></div>
+  <button class="install" id="installBtn"><span class="ic">📲</span><span><b>홈 화면에 추가하기</b><small>앱처럼 아이콘을 눌러 바로 열 수 있어요</small></span><i>›</i></button>
   <div id="tripCards"></div>
   <div class="home-foot"><button id="homeImport">백업 파일 불러오기</button></div>
 </section>
@@ -496,10 +508,28 @@
     <p class="inv-from" id="invFrom"></p>
     <h2 id="invTitle"></h2>
     <p class="muted" id="invDates"></p>
-    <button class="btn primary" id="joinBtn">참여하기</button>
+    <button class="btn primary" id="joinBtn">처음이에요, 참여하기</button>
+    <div class="inv-mine" id="invMine"></div>
     <button class="text-link" id="invBack">내 여행 목록으로</button>
   </div>
 </section>
+
+<!-- 홈 화면에 추가 안내 (설치 창을 바로 못 띄우는 브라우저용) -->
+<dialog id="installDlg">
+  <form method="dialog" class="help">
+    <h3>📲 홈 화면에 추가하기</h3>
+    <p class="note" id="instInapp">⚠️ 카카오톡·인스타그램 같은 앱 안에서 열면 추가할 수 없어요. 오른쪽 위 <b>⋯</b> → <b>다른 브라우저로 열기</b>(사파리·크롬)로 연 다음 해 주세요.</p>
+    <div id="instIos">
+      <h4>아이폰 (사파리)</h4>
+      <ul><li>화면 아래 <b>공유 버튼</b>(네모에 위 화살표)을 눌러요.</li><li>목록에서 <b>홈 화면에 추가</b>를 눌러요.</li><li>오른쪽 위 <b>추가</b>를 누르면 끝!</li></ul>
+    </div>
+    <div id="instAnd">
+      <h4>안드로이드 (크롬·삼성 인터넷)</h4>
+      <ul><li>오른쪽 위(또는 아래) <b>⋮ 메뉴</b>를 눌러요.</li><li><b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 눌러요.</li><li><b>설치</b>(추가)를 누르면 끝!</li></ul>
+    </div>
+    <div class="row"><button class="btn primary" value="cancel">확인</button></div>
+  </form>
+</dialog>
 
 <!-- 여행 목록의 ⋯ 더보기 -->
 <dialog id="tripAct">
@@ -531,6 +561,7 @@
       <button type="button" data-m="ics">📅 전체 일정을 캘린더로 내보내기</button>
       <button type="button" data-m="notify">🔔 알람 알림 허용 <small id="mNotify"></small></button>
       <button type="button" data-m="export">💾 백업 파일 저장 (JSON)</button>
+      <button type="button" data-m="install">📲 홈 화면에 추가</button>
       <button type="button" data-m="help">❓ 사용법</button>
     </div>
     <p class="note">⏰ 알람은 이 앱이 열려 있을 때만 울려요. 꼭 받아야 하는 알람은 '캘린더로 내보내기'를 쓰세요.<br>📎 예약 서류는 이 폰에만 저장되고 친구에게 공유되지 않아요.</p>
@@ -1676,13 +1707,22 @@ function openMenu() {
   $('mDocs').textContent = docs.length ? `${docs.length}개` : '';
   $('mNotify').textContent = !window.Notification ? '지원 안 됨' : Notification.permission === 'granted' ? '허용됨' : '';
   const myId = me()?.id;
-  $('mMembers').innerHTML = trip.members.map(m => `<span class="m">${avHtml(m, 40)}${esc(m.name)}${m.id === myId ? ' (나)' : ''}</span>`).join('')
+  $('mMembers').innerHTML = trip.members.map(m => `<button type="button" class="m" data-mem="${esc(m.id)}" aria-label="${esc(m.name)}${m.id === myId ? ' (나) 프로필 수정' : ' 빼기'}">${avHtml(m, 40)}${esc(m.name)}${m.id === myId ? ' (나)' : ''}</button>`).join('')
     + `<button type="button" class="inv" data-m="invite"><i>＋</i>초대</button>`;
   $('menu').showModal();
 }
 $('menuBtn').onclick = openMenu;
 $('titleBtn').onclick = openMenu;
 $('menu').onclick = async e => {
+  const mem = e.target.closest('[data-mem]')?.dataset.mem;
+  if (mem) { // 나: 프로필 수정 / 다른 사람: 이 여행에서 빼기 (중복 참여 정리용)
+    const who = trip.members.find(x => x.id === mem);
+    if (mem === me()?.id) { $('menu').close(); return editProfile(false); }
+    if (!who || !confirm(`'${who.name}'님을 이 여행에서 뺄까요?\n같은 사람이 두 번 참여한 경우 하나를 빼면 돼요.`)) return;
+    $('menu').close();
+    change(t => { t.members = t.members.filter(x => x.id !== mem); });
+    return toast(`${who.name}님을 뺐어요`);
+  }
   const m = e.target.closest('[data-m]')?.dataset.m; if (!m) return;
   $('menu').close();
   if (m === 'edit') openForm('edit');
@@ -1692,6 +1732,7 @@ $('menu').onclick = async e => {
   if (m === 'docs') openDocs(null);
   if (m === 'cover') $('fileCover').click();
   if (m === 'help') $('help').showModal();
+  if (m === 'install') install();
   if (m === 'ics') {
     const ev = trip.days.flatMap((d, i) => d.map(p => icsEvent(p, i))).concat(trip.flights.map(flightEvent));
     if (!ev.length) return toast('내보낼 일정이 없어요');
@@ -1823,7 +1864,19 @@ function showInvite() {
   $('invFrom').textContent = host ? `${host.name}님이 함께 가자고 초대했어요` : '여행에 초대받았어요';
   $('invTitle').textContent = trip.title;
   $('invDates').textContent = `${rangeText(trip.start, trip.end)}${trip.members.length ? ` · ${trip.members.length}명 참여 중` : ''}`;
+  $('joinBtn').textContent = trip.members.length ? '처음이에요, 참여하기' : '참여하기';
+  // 프로필은 브라우저마다 따로라서, 카톡 안 브라우저 등 다른 곳에서 열면 이미 참여한 사람도 처음처럼 보임
+  $('invMine').innerHTML = trip.members.length ? `<p>이미 참여했나요? 다른 앱(카톡 등)에서 열면 나를 못 알아볼 수 있어요.<br>내 프로필을 눌러 이어서 하세요.</p>
+    <div>${trip.members.map(m => `<button data-me="${esc(m.id)}">${avHtml(m, 30)}${esc(m.name)}</button>`).join('')}</div>` : '';
 }
+$('invMine').onclick = e => {
+  const b = e.target.closest('[data-me]'); if (!b) return;
+  const m = trip.members.find(x => x.id === b.dataset.me); if (!m) return;
+  if (!confirm(`'${m.name}'님으로 이어서 할까요?`)) return;
+  writeLocal('profile', JSON.stringify(memberOf(m)));
+  renderMe(); render(); remember(); showInvite();
+  toast(`${m.name}님, 다시 오셨네요!`);
+};
 $('joinBtn').onclick = async () => {
   const p = me() || await editProfile(true);
   if (!p) return;
@@ -1842,6 +1895,30 @@ async function invite() {
 $('shareBtn').onclick = invite;
 
 let tt;
+/* ---------- 홈 화면에 추가 ---------- */
+// 크롬(안드로이드)은 설치 창을 바로 띄우고, 아이폰·앱 안 브라우저는 따라 하는 안내를 보여 줌
+let installEvt = null;
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; });
+addEventListener('appinstalled', () => { installEvt = null; $('installBtn').hidden = true; toast('홈 화면에 추가했어요'); });
+$('installBtn').hidden = standalone();
+async function install() {
+  if (installEvt) { installEvt.prompt(); await installEvt.userChoice; installEvt = null; return; }
+  const ua = navigator.userAgent, ios = /iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  $('instInapp').hidden = !/KAKAOTALK|Instagram|FBAN|FBAV|NAVER|Line\/|DaumApps/i.test(ua);
+  $('instIos').hidden = !ios; $('instAnd').hidden = ios;
+  $('installDlg').showModal();
+}
+$('installBtn').onclick = install;
+
+/* ---------- 팝업 바깥(어두운 부분)을 누르면 닫기 ---------- */
+document.addEventListener('click', e => {
+  const d = e.target;
+  if (!(d instanceof HTMLDialogElement) || !d.open) return;
+  const r = d.getBoundingClientRect();
+  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close();
+});
+
 /* ---------- 폰 뒤로가기로 팝업·검색 화면 닫기 ---------- */
 // 팝업을 열 때 기록을 하나 쌓고, 뒤로가기(popstate)가 오면 맨 위 팝업만 닫음.
 // 버튼으로 닫을 땐 쌓은 기록을 history.back()으로 정리하는데, 그게 끝나기 전에 다음 팝업이 열리면
