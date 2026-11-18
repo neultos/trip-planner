@@ -198,7 +198,14 @@ const color = i => COLORS[i % COLORS.length];
 
 // 파이어베이스 웹 설정 (콘솔 > 프로젝트 설정 > 내 앱 > 웹 앱의 firebaseConfig). 공개용 값이고 보안은 firestore.rules가 담당.
 // 비어 있으면 서버 없이 이 기기에만 저장하고, 링크에 일정을 통째로 담아 공유함.
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyDH2RKFV5qp6b_dzUngvHNG7xNT8HVSbxY',
+  authDomain: 'hariple.firebaseapp.com',
+  projectId: 'hariple',
+  storageBucket: 'hariple.firebasestorage.app',
+  messagingSenderId: '645872697259',
+  appId: '1:645872697259:web:3e85f2eebcb6eb31f79cee'
+};
 
 // 서버 없는 모드: 일정 전체를 URL 해시에 담음 (예전 공유 링크도 이 형식)
 const enc = o => btoa(unescape(encodeURIComponent(JSON.stringify(o))));
