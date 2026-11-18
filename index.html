@@ -49,7 +49,6 @@
   .day small { font-weight:500; color:var(--muted); margin-left:4px; }
   .day.on { background:var(--fg); color:var(--bg); }
   .day.on small { color:inherit; opacity:.7; }
-  .day.add { color:var(--muted); }
   .list-head { display:flex; align-items:baseline; justify-content:space-between; padding:4px 20px 8px; flex:none; }
   .list-head h2 { margin:0; font-size:19px; }
   .list-head h2 small { font-size:14px; color:var(--muted); font-weight:500; margin-left:6px; }
@@ -102,12 +101,35 @@
   .btn { flex:1; height:48px; border-radius:12px; background:var(--bg2); font-weight:600; }
   .btn.primary { background:var(--accent); color:#fff; }
   .btn.danger { color:#e5484d; }
-  #tripsBox { margin-top:20px; padding-top:16px; border-top:1px solid var(--line); }
-  #tripsBox h4 { margin:0 0 8px; font-size:15px; }
-  #tripList { list-style:none; margin:0 0 10px; padding:0; max-height:30vh; overflow-y:auto; }
-  #tripList button { width:100%; text-align:left; padding:12px 4px; border-bottom:1px solid var(--line); font-size:15px; }
-  #tripList button.on { color:var(--accent); font-weight:600; }
-  #newTrip { width:100%; }
+  .dates { display:flex; gap:8px; }
+  .dates label { flex:1; min-width:0; }
+  dialog .seg { display:flex; margin:6px 0 16px; }
+  dialog .seg button { flex:1; padding:10px 0; font-size:15px; }
+  #fSpan { font-size:13px; color:var(--muted); margin:-6px 0 14px; }
+
+  /* 내 여행 (홈) */
+  #home { position:fixed; inset:0; z-index:900; background:var(--bg2); overflow-y:auto; display:none;
+    padding:calc(env(safe-area-inset-top,0px) + 24px) 16px calc(100px + var(--safe-b)); }
+  body.at-home #home { display:block; }
+  #home > * { max-width:600px; margin-left:auto; margin-right:auto; }
+  #home h1 { font-size:26px; margin:0 4px 4px; }
+  #home .sub { color:var(--muted); font-size:14px; margin:0 4px 20px; }
+  #tripCards { list-style:none; padding:0; }
+  .tcard { display:flex; align-items:stretch; background:var(--bg); border-radius:18px; margin-bottom:12px; box-shadow:0 2px 10px rgba(0,0,0,.05); overflow:hidden; }
+  .tcard .open { flex:1; min-width:0; text-align:left; padding:16px 0 16px 18px; }
+  .tcard .open:active, .fab:active, .btn:active { transform:scale(.98); }
+  .tcard b { display:block; font-size:18px; margin:8px 0 4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tcard small { display:block; color:var(--muted); font-size:13px; }
+  .tcard .more { width:48px; color:var(--muted); font-size:20px; }
+  .tcard.ended { opacity:.6; }
+  .badge { display:inline-block; font-size:12px; font-weight:700; padding:3px 8px; border-radius:6px; background:#fff1ec; color:var(--accent); }
+  .badge.region { background:var(--bg2); color:var(--muted); margin-left:4px; }
+  .ended .badge:first-child { background:var(--bg2); color:var(--muted); }
+  .home-empty { text-align:center; color:var(--muted); padding:48px 0; line-height:1.7; }
+  .home-empty b { color:var(--fg); font-size:17px; }
+  .fab { position:fixed; left:16px; right:16px; bottom:calc(20px + var(--safe-b)); max-width:600px; margin:0 auto; height:56px; border-radius:16px; background:var(--accent); color:#fff; font-size:16px; font-weight:700; box-shadow:0 6px 20px rgba(255,107,74,.35); z-index:910; display:none; }
+  body.at-home .fab { display:block; }
+  #titleBtn .badge { flex:none; }
 
   #toast { position:fixed; left:50%; bottom:calc(var(--sheet) + 16px); transform:translate(-50%,10px); z-index:1100; background:var(--fg); color:var(--bg); padding:10px 16px; border-radius:999px; font-size:14px; opacity:0; pointer-events:none; transition:.2s; white-space:nowrap; }
   #toast.on { opacity:1; transform:translate(-50%,0); }
@@ -132,8 +154,18 @@
 <div id="map" role="application" aria-label="일정 지도"></div>
 <div id="gmap" role="application" aria-label="일정 지도" hidden></div>
 
+<section id="home" aria-label="내 여행">
+  <h1>내 여행</h1>
+  <p class="sub">여행마다 일정을 따로 짜고, 링크로 친구와 함께 고쳐요.</p>
+  <ul id="tripCards"></ul>
+</section>
+<button class="fab" id="newTripBtn">+ 새 여행 만들기</button>
+
 <div class="top">
-  <button class="chip-btn" id="titleBtn" aria-label="여행 정보 수정"><span id="titleText"></span><small id="titleDates"></small></button>
+  <button class="chip-btn round" id="backBtn" aria-label="내 여행 목록으로">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="chip-btn" id="titleBtn" aria-label="여행 정보 수정"><span id="titleText"></span><span class="badge" id="titleDday"></span></button>
   <button class="chip-btn round" id="shareBtn" aria-label="일정 공유">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
   </button>
@@ -169,16 +201,18 @@
 
 <dialog id="settings">
   <form method="dialog">
-    <h3>여행 정보</h3>
-    <label>여행 이름<input id="fTitle" maxlength="40"></label>
-    <label>출발일<input id="fStart" type="date"></label>
-    <div class="row"><button class="btn danger" id="delDay" value="del" type="button">이 일차 삭제</button></div>
-    <div class="row"><button class="btn" value="cancel">취소</button><button class="btn primary" value="ok">저장</button></div>
-    <div id="tripsBox" hidden>
-      <h4>내 여행</h4>
-      <ul id="tripList"></ul>
-      <button class="btn" id="newTrip" type="button">+ 새 여행 만들기</button>
+    <h3 id="fHead">여행 정보</h3>
+    <label>여행 이름<input id="fTitle" maxlength="40" placeholder="예: 도쿄 먹방 여행"></label>
+    <div class="dates">
+      <label>가는 날<input id="fStart" type="date" required></label>
+      <label>오는 날<input id="fEnd" type="date" required></label>
     </div>
+    <div id="fSpan"></div>
+    <label style="margin-bottom:0">여행지</label>
+    <div class="seg" id="fAbroad" role="radiogroup" aria-label="여행지">
+      <button type="button" role="radio" data-ab="0">국내</button><button type="button" role="radio" data-ab="1">해외</button>
+    </div>
+    <div class="row"><button class="btn" value="cancel" formnovalidate>취소</button><button class="btn primary" id="fOk" value="ok">저장</button></div>
   </form>
 </dialog>
 
@@ -197,7 +231,6 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const color = i => COLORS[i % COLORS.length];
 
 // 파이어베이스 웹 설정 (콘솔 > 프로젝트 설정 > 내 앱 > 웹 앱의 firebaseConfig). 공개용 값이고 보안은 firestore.rules가 담당.
-// 비어 있으면 서버 없이 이 기기에만 저장하고, 링크에 일정을 통째로 담아 공유함.
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyDH2RKFV5qp6b_dzUngvHNG7xNT8HVSbxY',
   authDomain: 'hariple.firebaseapp.com',
@@ -207,25 +240,48 @@ const FIREBASE_CONFIG = {
   appId: '1:645872697259:web:3e85f2eebcb6eb31f79cee'
 };
 
-// 서버 없는 모드: 일정 전체를 URL 해시에 담음 (예전 공유 링크도 이 형식)
-const enc = o => btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+// 예전 버전의 공유 링크(#일정통째)를 읽을 때만 씀
 const dec = s => JSON.parse(decodeURIComponent(escape(atob(s))));
-console.assert(dec(enc({ t: '제주 여행 ✈' })).t === '제주 여행 ✈', 'share encoding broken');
 
 function readLocal(k) { try { return localStorage.getItem(k); } catch { return null; } }
 function writeLocal(k, s) { try { localStorage.setItem(k, s); } catch {} }
-const blank = () => ({ title: '나의 여행', start: new Date().toISOString().slice(0,10), days: [[]] });
-const fix = t => { if (!Array.isArray(t.days) || !t.days.length) t.days = [[]]; return t; };
+
+/* ---------- 날짜 ---------- */
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const today = () => iso(new Date());
+const addDays = (s, n) => { const d = new Date(s + 'T00:00'); d.setDate(d.getDate() + n); return iso(d); };
+const span = (a, b) => Math.round((new Date(b + 'T00:00') - new Date(a + 'T00:00')) / 864e5);
+const MAX_DAYS = 60;
+// 가는 날~오는 날에 맞춰 일차 수를 맞춤 (줄어들면 뒤쪽 일차는 지워짐)
+function setDates(t, start, end) {
+  t.start = start; t.end = end;
+  const n = Math.min(MAX_DAYS, span(start, end) + 1);
+  while (t.days.length < n) t.days.push([]);
+  t.days.length = n;
+}
+function dday(t) {
+  const a = span(today(), t.start), b = span(today(), t.end);
+  if (a > 0) return `D-${a}`;
+  if (a === 0) return 'D-DAY';
+  return b >= 0 ? `여행 ${1 - a}일차` : '여행 종료';
+}
+console.assert(span('2026-12-30', '2027-01-02') === 3 && addDays('2026-02-28', 1) === '2026-03-01', 'date math broken');
+
+const blank = () => ({ title: '나의 여행', start: today(), end: addDays(today(), 2), days: [[], [], []] });
+const fix = t => {
+  if (!Array.isArray(t.days) || !t.days.length) t.days = [[]];
+  if (!t.end) t.end = addDays(t.start, t.days.length - 1); // 예전 일정(오는 날 없음)
+  return t;
+};
 
 let trip = blank(), cur = 0, editing = false;
-let db = null, fs = null, tripId = null, unsub = null;
+let db = null, fs = null, tripId = null, unsub = null, loaded = false;
 
 // 모든 수정은 change()로: 화면엔 바로 반영하고, 파이어베이스에는 '최신본에 같은 수정을 다시 적용'해서
 // 친구와 동시에 고쳐도 서로의 수정이 덮어써지지 않게 함.
 function change(fn) {
-  if (db && !tripId) return toast('일정을 불러오는 중이에요');
+  if (!tripId) return toast('일정을 불러오는 중이에요');
   fn(trip); render();
-  if (!db) { writeLocal('trip', JSON.stringify(trip)); history.replaceState(null, '', '#' + enc(trip)); return; }
   const ref = fs.doc(db, 'trips', tripId), mine = JSON.stringify(trip);
   fs.runTransaction(db, async tx => {
     const snap = await tx.get(ref);
@@ -240,9 +296,49 @@ function recents() { try { return JSON.parse(readLocal('trips')) || []; } catch 
 function remember() {
   if (!tripId) return;
   const l = recents().filter(x => x.id !== tripId);
-  l.unshift({ id: tripId, title: trip.title });
-  writeLocal('trips', JSON.stringify(l.slice(0, 30)));
+  l.unshift({ id: tripId, title: trip.title, start: trip.start, end: trip.end, abroad: !!trip.abroad,
+    count: trip.days.reduce((n, d) => n + d.length, 0) });
+  writeLocal('trips', JSON.stringify(l.slice(0, 50)));
 }
+
+function showHome() {
+  unsub?.(); unsub = null; tripId = null;
+  document.body.classList.add('at-home');
+  const ended = x => x.end && span(today(), x.end) < 0;
+  // 다가오는·진행 중인 여행이 위, 끝난 여행은 아래(최근 것부터)
+  const l = recents().sort((x, y) => ended(x) - ended(y) || (ended(x) ? -1 : 1) * (x.start || '').localeCompare(y.start || ''));
+  $('tripCards').innerHTML = l.length ? l.map(x => {
+    const s = x.start && new Date(x.start + 'T00:00'), e = x.end && new Date(x.end + 'T00:00'), n = x.start && x.end ? span(x.start, x.end) : 0;
+    return `<li class="tcard${ended(x) ? ' ended' : ''}">
+      <button class="open" data-id="${esc(x.id)}">
+        ${x.start ? `<span class="badge">${dday(x)}</span>` : ''}<span class="badge region">${x.abroad ? '해외' : '국내'}</span>
+        <b>${esc(x.title || '나의 여행')}</b>
+        <small>${s ? `${md(s)} (${WD[s.getDay()]}) – ${md(e)} (${WD[e.getDay()]}) · ${n ? `${n}박 ${n + 1}일` : '당일'}` : ''}${x.count != null ? ` · 장소 ${x.count}곳` : ''}</small>
+      </button>
+      <button class="more" data-del="${esc(x.id)}" aria-label="${esc(x.title)} 목록에서 빼기">⋯</button>
+    </li>`;
+  }).join('') : `<li class="home-empty"><b>아직 여행이 없어요</b><br>아래 버튼으로 첫 여행을 만들어 보세요.</li>`;
+}
+$('tripCards').onclick = e => {
+  const o = e.target.closest('[data-id]'), d = e.target.closest('[data-del]');
+  if (o) location.hash = 't=' + o.dataset.id;
+  if (d) {
+    const x = recents().find(r => r.id === d.dataset.del);
+    if (!confirm(`'${x?.title || '이 여행'}'을 내 목록에서 뺄까요?\n함께 쓰는 친구의 일정은 지워지지 않고, 링크로 다시 열 수 있어요.`)) return;
+    writeLocal('trips', JSON.stringify(recents().filter(r => r.id !== d.dataset.del)));
+    showHome(); toast('목록에서 뺐어요');
+  }
+};
+
+// 주소(#t=여행ID)로 화면을 정함 → 폰의 뒤로가기도 자연스럽게 동작
+function route() {
+  const h = location.hash.slice(1);
+  if (!h.startsWith('t=')) return showHome();
+  document.body.classList.remove('at-home');
+  if (h.slice(2) !== tripId) openTrip(h.slice(2));
+}
+addEventListener('hashchange', () => { if (db) route(); });
+$('backBtn').onclick = () => { location.hash = ''; };
 
 async function createTrip(t) {
   // 추측할 수 없는 32자 주소 = 링크 가진 사람만 편집
@@ -252,11 +348,11 @@ async function createTrip(t) {
 }
 function openTrip(id) {
   unsub?.();
-  tripId = id; cur = 0; editing = false;
-  history.replaceState(null, '', '#t=' + id);
+  tripId = id; cur = 0; editing = false; loaded = false;
+  trip = { ...blank(), title: '불러오는 중…' }; render(); setSheet('mid');
   unsub = fs.onSnapshot(fs.doc(db, 'trips', id), snap => {
     if (!snap.exists()) return toast('없는 일정이에요. 링크를 확인해 주세요');
-    trip = fix(JSON.parse(snap.data().data));
+    trip = fix(JSON.parse(snap.data().data)); loaded = true;
     cur = Math.min(cur, trip.days.length - 1);
     render(); remember();
   }, () => toast('일정을 불러오지 못했어요'));
@@ -264,10 +360,7 @@ function openTrip(id) {
 
 async function init() {
   const h = location.hash.slice(1);
-  if (!FIREBASE_CONFIG) {
-    try { trip = fix(h ? dec(h) : JSON.parse(readLocal('trip')) || blank()); } catch { trip = blank(); }
-    return render();
-  }
+  if (!h.startsWith('t=')) showHome(); // 서버 연결 전에도 목록은 바로 보여 줌
   trip.title = '불러오는 중…'; render();
   try {
     const [{ initializeApp }, f] = await Promise.all([
@@ -275,14 +368,15 @@ async function init() {
       import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
     ]);
     fs = f; db = f.getFirestore(initializeApp(FIREBASE_CONFIG), 'default'); // 콘솔에서 만든 DB 이름이 '(default)'가 아닌 'default'
-    let id = h.startsWith('t=') ? h.slice(2) : null, seed = null;
-    if (!id && h) try { seed = fix(dec(h)); } catch {}          // 예전 형식 공유 링크 → 새 공유 일정으로
-    if (!id && !seed) id = recents()[0]?.id;                     // 마지막으로 보던 여행
-    if (!id) {                                                   // 첫 사용: 이 기기에 있던 일정을 올림
-      try { seed ??= fix(JSON.parse(readLocal('trip')) || blank()); } catch { seed = blank(); }
-      id = await createTrip(seed);
+    // 예전 버전에서 넘어온 일정(예전 공유 링크, 이 기기에만 있던 일정)은 새 여행으로 옮김
+    let seed = null;
+    if (h && !h.startsWith('t=')) try { seed = fix(dec(h)); } catch {}
+    if (!seed && readLocal('trip')) try { seed = fix(JSON.parse(readLocal('trip'))); } catch {}
+    if (seed) {
+      history.replaceState(null, '', '#t=' + await createTrip(seed));
+      try { localStorage.removeItem('trip'); } catch {}
     }
-    openTrip(id);
+    route();
   } catch { toast('서버에 연결하지 못했어요. 새로고침해 주세요'); }
 }
 
@@ -358,12 +452,12 @@ const WD = '일월화수목금토';
 function render() {
   if (trip.abroad) loadGoogle();
   $('titleText').textContent = trip.title || '나의 여행';
-  const n = trip.days.length;
-  $('titleDates').textContent = n > 1 ? `${md(dayDate(0))} – ${md(dayDate(n-1))}` : md(dayDate(0));
+  $('titleDday').textContent = loaded ? dday(trip) : '';
+  $('titleDday').hidden = !$('titleDday').textContent;
 
-  $('days').innerHTML = trip.days.map((_, i) =>
-    `<button class="day${i===cur?' on':''}" data-i="${i}" aria-pressed="${i===cur}">${i+1}일차<small>${md(dayDate(i))}</small></button>`
-  ).join('') + '<button class="day add" id="addDay" aria-label="일차 추가">+ 일차</button>';
+  $('days').innerHTML = trip.days.map((_, i) => { const d = dayDate(i);
+    return `<button class="day${i===cur?' on':''}" data-i="${i}" aria-pressed="${i===cur}">${i+1}일차<small>${md(d)} ${WD[d.getDay()]}</small></button>`;
+  }).join('');
 
   const d = dayDate(cur), list = trip.days[cur];
   $('dayTitle').innerHTML = `${cur+1}일차<small>${md(d)} (${WD[d.getDay()]}) · 장소 ${list.length}곳</small>`;
@@ -405,8 +499,7 @@ function focusStop(i) {
 
 $('days').onclick = e => {
   const b = e.target.closest('.day'); if (!b) return;
-  if (b.id === 'addDay') { change(t => t.days.push([])); cur = trip.days.length - 1; toast(`${cur+1}일차를 추가했어요`); }
-  else cur = +b.dataset.i;
+  cur = +b.dataset.i;
   editing = false; render();
   $('days').querySelector('.on')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
 };
@@ -532,46 +625,59 @@ $('addPlace').onclick = openSearch;
 $('closeSearch').onclick = closeSearch;
 addEventListener('keydown', e => { if (e.key === 'Escape' && $('searchView').classList.contains('on')) closeSearch(); });
 
-/* ---------- 여행 정보 ---------- */
-$('titleBtn').onclick = () => {
-  $('fTitle').value = trip.title; $('fStart').value = trip.start;
-  $('delDay').hidden = trip.days.length < 2;
-  $('delDay').textContent = `${cur+1}일차 삭제`;
-  $('tripsBox').hidden = !db;
-  $('tripList').innerHTML = recents().map(x =>
-    `<li><button type="button" data-id="${esc(x.id)}" class="${x.id === tripId ? 'on' : ''}">${esc(x.title || '나의 여행')}${x.id === tripId ? ' · 지금 보는 중' : ''}</button></li>`).join('');
+/* ---------- 여행 만들기 · 수정 (같은 창을 같이 씀) ---------- */
+let formMode = 'edit';
+const formAbroad = () => $('fAbroad').querySelector('[aria-checked="true"]')?.dataset.ab === '1';
+function setFormAbroad(v) { $('fAbroad').querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String((b.dataset.ab === '1') === v))); }
+$('fAbroad').onclick = e => { const b = e.target.closest('button'); if (b) setFormAbroad(b.dataset.ab === '1'); };
+function syncSpan() {
+  const s = $('fStart').value, e = $('fEnd').value;
+  $('fEnd').min = s;
+  if (s && e && e < s) $('fEnd').value = s;
+  const n = s && $('fEnd').value ? span(s, $('fEnd').value) : -1;
+  $('fSpan').textContent = n < 0 ? '' : n + 1 > MAX_DAYS ? `최대 ${MAX_DAYS}일까지 짤 수 있어요` : n ? `${n}박 ${n + 1}일` : '당일치기';
+}
+$('fStart').onchange = () => { if (!$('fEnd').value) $('fEnd').value = $('fStart').value; syncSpan(); };
+$('fEnd').onchange = syncSpan;
+
+function openForm(mode) {
+  formMode = mode;
+  const t = mode === 'new' ? blank() : trip;
+  $('fHead').textContent = mode === 'new' ? '새 여행 만들기' : '여행 정보';
+  $('fOk').textContent = mode === 'new' ? '만들기' : '저장';
+  $('fTitle').value = mode === 'new' ? '' : t.title;
+  $('fStart').value = t.start; $('fEnd').value = t.end;
+  setFormAbroad(!!t.abroad); syncSpan();
   $('settings').returnValue = ''; // 이전에 누른 '저장'이 남아 다른 동작에 적용되지 않게
   $('settings').showModal();
-};
-$('settings').onclose = () => {
+  if (mode === 'new') $('fTitle').focus();
+}
+$('newTripBtn').onclick = () => openForm('new');
+$('titleBtn').onclick = () => tripId && openForm('edit');
+
+$('settings').onclose = async () => {
   if ($('settings').returnValue !== 'ok') return;
-  const title = $('fTitle').value.trim() || '나의 여행', start = $('fStart').value;
-  change(t => { t.title = title; if (start) t.start = start; });
-};
-$('delDay').onclick = () => {
-  if (!confirm(`${cur+1}일차 일정을 모두 삭제할까요?`)) return;
-  const d = cur;
-  cur = Math.max(0, cur - 1); // 화면이 지워진 일차를 가리키지 않도록 먼저 옮김
-  $('settings').close();
-  change(t => { if (t.days.length > 1) t.days.splice(d, 1); });
-  toast('일차를 삭제했어요');
-};
-$('tripList').onclick = e => {
-  const b = e.target.closest('button[data-id]'); if (!b) return;
-  $('settings').close(); openTrip(b.dataset.id); setSheet('mid');
-};
-$('newTrip').onclick = async () => {
-  $('settings').close();
-  try { openTrip(await createTrip(blank())); toast('새 여행을 만들었어요'); }
-  catch { toast('만들지 못했어요. 인터넷 연결을 확인해 주세요'); }
+  const title = $('fTitle').value.trim() || '나의 여행', abroad = formAbroad();
+  const start = $('fStart').value, end = addDays(start, Math.min(MAX_DAYS - 1, span(start, $('fEnd').value)));
+  if (formMode === 'new') {
+    const t = blank(); t.title = title; t.abroad = abroad; setDates(t, start, end);
+    try { location.hash = 't=' + await createTrip(t); toast('새 여행을 만들었어요'); }
+    catch { toast('만들지 못했어요. 인터넷 연결을 확인해 주세요'); }
+    return;
+  }
+  const n = span(start, end) + 1, lost = trip.days.slice(n).reduce((k, d) => k + d.length, 0);
+  if (lost && !confirm(`기간이 줄어서 ${n + 1}일차 이후 장소 ${lost}곳이 지워져요. 계속할까요?`)) return;
+  cur = Math.min(cur, n - 1);
+  change(t => { t.title = title; t.abroad = abroad; setDates(t, start, end); });
+  toast('여행 정보를 저장했어요');
 };
 
 /* ---------- 공유 ---------- */
 $('shareBtn').onclick = async () => {
   const url = location.href;
-  const text = db ? `"${trip.title}" 같이 짜요! 링크로 들어오면 함께 수정할 수 있어요` : `${trip.title} 일정이에요`;
+  const text = `"${trip.title}" 같이 짜요! 링크로 들어오면 함께 수정할 수 있어요`;
   if (navigator.share) { try { await navigator.share({ title: trip.title, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
-  try { await navigator.clipboard.writeText(url); toast(db ? '링크를 복사했어요. 받은 사람도 함께 수정할 수 있어요' : '링크를 복사했어요'); }
+  try { await navigator.clipboard.writeText(url); toast('링크를 복사했어요. 받은 사람도 함께 수정할 수 있어요'); }
   catch { prompt('이 링크를 복사해서 보내 주세요', url); }
 };
 
