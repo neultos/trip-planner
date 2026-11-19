@@ -36,7 +36,11 @@
   body { font-family:Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; background:var(--bg); color:var(--fg); letter-spacing:-.01em; }
   button { font:inherit; color:inherit; background:none; border:0; cursor:pointer; padding:0; }
   button:active { transform:scale(.97); }
-  input, select, textarea { font:inherit; color:inherit; }
+  input, select, textarea { font:inherit; color:var(--fg); }
+  input::placeholder, textarea::placeholder { color:#9aa1ab; }
+  input:focus, select:focus, textarea:focus { outline:none; box-shadow:inset 0 0 0 2px var(--accent); }
+  .nw-search input:focus { box-shadow:none; }
+  .nw-search:focus-within { box-shadow:inset 0 0 0 2px var(--accent); }
   [hidden] { display:none !important; }
 
   #map, #gmap { position:fixed; inset:0; z-index:0; background:var(--bg2); }
@@ -2330,7 +2334,7 @@ function wxText(d) {
 }
 
 /* ---------- 바텀시트 (모바일) ---------- */
-const SNAP = { low: 30, mid: 52, high: 88 }; // dvh
+const SNAP = { low: 30, mid: 52, high: 74 }; // dvh
 let snap = 'mid';
 function setSheet(s) { snap = s; document.documentElement.style.setProperty('--sheet', SNAP[s] + 'dvh'); }
 setSheet(SNAP[readLocal('sheet')] ? readLocal('sheet') : 'mid');
@@ -2347,7 +2351,7 @@ function userSheet(k) { setSheet(k); writeLocal('sheet', k); setTimeout(() => fi
   const g = $('grip'), sh = $('sheet');
   let y0, h0;
   g.addEventListener('pointerdown', e => { y0 = e.clientY; h0 = sh.offsetHeight; sh.classList.add('dragging'); g.setPointerCapture(e.pointerId); });
-  g.addEventListener('pointermove', e => { if (y0 == null) return; sh.style.height = Math.max(120, h0 + y0 - e.clientY) + 'px'; });
+  g.addEventListener('pointermove', e => { if (y0 == null) return; sh.style.height = Math.min(innerHeight * .8, Math.max(120, h0 + y0 - e.clientY)) + 'px'; });
   g.addEventListener('pointerup', e => {
     if (y0 == null) return;
     const dy = y0 - e.clientY; y0 = null;
@@ -2376,7 +2380,7 @@ function userSheet(k) { setSheet(k); writeLocal('sheet', k); setTimeout(() => fi
     }
     if (t.mode !== 'sheet') return;
     if (e.cancelable) e.preventDefault();
-    sh.style.height = Math.min(innerHeight * .92, Math.max(120, t.h - dy)) + 'px';
+    sh.style.height = Math.min(innerHeight * .8, Math.max(120, t.h - dy)) + 'px';
   }, { passive: false });
   const end = () => { if (t?.mode === 'sheet') endSheet(t.y0 - t.y); t = null; };
   sh.addEventListener('touchend', end); sh.addEventListener('touchcancel', end);
@@ -3488,7 +3492,7 @@ function claimMe() {
 function authHtml() {
   if (!auth) return '';
   if (!user) return `로그인하면 다른 기기에서도 내 여행과 프로필이 그대로예요.<div class="row"><button type="button" class="btn primary" data-pa="login">로그인하기</button></div>`;
-  const pv = user.providerData[0]?.providerId || '';
+  const pv = user.uid.startsWith('kakao:') ? 'kakao' : user.providerData[0]?.providerId || ''; // 카카오는 직접 만든 로그인 표라 providerData가 비어 있음
   return `${pv.includes('kakao') ? '카카오' : pv.includes('google') ? '구글' : ''} 계정으로 로그인했어요${user.email ? ` (${esc(user.email)})` : ''}.
     <div class="row"><button type="button" class="btn" data-pa="logout">로그아웃</button></div>`;
 }
