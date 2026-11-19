@@ -986,6 +986,8 @@
 // 구글 지도 API 키 (지도·장소 검색, neultos.github.io 도메인으로 제한해서 씀). 비어 있으면 오픈스트리트맵으로 대체.
 const GOOGLE_KEY = 'AIzaSyC9wY18uwJpZe3ywDh4rdFKLt6jkQ7Jekk';
 // 파이어베이스 웹 설정 (공개용 값이고 보안은 firestore.rules가 담당)
+// 카카오 로그인 서버 (Cloudflare Worker, 코드는 worker/kakao-auth.js). 비어 있으면 '준비 중'
+const KAKAO_AUTH = '';
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyDH2RKFV5qp6b_dzUngvHNG7xNT8HVSbxY',
   authDomain: 'hariple.firebaseapp.com',
@@ -1486,6 +1488,17 @@ function openTrip(id) {
 }
 
 async function init() {
+  // 카카오 로그인에서 돌아옴: #kakao=로그인표&s=확인값&n=닉네임 → 주소를 로그인 전으로 되돌리고 로그인
+  let kakaoTok = '';
+  if (/^#kakao(err)?=/.test(location.hash)) {
+    const p = new URLSearchParams(location.hash.slice(1));
+    let st = ''; try { st = sessionStorage.getItem('kakaoState') || ''; sessionStorage.removeItem('kakaoState'); } catch {}
+    history.replaceState(null, '', location.pathname + (readLocal('kakaoBack') || ''));
+    if (p.get('kakaoerr')) { if (!['access_denied', 'cancel'].includes(p.get('kakaoerr'))) setTimeout(() => toast('카카오 로그인을 마치지 못했어요. 잠시 후 다시 해 주세요'), 500); }
+    else if (!st || p.get('s') !== st) setTimeout(() => toast('로그인 확인에 실패했어요. 다시 해 주세요'), 500); // 이 기기에서 시작한 로그인이 아님
+    else { kakaoTok = p.get('kakao') || ''; if (p.get('n')) writeLocal('kakaoName', p.get('n')); joinAfterLogin = readLocal('kakaoJoin') === '1'; }
+    writeLocal('kakaoJoin', '');
+  }
   const h = location.hash.slice(1);
   if (!h.startsWith('t=')) showHome(); // 서버 연결 전에도 목록은 바로 보여 줌
   render();
@@ -1503,6 +1516,7 @@ async function init() {
     fa = a; auth = a.getAuth(app); auth.languageCode = 'ko';
     a.getRedirectResult(auth).catch(loginError); // 팝업이 막혀 페이지 이동으로 로그인한 경우
     a.onAuthStateChanged(auth, onUser);
+    if (kakaoTok) a.signInWithCustomToken(auth, kakaoTok).catch(loginError);
     // 예전 버전에서 넘어온 일정(예전 공유 링크, 이 기기에만 있던 일정)은 새 여행으로 옮김
     let seed = null;
     const dec = s => JSON.parse(decodeURIComponent(escape(atob(s))));
@@ -3311,7 +3325,7 @@ async function invite() {
 }
 $('shareBtn').onclick = invite;
 
-/* ---------- 로그인 (카카오 = 파이어베이스 OpenID Connect 'oidc.kakao', 구글) ---------- */
+/* ---------- 로그인 (카카오 = Cloudflare 서버가 만든 파이어베이스 로그인 표, 구글 = 파이어베이스 기본) ---------- */
 // 로그인하면 프로필 id가 계정 uid가 되고, 내 여행 목록이 users/{uid}에 저장돼 어느 기기에서나 보임
 let fa = null, auth = null, user = null, userDoc = null, joinAfterLogin = false, syncT;
 const inApp = /KAKAOTALK|Instagram|FBAN|FBAV|Line\/|NAVER\(inapp|DaumApps|everytimeApp/i.test(navigator.userAgent);
@@ -3322,9 +3336,16 @@ async function login(kind) {
     if (!$('loginDlg').open) openLogin();
     $('lgInapp').hidden = false; return toast('이 앱 안에서는 구글 로그인이 막혀 있어요');
   }
-  const p = kind === 'kakao' ? new fa.OAuthProvider('oidc.kakao') : new fa.GoogleAuthProvider();
-  if (kind === 'kakao') p.addScope('profile_nickname');
-  else p.setCustomParameters({ prompt: 'select_account' });
+  if (kind === 'kakao') { // 카카오는 우리 서버(Cloudflare)를 거쳐 로그인 → 돌아오면 init()에서 마무리
+    if (!KAKAO_AUTH) return toast('카카오 로그인은 준비 중이에요');
+    const st = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(36).padStart(2, '0')).join('');
+    try { sessionStorage.setItem('kakaoState', st); } catch {}
+    writeLocal('kakaoBack', location.hash); writeLocal('kakaoJoin', joinAfterLogin ? '1' : '');
+    location.href = `${KAKAO_AUTH}/kakao/start?state=${st}&back=${encodeURIComponent(location.origin + location.pathname)}`;
+    return;
+  }
+  const p = new fa.GoogleAuthProvider();
+  p.setCustomParameters({ prompt: 'select_account' });
   try { await fa.signInWithPopup(auth, p); if ($('loginDlg').open) $('loginDlg').close(); }
   catch (e) {
     if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') return fa.signInWithRedirect(auth, p);
@@ -3358,7 +3379,7 @@ async function onUser(u) {
     try {
       const ref = fs.doc(db, 'users', u.uid), snap = await fs.getDoc(ref), d = snap.exists() ? snap.data() : {};
       const local = me(), old = local && local.id !== u.uid ? local.id : null;
-      const prof = d.profile?.name ? d.profile : { name: (local?.name || u.displayName || '여행자').slice(0, 12), av: local?.av || 'p' + Math.floor(Math.random() * AV.length) };
+      const prof = d.profile?.name ? d.profile : { name: (local?.name || u.displayName || readLocal('kakaoName') || '여행자').slice(0, 12), av: local?.av || 'p' + Math.floor(Math.random() * AV.length) };
       writeLocal('profile', JSON.stringify({ id: u.uid, name: String(prof.name).slice(0, 12), av: typeof prof.av === 'string' ? prof.av : 'p0' }));
       const alias = [...new Set([...(Array.isArray(d.alias) ? d.alias : []), ...(old ? [old] : [])])].slice(-20);
       const trips = mergeTrips(Array.isArray(d.trips) ? d.trips : [], recents());
