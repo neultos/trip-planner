@@ -1574,6 +1574,8 @@ function loadGoogle() {
       zoomControl: innerWidth >= 820, clickableIcons: false, gestureHandling: 'greedy' });
     render();
   };
+  // 키가 이 주소에서 거부되면(허용 주소 밖 등) 구글 오류 화면 대신 무료 지도로
+  window.gm_authFailure = () => { console.warn('google maps key refused at', location.href); gmap = null; gshapes = []; render(); };
   const s = document.createElement('script');
   s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_KEY}&libraries=places&language=ko&loading=async&callback=initGoogle`;
   document.head.append(s);
