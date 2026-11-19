@@ -344,6 +344,12 @@
   .paste-btn { display:block; width:100%; min-height:50px; border-radius:12px; border:1.5px dashed var(--accent); color:var(--accent); font-weight:700; font-size:15px; margin-bottom:16px; }
   #flPasteBox { margin:-6px 0 16px; } #flPasteBox textarea { display:block; width:100%; margin-bottom:8px; }
   .fl-air { color:var(--accent); font-size:13px; margin-left:4px; }
+  #flLegs { margin:-4px 0 18px; padding:14px; border-radius:14px; background:var(--accent-soft); }
+  #flLegs p { margin:0 0 10px; font-size:14px; font-weight:700; }
+  #flLegs .leg { display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; margin-bottom:6px; border-radius:10px; background:var(--bg); text-align:left; font-size:14px; }
+  #flLegs .leg b { font-size:15px; } #flLegs .leg small { margin-left:auto; color:var(--muted); font-size:12.5px; }
+  #flLegs .leg:disabled { opacity:.45; }
+  #flLegs .btn { width:100%; margin-top:6px; }
   .hero small { font-size:15px; font-weight:600; color:var(--muted); }
   .hero b { display:block; font-size:28px; line-height:1.32; font-weight:800; letter-spacing:-.03em; margin-top:8px; word-break:keep-all; }
   .hero em { font-style:normal; color:var(--accent); }
@@ -746,6 +752,7 @@
     <button type="button" class="paste-btn" id="flPasteBtn">📋 예약 문자·메일 붙여넣어 자동 채우기</button>
     <div id="flPasteBox" hidden><textarea id="flPaste" rows="4" placeholder="항공권 예약 확인 메일이나 문자를 통째로 붙여 넣으세요. 가는 편·오는 편이 같이 있어도 돼요."></textarea>
       <button type="button" class="btn primary wide" id="flPasteGo">읽어서 채우기</button></div>
+    <div id="flLegs" hidden></div>
     <label>편명 <b class="fl-air" id="flAir"></b><input id="flNo" maxlength="12" placeholder="예: KE703" autocomplete="off" style="text-transform:uppercase"></label>
     <label>출발 공항<input id="flFromQ" maxlength="24" placeholder="도시·공항 이름이나 코드 (예: 인천)" autocomplete="off"></label>
     <ul class="clist" id="flFromL" hidden></ul>
@@ -2706,6 +2713,7 @@ function parseFlights(text, baseDate) {
   // 같은 자리를 가리키는 이름은 하나만 (코드 우선, 그다음 긴 이름)
   ports.sort((x, y) => x.i - y.i || y.strong - x.strong || (y.len || 0) - (x.len || 0));
   const pts = []; for (const p of ports) { const l = pts[pts.length - 1]; if (l && (p.i < l.end || (p.v === l.v && p.i - l.end < 12))) continue; pts.push({ ...p, end: p.i + (p.strong ? 3 : p.len) }); }
+  for (let k = nos.length - 1; k > 0; k--) if (nos.slice(0, k).some(x => x.no === nos[k].no)) nos.splice(k, 1);
   if (!nos.length) nos.push({ i: 0, no: '' });
   // 정보가 편명 뒤에 오는지 앞에 오는지 보고 구간 나누기
   const before = nos.length > 1 && times.some(t => t.i < nos[0].i) && !times.some(t => t.i > nos[nos.length - 1].i);
@@ -2726,7 +2734,7 @@ function parseFlights(text, baseDate) {
     && a[1].from === 'NRT' && a[1].to === 'ICN' && a[1].depT === '12:55', 'parseFlights a', JSON.stringify(a));
   console.assert(b.length === 1 && b[0].no === 'BX122' && b[0].from === 'PUS' && b[0].to === 'KIX' && b[0].dep === '2026-12-20' && b[0].depT === '14:10' && b[0].arrT === '15:45', 'parseFlights b', JSON.stringify(b));
 }
-let flQueue = [], flFirst = false;
+let flFirst = false;
 // 공항 칸: 이름·코드로 검색해서 고름
 function setPort(k, code, city) {
   const a = airportOf(code), q = $('fl' + k + 'Q');
@@ -2758,14 +2766,38 @@ function fillFlight(p) {
   $('flAir').textContent = airlineOf($('flNo').value); flDates();
 }
 // 예약 문자: 버튼을 누르면 클립보드를 먼저 읽어 보고, 안 되면 붙여 넣는 칸을 엶
+// 붙여 넣은 글의 항공편들: 이미 등록한 편(편명+날짜 같음)은 빼고, 1개면 칸을 채우고 여러 개면 고르거나 한 번에 추가
+let flLegs = [];
+const legDone = l => trip.flights.some(f => f.no && f.no === l.no && (f.dep || '').slice(0, 10) === l.dep);
+const legFlight = l => ({ id: newId(), no: l.no, from: l.from, fromCity: airportOf(l.from)?.city || '', to: l.to, toCity: airportOf(l.to)?.city || '',
+  dep: `${l.dep || trip.start}T${l.depT || '00:00'}`, arr: l.arrT ? `${l.arr || l.dep || trip.start}T${l.arrT}` : '' });
 function usePaste(text) {
-  const legs = parseFlights(text || '', trip.start);
-  if (!legs.length || !(legs[0].from || legs[0].dep)) return false;
-  fillFlight(legs[0]); flQueue = legs.slice(1);
-  $('flPasteBox').hidden = true;
-  toast(legs.length > 1 ? `항공편 ${legs.length}개를 찾았어요 · 저장하면 다음 편이 이어서 열려요` : '항공편을 찾아 채웠어요 · 맞는지 확인해 주세요');
+  const legs = parseFlights(text || '', trip.start).filter(l => l.from || l.dep);
+  if (!legs.length) return false;
+  const fresh = legs.filter(l => !legDone(l));
+  $('flPasteBox').hidden = true; $('flLegs').hidden = true;
+  if (!fresh.length) { toast('이미 등록한 항공편이에요'); return true; }
+  if (fresh.length === 1) {
+    fillFlight(fresh[0]);
+    toast(legs.length > 1 ? '이미 등록한 편은 빼고 남은 항공편을 채웠어요' : '항공편을 찾아 채웠어요 · 맞는지 확인해 주세요');
+    return true;
+  }
+  flLegs = legs;
+  $('flLegs').innerHTML = `<p>항공편 ${legs.length}개를 찾았어요</p>` + legs.map((l, i) => `<button type="button" class="leg" data-leg="${i}"${legDone(l) ? ' disabled' : ''}>
+      <b>${esc(l.no || '편명 없음')}</b>${esc(l.from || '?')} → ${esc(l.to || '?')}<small>${legDone(l) ? '등록됨' : l.dep ? esc(md(new Date(l.dep + 'T00:00'))) + ' ' + esc(l.depT) : ''}</small></button>`).join('')
+    + `<button type="button" class="btn primary" id="flAllGo">${fresh.length}개 모두 추가</button>`;
+  $('flLegs').hidden = false;
   return true;
 }
+$('flLegs').onclick = e => {
+  const b = e.target.closest('[data-leg]');
+  if (b) { fillFlight(flLegs[+b.dataset.leg]); $('flLegs').hidden = true; return toast('이 항공편으로 채웠어요 · 확인하고 저장하세요'); }
+  if (!e.target.closest('#flAllGo')) return;
+  const add = flLegs.filter(l => !legDone(l)).map(legFlight);
+  $('flightForm').close();
+  change(t => { add.forEach(f => t.flights.push(f)); });
+  cur = flightDay(add[0]); render(); toast(`항공편 ${add.length}개를 추가했어요`);
+};
 $('flPasteBtn').onclick = async () => {
   let t = ''; try { t = await navigator.clipboard.readText(); } catch {}
   if (t && usePaste(t)) return;
@@ -2776,7 +2808,7 @@ function openFlight(f, pre) {
   if (loaded && !isMember()) return showInvite();
   flightEdit = f?.id || null;
   flFirst = !f && !pre && !trip.flights.length; // 첫 항공편: 저장 뒤 돌아오는 편을 물어봄
-  if (!pre) flQueue = [];
+  $('flLegs').hidden = true;
   $('flNo').value = f?.no || ''; $('flPaste').value = ''; $('flPasteBox').hidden = true; $('flPasteBtn').hidden = !!f;
   setPort('From', f?.from || '', f?.fromCity || ''); setPort('To', f?.to || '', f?.toCity || '');
   fl.dep = f?.dep?.slice(0, 10) || iso(dayDate(cur)); fl.arr = f?.arr?.slice(0, 10) || fl.dep;
@@ -2798,8 +2830,6 @@ $('flightForm').onclose = () => {
   change(t => { const i = t.flights.findIndex(x => x.id === f.id); i >= 0 ? (t.flights[i] = f) : t.flights.push(f); });
   cur = flightDay(f); render(); toast('항공편을 저장했어요');
   // 붙여 넣은 다음 편 이어서 열기, 아니면 첫 항공편 뒤에 돌아오는 편 물어보기
-  const next = flQueue.shift();
-  if (next) return setTimeout(() => openFlight(null, next), 350);
   if (flFirst && trip.days.length > 1 && (f.from || f.to) && confirm('돌아오는 항공편도 추가할까요?'))
     setTimeout(() => openFlight(null, { no: '', from: f.to, fromCity: f.toCity, to: f.from, toCity: f.fromCity, dep: trip.end, arr: trip.end, depT: '', arrT: '' }), 350);
 };
