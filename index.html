@@ -10,14 +10,14 @@
 <meta property="og:site_name" content="위트립">
 <meta property="og:title" content="위트립 · 친구와 함께 짜는 여행 일정">
 <meta property="og:description" content="날짜별 일정을 지도로 보고, 링크 하나로 친구를 초대해 같이 고쳐요. 항공편·예약 서류·알람까지 한곳에.">
-<meta property="og:image" content="https://neultos.github.io/trip-planner/og.png?v=3">
+<meta property="og:image" content="https://neultos.github.io/trip-planner/og.png?v=4">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://neultos.github.io/trip-planner/">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -229,6 +229,13 @@
   #results .plus { flex:none; width:30px; height:30px; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-size:20px; font-weight:700; }
   #results .res.done .plus { background:var(--accent); color:#fff; font-size:15px; }
   #results .direct .plus { background:var(--fg); color:var(--bg); }
+  #results li.spot-head { display:block; padding:18px 20px 10px; border:0; }
+  #results .spot-head b { font-size:17px; font-weight:800; }
+  .spot-cities { display:flex; gap:6px; overflow-x:auto; margin:10px -20px 0; padding:0 20px; scrollbar-width:none; }
+  .spot-cities::-webkit-scrollbar { display:none; }
+  .spot-cities button { flex:none; padding:7px 13px; border-radius:999px; background:var(--bg2); font-size:13.5px; font-weight:600; }
+  .spot-cities [aria-pressed="true"] { background:var(--fg); color:#fff; }
+  #results .sth { flex:none; width:52px; height:52px; border-radius:12px; background:var(--bg2) center/cover; }
   #results .msg { justify-content:center; color:var(--muted); border:0; font-size:14px; }
 
   /* 시트형 창 */
@@ -342,7 +349,7 @@
   #home > * { max-width:600px; margin-left:auto; margin-right:auto; }
   .home-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; min-height:44px; }
   .brand { flex:1; display:flex; align-items:center; color:var(--accent); }
-  .wordmark { height:30px; width:auto; display:block; }
+  .wordmark { height:28px; width:auto; display:block; }
   .hero { display:flex; align-items:center; gap:6px; margin-bottom:14px; min-height:128px; }
   .hero-t { flex:1; min-width:0; }
   .hero-art { flex:none; width:124px; height:124px; margin-right:-6px; }
@@ -585,7 +592,7 @@
 <section id="home" aria-label="내 여행">
   <div class="home-head">
     <span class="brand" role="img" aria-label="위트립">
-      <svg class="wordmark" viewBox="-6 -4 232 90" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M5 24l10 35 11-27 11 27 10-35"/><path d="M60 41h33a17 17 0 1 0-5 13"/><path d="M110 9v38q0 12 11 12"/><path d="M101 25h19"/><path d="M135 59V24"/><path d="M135 40q0-16 18-16"/><path d="M167 59V26"/><path d="M184 78V24"/><circle cx="200" cy="41.5" r="16.5"/></g><circle cx="167" cy="8" r="7" fill="var(--coral)"/></svg>
+      <img class="wordmark" src="logo.png" width="89" height="28" alt="">
     </span>
     <button id="meBtn" aria-label="내 프로필"></button>
   </div>
@@ -2407,7 +2414,7 @@ function syncSub() { $('searchSub').textContent = `${cur + 1}일차에 추가 ·
 let found = [], seq = 0, timer;
 async function runSearch() {
   const q = $('q').value.trim(), my = ++seq;
-  if (!q) { $('results').innerHTML = ''; return; }
+  if (!q) return showSpots();
   const direct = `<li class="r direct"><button class="res" data-direct="1"><span class="t"><b>'${esc(q)}' 직접 추가</b><small>지도 검색 없이 일정만 추가 (항공·이동·메모용)</small></span><span class="plus" aria-hidden="true">+</span></button></li>`;
   $('results').innerHTML = direct + '<li class="msg">검색 중…</li>';
   try {
@@ -2429,13 +2436,40 @@ $('results').onclick = e => {
     const name = $('q').value.trim().slice(0, 60);
     closeSearch(); openItem({ name, type: '기타' }, d, true); return;
   }
+  const sc = e.target.closest('[data-sc]'); if (sc) { spotCity = sc.dataset.sc; return showSpots(); }
   const b = e.target.closest('button[data-i]'); if (!b || b.classList.contains('done')) return;
-  const f = found[+b.dataset.i], p = { ...f, id: newId(), type: guessType(f.cat + ' ' + f.name), by: me()?.id };
+  const { img, spot, ...f } = found[+b.dataset.i];
+  const p = { ...f, id: newId(), type: spot ? (/시장|쇼핑/.test(f.cat) ? '쇼핑' : '명소') : guessType(f.cat + ' ' + f.name), by: me()?.id };
   change(t => { (t.days[d] ??= []).push(p); });
   b.classList.add('done'); b.querySelector('.plus').textContent = '✓';
   toast(`${d + 1}일차에 추가했어요 · 편집에서 시간을 정하세요`);
 };
+/* ---------- 추천 관광지: spots.json (tools/build-spots.mjs로 위키데이터에서 미리 만든 도시별 목록) ---------- */
+let spots = null, spotCity = '';
+const loadSpots = () => spots ??= fetch('spots.json').then(r => r.json()).catch(() => { spots = null; return {}; });
+// 이 날 도시 → 여행의 다른 도시 → 여행 이름 단어 → 나라의 도시들 순서
+function spotCities(all) {
+  const c = countryOf(trip.country);
+  return [...new Set([trip.cities[cur], ...trip.cities, ...(trip.title || '').split(/\s+/), ...(c ? [c.city, ...c.alias.split(' ')] : [])]
+    .map(w => (w || '').trim()).filter(w => all[w]?.length))];
+}
+const commonsThumb = f => 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(f).replace(/['()]/g, c => '%' + c.charCodeAt(0).toString(16)) + '?width=160';
+async function showSpots() {
+  const my = seq, all = await loadSpots();
+  if (my !== seq || $('q').value.trim()) return; // 그사이 검색을 시작함
+  const cs = spotCities(all);
+  if (!cs.length) { found = []; $('results').innerHTML = ''; return; }
+  if (!cs.includes(spotCity)) spotCity = cs[0];
+  found = all[spotCity].map(([name, lat, lng, cat, img]) => ({ name, lat, lng, cat, img, addr: spotCity, spot: 1 }));
+  const have = new Set(trip.days.flat().map(x => x.name));
+  $('results').innerHTML = `<li class="spot-head"><b>추천 관광지</b><div class="spot-cities">${cs.map(c => `<button type="button" data-sc="${esc(c)}" aria-pressed="${c === spotCity}">${esc(c)}</button>`).join('')}</div></li>`
+    + found.map((p, i) => { const on = have.has(p.name); return `<li class="r"><button class="res${on ? ' done' : ''}" data-i="${i}" aria-label="${esc(p.name)} 일정에 추가">
+      <span class="sth"${p.img ? ` style="background-image:url('${commonsThumb(p.img)}')"` : ''}></span>
+      <span class="t">${p.cat ? `<span class="cat">${esc(p.cat)}</span>` : ''}<b>${esc(p.name)}</b></span><span class="plus" aria-hidden="true">${on ? '✓' : '+'}</span></button></li>`; }).join('')
+    + '<li class="msg">이름으로 검색하면 맛집·숙소도 찾을 수 있어요</li>';
+}
 function openSearch() {
+  spotCity = '';
   $('searchView').classList.add('on'); $('q').value = ''; syncSub(); runSearch();
   pushLayer(); // 뒤로가기로 닫히게
   setTimeout(() => $('q').focus(), 50);
