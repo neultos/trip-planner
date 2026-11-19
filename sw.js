@@ -10,7 +10,8 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || !HOSTS.includes(u.host)) return; // 지도 타일·파이어베이스 통신은 건드리지 않음
   if (u.host === 'www.gstatic.com' && !u.pathname.startsWith('/firebasejs/')) return;
   e.respondWith(fetch(e.request).then(r => {
-    if (r.ok || r.type === 'opaque') { // opaque = 다른 사이트 CSS(글꼴·지도 스타일) const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
+    // opaque = 다른 사이트 CSS(글꼴·지도 스타일)
+    if (r.ok || r.type === 'opaque') { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
     return r;
   }).catch(() => caches.match(e.request, { ignoreSearch: u.host === location.host })));
 });
