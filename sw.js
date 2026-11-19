@@ -1,5 +1,5 @@
 // 오프라인 보기: 항상 인터넷에서 새로 받고(최신 유지), 실패하면 저장해 둔 사본을 씀
-const CACHE = 'wetrip-v1';
+const CACHE = 'wetrip-v2';
 const HOSTS = [location.host, 'www.gstatic.com', 'cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
 
 self.addEventListener('install', () => self.skipWaiting());

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#62b2e6">
+<meta name="theme-color" content="#ffffff">
 <title>위트립 · 여행 일정 지도</title>
 <meta name="description" content="여행마다 일정을 날짜별로 짜고, 지도로 보고, 친구와 함께 고치는 여행 플래너">
 <meta property="og:type" content="website">
@@ -26,13 +26,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-  :root {
-    --bg:#ffffff; --bg2:#f4f5f7; --fg:#1a1c20; --muted:#8a8f98; --line:#eceef1;
-    --accent:#62b2e6; --accent-ink:#2b7fc0; --accent-soft:#e3f1fb; --navy:#253445; --shadow:0 -6px 24px rgba(0,0,0,.10);
+  :root { color-scheme:light;
+    --bg:#ffffff; --bg2:#f3f5f8; --fg:#0e1116; --muted:#6b7280; --line:#e6e9ee;
+    --accent:#0b5cff; --accent-ink:#0b5cff; --accent-soft:#e8efff; --coral:#ff5a3c; --navy:#0e1116; --shadow:0 -4px 20px rgba(14,17,22,.08);
     --sheet:40dvh; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#17191d; --bg2:#22252b; --fg:#f1f2f4; --muted:#8d929b; --line:#2b2f36; --shadow:0 -6px 24px rgba(0,0,0,.5); --accent-ink:#7cc3ef; --accent-soft:rgba(98,178,230,.2); }
   }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { margin:0; height:100%; overflow:hidden; }
@@ -47,7 +44,7 @@
   .seg { display:inline-flex; background:var(--bg2); border-radius:10px; padding:3px; flex:none; }
   .seg button { padding:6px 14px; border-radius:8px; font-size:13px; font-weight:600; color:var(--muted); }
   .seg button[aria-checked="true"] { background:var(--bg); color:var(--fg); box-shadow:0 1px 3px rgba(0,0,0,.12); }
-  .badge { display:inline-block; font-size:12px; font-weight:700; padding:3px 8px; border-radius:6px; background:#e6f3fc; color:var(--accent-ink); white-space:nowrap; }
+  .badge { display:inline-block; font-size:12px; font-weight:700; padding:3px 8px; border-radius:6px; background:var(--accent-soft); color:var(--accent-ink); white-space:nowrap; }
   .badge.region { background:var(--bg2); color:var(--muted); margin-left:4px; }
 
   /* 상단 바 */
@@ -64,21 +61,24 @@
   #sheet.dragging { transition:none; }
   #grip { padding:10px 0 6px; touch-action:none; cursor:grab; }
   #grip::before { content:''; display:block; width:40px; height:5px; border-radius:3px; background:var(--line); margin:0 auto; }
-  #days { display:flex; gap:8px; overflow-x:auto; padding:6px 16px 12px; scrollbar-width:none; flex:none; }
+  #days { display:flex; gap:8px; overflow-x:auto; padding:4px 20px 14px; scrollbar-width:none; flex:none; }
   #days::-webkit-scrollbar { display:none; }
-  .day { flex:none; border-radius:14px; padding:7px 13px; background:var(--bg2); font-size:14px; font-weight:700; white-space:nowrap; text-align:left; line-height:1.25; }
+  .day { flex:none; border-radius:12px; padding:8px 14px; background:var(--bg2); font-size:14px; font-weight:700; white-space:nowrap; text-align:left; line-height:1.25; }
   .day small { display:block; font-weight:500; color:var(--muted); font-size:12px; }
-  .day.on { background:var(--fg); color:var(--bg); }
+  .day.on { background:var(--accent); color:#fff; }
   .day.on small { color:inherit; opacity:.7; }
-  .list-head { display:flex; align-items:center; gap:8px; padding:2px 16px 10px 20px; flex:none; }
-  .list-head h2 { margin:0; font-size:19px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .list-head { display:flex; align-items:center; gap:8px; padding:2px 20px 14px; flex:none; }
+  .list-head h2 { margin:0; font-size:21px; font-weight:800; letter-spacing:-.02em; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .list-head h2 small { font-size:14px; color:var(--muted); font-weight:500; margin-left:6px; }
   .mini { flex:none; font-size:13px; font-weight:600; padding:7px 11px; border-radius:10px; background:var(--bg2); }
-  .mini.accent { background:var(--accent); color:#fff; }
-  #scroll { flex:1; overflow-y:auto; padding:0 16px calc(16px + var(--safe-b)); overscroll-behavior:contain; }
+  .mini.accent { background:var(--fg); color:var(--bg); }
+  #cityBtn { display:flex; align-items:center; gap:6px; padding:4px 11px 4px 4px; border-radius:999px; }
+  #cityBtn .cph { width:26px; height:26px; border-radius:50%; background:var(--line) center/cover; flex:none; }
+  #cityBtn.none { padding:7px 11px; }
+  #scroll { flex:1; overflow-y:auto; padding:0 20px calc(16px + var(--safe-b)); overscroll-behavior:contain; }
 
   /* 항공편 카드 */
-  .flight { display:flex; align-items:center; width:100%; text-align:left; background:linear-gradient(135deg,#253445,#3a7fb5); color:#fff; border-radius:16px; padding:14px 16px; margin-bottom:12px; }
+  .flight { display:flex; align-items:center; width:100%; text-align:left; background:var(--fg); color:#fff; border-radius:16px; padding:14px 16px; margin-bottom:12px; }
   .fe { flex:1; min-width:0; }
   .fe b { display:block; font-size:22px; letter-spacing:.03em; }
   .fe small { display:block; font-size:12px; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -93,7 +93,7 @@
   .stop:not(:last-child)::after { content:''; position:absolute; left:13px; top:44px; bottom:0; border-left:2px dashed var(--line); }
   .num { flex:none; width:28px; height:28px; border-radius:50%; color:#fff; display:grid; place-items:center; font-size:13px; font-weight:700; margin-top:14px; }
   .num.off { background:var(--line) !important; color:var(--muted); }
-  .card { flex:1; min-width:0; background:var(--bg2); border-radius:16px; padding:12px; transition:box-shadow .3s; }
+  .card { flex:1; min-width:0; background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:14px; transition:box-shadow .3s; }
   .flash .card { box-shadow:0 0 0 2px var(--accent); }
   .row1 { display:flex; gap:10px; align-items:flex-start; cursor:pointer; }
   .ticon { flex:none; width:38px; height:38px; border-radius:11px; display:grid; place-items:center; font-size:19px; }
@@ -101,31 +101,31 @@
   .l1 { display:flex; align-items:center; gap:6px; min-width:0; }
   .l1 time { flex:none; font-weight:800; color:var(--accent-ink); font-size:14px; }
   .l1 b { font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .pill { flex:none; font-size:11px; font-weight:600; padding:2px 6px; border-radius:6px; background:var(--bg); color:var(--muted); }
+  .pill { flex:none; font-size:11px; font-weight:600; padding:2px 6px; border-radius:6px; background:var(--bg2); color:var(--muted); }
   .row1 small { display:block; color:var(--muted); font-size:12.5px; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .memo { margin:6px 0 0; font-size:13px; line-height:1.5; white-space:pre-wrap; word-break:break-word; }
   .acts { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
-  .acts a, .acts button { font-size:12.5px; font-weight:600; padding:6px 10px; border-radius:8px; background:var(--bg); color:var(--fg); text-decoration:none; }
+  .acts a, .acts button { font-size:12.5px; font-weight:600; padding:7px 11px; border-radius:8px; background:var(--bg2); color:var(--fg); text-decoration:none; }
   .acts .go { color:var(--accent-ink); }
   .acts .pri { background:var(--accent); color:#fff; }
   .acts [data-act="more"] { margin-left:auto; padding:6px 12px; }
   .row1 .by { flex:none; align-self:center; }
   .stop, .day { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
-  .open .card { background:var(--bg); box-shadow:0 0 0 1.5px var(--accent), 0 4px 14px rgba(27,47,85,.08); }
+  .open .card { background:var(--bg); border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 4px 14px rgba(14,17,22,.08); }
   .sel .card { background:var(--accent-soft); box-shadow:0 0 0 2px var(--accent); }
   .grip { flex:none; width:26px; align-self:stretch; margin:4px -6px 0 -4px; color:#b9c0c9; display:grid; place-items:center; touch-action:none; cursor:grab; }
   .hint { list-style:none; text-align:center; font-size:12px; color:var(--muted); padding:2px 8px 10px; line-height:1.5; }
   .stop.dragging { opacity:.3; }
   #dropLine { list-style:none; height:4px; border-radius:2px; background:var(--accent); margin:-6px 0 8px 38px; }
   .ghost { position:fixed; left:0; top:0; z-index:2000; pointer-events:none; opacity:.95; transform-origin:0 0; }
-  .ghost .card { box-shadow:0 12px 28px rgba(27,47,85,.28); background:var(--bg); }
+  .ghost .card { box-shadow:0 12px 28px rgba(14,17,22,.28); background:var(--bg); }
   .gcount { position:absolute; right:-8px; top:-8px; min-width:26px; height:26px; border-radius:13px; background:var(--accent); color:#fff; font-weight:800; font-size:13px; display:grid; place-items:center; padding:0 7px; }
-  .gday .day { box-shadow:0 10px 24px rgba(27,47,85,.3); }
+  .gday .day { box-shadow:0 10px 24px rgba(14,17,22,.3); }
   body.drag-on, body.drag-on * { cursor:grabbing !important; }
   .day.drop { background:var(--accent) !important; color:#fff; transform:scale(1.08); }
   .day.drop small { color:#fff; }
   .day.dropl { box-shadow:-4px 0 0 var(--accent); } .day.dropr { box-shadow:4px 0 0 var(--accent); }
-  .day.lift { transform:scale(1.08); box-shadow:0 6px 16px rgba(27,47,85,.25); }
+  .day.lift { transform:scale(1.08); box-shadow:0 6px 16px rgba(14,17,22,.25); }
   .day.dragging { opacity:.3; }
   #selBar { flex:none; display:flex; align-items:center; gap:6px; padding:10px 12px calc(10px + var(--safe-b)); border-top:1px solid var(--line); background:var(--bg); }
   #selBar[hidden] { display:none; }
@@ -137,12 +137,12 @@
   .mvdays button b { display:block; font-size:15px; } .mvdays button small { color:var(--muted); font-size:12px; }
   .mvdays button:disabled { opacity:.35; }
   .danger-t { color:#e5484d; }
-  #tabs { display:flex; gap:4px; margin:0 16px 8px; background:var(--bg2); border-radius:12px; padding:3px; flex:none; }
-  #tabs button { flex:1; padding:7px 0; border-radius:9px; font-size:13.5px; font-weight:700; color:var(--muted); }
-  #tabs button[aria-pressed="true"] { background:var(--bg); color:var(--fg); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  #tabs { display:flex; gap:22px; margin:0 20px 12px; border-bottom:1px solid var(--line); flex:none; }
+  #tabs button { padding:8px 0 10px; font-size:15px; font-weight:700; color:var(--muted); border-bottom:2.5px solid transparent; margin-bottom:-1px; }
+  #tabs button[aria-pressed="true"] { color:var(--fg); border-color:var(--fg); }
   #sheet.alt #days, #sheet.alt .list-head, #sheet.alt #scroll { display:none; }
-  #pane { flex:1; overflow-y:auto; padding:4px 16px calc(16px + var(--safe-b)); overscroll-behavior:contain; }
-  .sum { background:linear-gradient(135deg,#62b2e6,#3a8fd8); color:#fff; border-radius:18px; padding:16px 18px; margin-bottom:14px; }
+  #pane { flex:1; overflow-y:auto; padding:4px 20px calc(16px + var(--safe-b)); overscroll-behavior:contain; }
+  .sum { background:var(--accent); color:#fff; border-radius:18px; padding:16px 18px; margin-bottom:14px; }
   .sum small { font-size:13px; font-weight:600; opacity:.9; }
   .sum b { display:block; font-size:24px; margin-top:4px; }
   .sum p { margin:6px 0 0; font-size:13px; opacity:.92; }
@@ -181,9 +181,9 @@
   .voterow .stack { display:flex; }
   .voterow .stack > * { margin-left:-6px; }
   #results button.ghost { background:var(--bg2); color:var(--fg); }
-  .grade { display:inline-block; margin-top:10px; background:rgba(255,255,255,.2); border-radius:10px; padding:3px 10px; font-size:12.5px; font-weight:700; }
+  .grade { display:inline-block; margin-top:14px; background:var(--bg2); color:var(--fg); border-radius:999px; padding:5px 12px; font-size:12.5px; font-weight:700; }
   .empty { text-align:center; color:var(--muted); padding:16px 0 4px; font-size:14px; line-height:1.6; list-style:none; }
-  .add-place { width:100%; height:52px; border-radius:14px; border:1.5px dashed var(--line); color:var(--accent-ink); font-weight:700; font-size:15px; margin-top:4px; }
+  .add-place { width:100%; height:52px; border-radius:14px; border:1.5px dashed #c9cfd8; color:var(--accent-ink); font-weight:700; font-size:15px; margin-top:4px; }
 
   /* 여정 보기 */
   #tour { position:fixed; left:12px; right:12px; bottom:calc(12px + var(--safe-b)); z-index:600; background:var(--bg); border-radius:20px; box-shadow:var(--shadow); padding:14px 16px 16px; display:none; }
@@ -224,11 +224,11 @@
   #results .msg { justify-content:center; color:var(--muted); border:0; font-size:14px; }
 
   /* 시트형 창 */
-  dialog { border:0; padding:20px 20px calc(20px + var(--safe-b)); width:100%; max-width:520px; max-height:90dvh; overflow-y:auto; margin:auto auto 0; border-radius:22px 22px 0 0; background:var(--bg); color:var(--fg); }
+  dialog { border:0; padding:24px 20px calc(20px + var(--safe-b)); width:100%; max-width:520px; max-height:90dvh; overflow-y:auto; margin:auto auto 0; border-radius:22px 22px 0 0; background:var(--bg); color:var(--fg); }
   dialog[open] { animation:up .28s cubic-bezier(.2,.8,.2,1); }
   @keyframes up { from { transform:translateY(60px); opacity:.3; } }
   dialog::backdrop { background:rgba(0,0,0,.4); }
-  dialog h3 { margin:0 0 16px; font-size:18px; }
+  dialog h3 { margin:0 0 18px; font-size:20px; font-weight:800; letter-spacing:-.02em; }
   dialog label { display:block; font-size:13px; color:var(--muted); margin-bottom:14px; }
   dialog input, dialog select, dialog textarea { display:block; width:100%; margin-top:6px; min-height:46px; border-radius:12px; border:0; background:var(--bg2); padding:0 14px; font-size:16px; }
   dialog textarea { padding:12px 14px; resize:vertical; }
@@ -283,7 +283,7 @@
   #invite { position:fixed; inset:0; z-index:950; background:var(--bg2); display:none; align-items:center; justify-content:center; padding:24px 16px calc(24px + var(--safe-b)); }
   #invite.on { display:flex; }
   .inv-card { width:100%; max-width:420px; background:var(--bg); border-radius:24px; padding:0 0 22px; text-align:center; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.08); }
-  .inv-cover { height:150px; background:linear-gradient(135deg,#62b2e6,#253445) center/cover; display:grid; place-items:center; font-size:46px; }
+  .inv-cover { height:150px; background:var(--accent) center/cover; display:grid; place-items:center; font-size:46px; }
   .inv-card .stack { margin-top:-24px; }
   .inv-card .stack .av { box-shadow:0 0 0 3px var(--bg); }
   .inv-from { color:var(--accent-ink); font-weight:700; font-size:14px; margin:12px 0 4px; }
@@ -320,23 +320,20 @@
   .feat b { display:block; font-size:14px; margin-bottom:2px; }
 
   /* 내 여행 (홈) */
-  #home { position:fixed; inset:0; z-index:900; background:var(--bg2); overflow-y:auto; display:none;
-    padding:calc(var(--safe-t) + 20px) 16px calc(100px + var(--safe-b)); }
+  #home { position:fixed; inset:0; z-index:900; background:var(--bg); overflow-y:auto; display:none;
+    padding:calc(var(--safe-t) + 18px) 20px calc(100px + var(--safe-b)); }
   body.at-home #home { display:block; }
   #home > * { max-width:600px; margin-left:auto; margin-right:auto; }
-  .home-head { display:flex; align-items:center; gap:8px; margin-bottom:18px; }
-  .brand { flex:1; display:flex; align-items:center; gap:8px; }
-  .brand b { font-size:24px; font-weight:800; letter-spacing:-.03em; color:var(--navy); }
-  @media (prefers-color-scheme: dark) { .brand b { color:var(--fg); } }
-  .hero { display:flex; align-items:center; gap:4px; background:linear-gradient(135deg,#62b2e6,#3a8fd8); color:#fff; border-radius:24px; padding:18px 10px 18px 22px; margin-bottom:26px; box-shadow:0 12px 26px rgba(98,178,230,.35); overflow:hidden; position:relative; }
-  .hero::after { content:''; position:absolute; right:-40px; top:-40px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.12); }
-  .hero-t { flex:1; min-width:0; position:relative; z-index:1; }
-  .hero small { font-size:14px; font-weight:600; opacity:.92; }
-  .hero b { display:block; font-size:21px; line-height:1.4; margin-top:6px; word-break:keep-all; }
-  .hero em { font-style:normal; display:inline-block; margin-top:8px; background:#fff; color:#2b7fc0; border-radius:12px; padding:3px 12px; font-size:20px; font-weight:800; }
+  .home-head { display:flex; align-items:center; gap:8px; margin-bottom:28px; }
+  .brand { flex:1; display:flex; align-items:center; color:var(--accent); }
+  .wordmark { height:30px; width:auto; display:block; }
+  .hero { margin-bottom:32px; }
+  .hero small { font-size:15px; font-weight:600; color:var(--muted); }
+  .hero b { display:block; font-size:28px; line-height:1.32; font-weight:800; letter-spacing:-.03em; margin-top:8px; word-break:keep-all; }
+  .hero em { font-style:normal; color:var(--accent); }
   .hero-m { flex:none; position:relative; z-index:1; }
-  .hero-m svg { display:block; filter:drop-shadow(0 6px 8px rgba(27,47,85,.2)); }
-  .install { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:var(--bg); border-radius:18px; padding:14px 16px; margin:-12px 0 24px; box-shadow:0 4px 14px rgba(27,47,85,.06); }
+  .hero-m svg { display:block; filter:drop-shadow(0 6px 8px rgba(14,17,22,.2)); }
+  .install { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:var(--bg); border-radius:18px; padding:14px 16px; margin:-12px 0 24px; box-shadow:0 4px 14px rgba(14,17,22,.06); }
   .install .ic { font-size:26px; }
   .install b { display:block; font-size:15px; }
   .install small { color:var(--muted); font-size:13px; }
@@ -347,25 +344,27 @@
   .inv-mine div { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
   .inv-mine button { display:flex; align-items:center; gap:6px; padding:4px 12px 4px 4px; border-radius:999px; background:var(--bg2); font-size:14px; font-weight:600; }
   .mem button.m { display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; width:56px; text-align:center; overflow:hidden; }
-  .sec { display:flex; align-items:baseline; justify-content:space-between; font-size:18px; font-weight:800; margin:4px 4px 12px; }
+  .sec { display:flex; align-items:baseline; justify-content:space-between; font-size:20px; font-weight:800; letter-spacing:-.02em; margin:8px 0 14px; }
   .sec small { color:var(--muted); font-size:13px; font-weight:600; }
-  #tripCards ul { list-style:none; padding:0; margin:0 0 22px; }
-  .tcard { position:relative; background:var(--bg); border-radius:22px; margin-bottom:16px; box-shadow:0 4px 16px rgba(27,47,85,.08); overflow:hidden; }
+  #tripCards ul { list-style:none; padding:0; margin:0 0 36px; }
+  .tcard { position:relative; background:var(--bg); margin-bottom:28px; }
   .tcard .open { display:block; width:100%; text-align:left; }
   .tcard .open:active, .prow .open:active { transform:scale(.99); }
-  .tcard .cv { height:132px; background:center/cover; position:relative; display:grid; place-items:center; }
-  .cv-e { font-size:46px; filter:drop-shadow(0 4px 6px rgba(0,0,0,.15)); }
-  .tcard .dd { position:absolute; left:14px; top:14px; background:#fff; color:#2b7fc0; font-weight:800; font-size:13px; padding:5px 11px; border-radius:999px; box-shadow:0 2px 6px rgba(0,0,0,.12); }
-  .tcard .rg { position:absolute; left:14px; bottom:12px; background:rgba(27,47,85,.55); color:#fff; font-size:12px; font-weight:700; padding:3px 8px; border-radius:6px; }
-  .tcard .ti { padding:14px 16px 16px; }
-  .tcard b { display:block; font-size:19px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tcard .cv { aspect-ratio:16/10; border-radius:18px; background:var(--accent) center/cover; position:relative; display:grid; place-items:center; overflow:hidden; }
+  .cv-e { width:40%; color:rgba(255,255,255,.95); }
+  .cv-e svg { width:100%; height:auto; display:block; }
+  .tcard .dd { position:absolute; left:14px; top:14px; background:var(--coral); color:#fff; font-weight:800; font-size:13px; padding:6px 11px; border-radius:999px; }
+  .tcard .rg { position:absolute; left:14px; bottom:14px; background:rgba(255,255,255,.95); color:#0e1116; font-size:12px; font-weight:700; padding:4px 9px; border-radius:999px; }
+  .tcard .ti { padding:14px 2px 0; }
+  .tcard b { display:block; font-size:20px; font-weight:800; letter-spacing:-.02em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .tcard small { display:block; color:var(--muted); font-size:13px; margin-top:4px; }
   .row2 { display:flex; align-items:center; justify-content:space-between; margin-top:12px; min-height:26px; }
-  .cnt { font-size:12px; color:var(--muted); font-weight:700; background:var(--bg2); border-radius:8px; padding:4px 8px; }
-  .tcard .more { position:absolute; right:10px; top:10px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.92); color:#1b2f55; font-size:18px; }
-  .prow { display:flex; align-items:center; background:var(--bg); border-radius:16px; margin-bottom:10px; padding:10px; }
+  .cnt { font-size:12.5px; color:var(--muted); font-weight:700; }
+  .tcard .more { position:absolute; right:12px; top:12px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.95); color:#0e1116; font-size:18px; }
+  .prow { display:flex; align-items:center; background:var(--bg); padding:10px 0; border-bottom:1px solid var(--line); }
   .prow .open { flex:1; min-width:0; display:flex; gap:12px; align-items:center; text-align:left; }
-  .pthumb { width:52px; height:52px; border-radius:12px; background:center/cover; flex:none; display:grid; place-items:center; font-size:22px; filter:grayscale(.3); }
+  .pthumb { width:56px; height:56px; border-radius:12px; background:var(--accent) center/cover; flex:none; display:grid; place-items:center; color:#fff; }
+  .pthumb svg { width:60%; }
   .prow .open span:last-child { min-width:0; }
   .prow b { display:block; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .prow small { color:var(--muted); font-size:12px; }
@@ -377,11 +376,10 @@
   #home { padding-bottom:calc(170px + var(--safe-b)); }
   #hNav { position:fixed; left:0; right:0; bottom:0; z-index:912; display:none; background:var(--bg); border-top:1px solid var(--line); padding:6px 8px calc(6px + var(--safe-b)); }
   body.at-home #hNav { display:flex; }
-  #hNav button { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:11.5px; font-weight:700; color:var(--muted); padding:4px 0; }
-  #hNav i { font-style:normal; font-size:21px; filter:grayscale(1); opacity:.6; }
-  #hNav [aria-pressed="true"] { color:var(--accent-ink); }
-  #hNav [aria-pressed="true"] i { filter:none; opacity:1; }
-  .tip { display:flex; align-items:center; background:var(--bg); border-radius:16px; margin:-14px 0 22px; padding:4px 4px 4px 0; box-shadow:0 2px 10px rgba(27,47,85,.05); }
+  #hNav button { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:11.5px; font-weight:700; color:#a3a9b3; padding:4px 0; }
+  #hNav svg { width:24px; height:24px; }
+  #hNav [aria-pressed="true"] { color:var(--fg); }
+  .tip { display:flex; align-items:center; background:var(--bg2); border-radius:14px; margin:-12px 0 32px; padding:4px 4px 4px 0; box-shadow:0 2px 10px rgba(14,17,22,.05); }
   .tip.login { background:#fee500; color:#191919; }
   .tip-go { flex:1; min-width:0; display:flex; align-items:center; gap:10px; text-align:left; padding:8px 0 8px 14px; }
   .tip-go .ic { font-size:20px; } .tip-go b { display:block; font-size:14px; } .tip-go small { font-size:12px; opacity:.7; }
@@ -400,13 +398,13 @@
   .pauth { margin-top:16px; padding-top:14px; border-top:1px solid var(--line); font-size:13.5px; color:var(--muted); }
   .pauth .row { margin-top:8px; }
   /* 위톡 · 여행 글 */
-  .ctop { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; margin:0 -16px 10px; padding:0 16px; }
+  .ctop { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; margin:0 -20px 10px; padding:0 20px; }
   .ctop::-webkit-scrollbar { display:none; }
-  .ctop button { flex:none; padding:8px 13px; border-radius:999px; background:var(--bg); font-size:13.5px; font-weight:700; color:var(--muted); }
+  .ctop button { flex:none; padding:8px 14px; border-radius:999px; background:var(--bg2); font-size:13.5px; font-weight:700; color:var(--muted); }
   .ctop button[aria-pressed="true"] { background:var(--fg); color:var(--bg); }
   .ctop.city button { padding:5px 11px; font-size:12.5px; background:transparent; border:1px solid var(--line); }
   .ctop.city button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .pcard { display:block; width:100%; text-align:left; background:var(--bg); border-radius:18px; padding:14px 16px; margin-bottom:10px; box-shadow:0 2px 10px rgba(27,47,85,.05); }
+  .pcard { display:block; width:100%; text-align:left; background:var(--bg); padding:18px 0; border-bottom:1px solid var(--line); }
   .pmeta { display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); margin-bottom:8px; }
   .pmeta b { color:var(--fg); font-size:13px; }
   .tag { font-size:11.5px; font-weight:700; padding:2px 7px; border-radius:6px; background:var(--accent-soft); color:var(--accent-ink); }
@@ -438,17 +436,16 @@
   .cmt-in button { height:42px; padding:0 16px; border-radius:21px; background:var(--accent); color:#fff; font-weight:700; }
   .pmenu { color:var(--muted); font-size:18px; padding:4px 8px; }
   .bsrch { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
-  .bsrch a { display:flex; align-items:center; gap:8px; background:var(--bg); border-radius:14px; padding:12px; font-size:14px; font-weight:700; color:var(--fg); text-decoration:none; }
+  .bsrch a { display:flex; align-items:center; gap:8px; background:var(--bg2); border-radius:14px; padding:12px; font-size:14px; font-weight:700; color:var(--fg); text-decoration:none; }
   .bsrch a small { display:block; font-size:11.5px; color:var(--muted); font-weight:600; }
   .bq { display:flex; gap:8px; margin-bottom:12px; }
-  .bq input { flex:1; min-width:0; height:46px; border-radius:14px; border:1px solid var(--line); background:var(--bg); padding:0 14px; font-size:15px; }
-  .fab { position:fixed; left:16px; right:16px; bottom:calc(20px + var(--safe-b)); max-width:600px; margin:0 auto; height:56px; border-radius:16px; background:var(--accent); color:#fff; font-size:16px; font-weight:700; box-shadow:0 6px 20px rgba(98,178,230,.45); z-index:910; display:none; }
+  .bq input { flex:1; min-width:0; height:46px; border-radius:14px; border:0; background:var(--bg2); padding:0 14px; font-size:15px; }
+  .fab { position:fixed; left:16px; right:16px; bottom:calc(20px + var(--safe-b)); max-width:600px; margin:0 auto; height:56px; border-radius:14px; background:var(--accent); color:#fff; font-size:16px; font-weight:700; box-shadow:0 8px 20px rgba(11,92,255,.28); z-index:910; display:none; }
   body.at-home .fab { display:block; bottom:calc(80px + var(--safe-b)); }
   body.at-home.fab-off .fab { display:none; }
   /* 버튼 뒤 회색 띠: 아래로 스크롤된 카드가 버튼과 겹쳐 보이지 않게 */
   body.at-home::after { content:''; position:fixed; left:0; right:0; bottom:0; z-index:905; height:calc(156px + var(--safe-b));
-    background:linear-gradient(to bottom, rgba(244,245,247,0), var(--bg2) 22px); pointer-events:none; }
-  @media (prefers-color-scheme: dark) { body.at-home::after { background:linear-gradient(to bottom, rgba(34,37,43,0), var(--bg2) 22px); } }
+    background:linear-gradient(to bottom, rgba(255,255,255,0), var(--bg) 22px); pointer-events:none; }
 
   /* 알람 팝업 · 토스트 */
   #alarmPop { position:fixed; top:calc(var(--safe-t) + 10px); left:12px; right:12px; max-width:480px; margin:0 auto; z-index:1200; background:var(--navy); color:#fff; border-radius:16px; padding:14px 16px; display:none; gap:10px; align-items:center; box-shadow:0 8px 24px rgba(0,0,0,.3); }
@@ -487,8 +484,7 @@
 <section id="home" aria-label="내 여행">
   <div class="home-head">
     <span class="brand" role="img" aria-label="위트립">
-      <svg viewBox="0 0 100 100" width="34" height="34" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#62b2e6"/><path d="M22 33l13 36 15-28 15 28 13-36" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <b>위트립</b>
+      <svg class="wordmark" viewBox="-6 -4 232 90" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M5 24l10 35 11-27 11 27 10-35"/><path d="M60 41h33a17 17 0 1 0-5 13"/><path d="M110 9v38q0 12 11 12"/><path d="M101 25h19"/><path d="M135 59V24"/><path d="M135 40q0-16 18-16"/><path d="M167 59V26"/><path d="M184 78V24"/><circle cx="200" cy="41.5" r="16.5"/></g><circle cx="167" cy="8" r="7" fill="var(--coral)"/></svg>
     </span>
     <button id="meBtn" aria-label="내 프로필"></button>
   </div>
@@ -502,9 +498,9 @@
 </section>
 <button class="fab" id="newTripBtn">+ 새 여행 만들기</button>
 <nav id="hNav" aria-label="홈 메뉴">
-  <button data-h="trips" aria-pressed="true"><i>🧳</i>내 여행</button>
-  <button data-h="cafe" aria-pressed="false"><i>💬</i>위톡</button>
-  <button data-h="blog" aria-pressed="false"><i>📰</i>여행 글</button>
+  <button data-h="trips" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>내 여행</button>
+  <button data-h="cafe" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>위톡</button>
+  <button data-h="blog" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>여행 글</button>
 </nav>
 
 <div class="top">
@@ -523,7 +519,7 @@
 <section id="sheet" aria-label="일정">
   <div id="grip" role="button" aria-label="일정 목록 펼치기/접기" tabindex="0"></div>
   <nav id="tabs" aria-label="보기 선택">
-    <button data-v="plan" aria-pressed="true">🗓️ 일정</button><button data-v="money" aria-pressed="false">💰 가계부</button><button data-v="pack" aria-pressed="false">✅ 준비물</button>
+    <button data-v="plan" aria-pressed="true">일정</button><button data-v="money" aria-pressed="false">가계부</button><button data-v="pack" aria-pressed="false">준비물</button>
   </nav>
   <div id="pane" hidden></div>
   <nav id="days" aria-label="일차 선택"></nav>
@@ -895,7 +891,7 @@ const FIREBASE_CONFIG = {
   appId: '1:645872697259:web:3e85f2eebcb6eb31f79cee'
 };
 
-const COLORS = ['#62b2e6','#3b82f6','#16a34a','#f59e0b','#8b5cf6','#ec4899','#0ea5e9'];
+const COLORS = ['#0b5cff','#3b82f6','#16a34a','#f59e0b','#8b5cf6','#ec4899','#0ea5e9'];
 const TYPES = {
   항공: { e: '✈️', c: '#3b82f6' }, 숙소: { e: '🏨', c: '#8b5cf6' }, 식당: { e: '🍽️', c: '#ef4444' }, 카페: { e: '☕', c: '#b45309' },
   명소: { e: '📸', c: '#16a34a' }, 이동: { e: '🚉', c: '#0ea5e9' }, 쇼핑: { e: '🛍️', c: '#ec4899' }, 기타: { e: '📍', c: '#6b7280' }
@@ -1025,9 +1021,8 @@ function timeSort(l) { return l.map((p, i) => [p, i]).sort((a, b) => (!a[0].time
 function placeByTime(list, p) {
   const i = list.indexOf(p); if (i >= 0) list.splice(i, 1);
   if (!p.time) return void list.push(p);
-  const j = list.findIndex(x => x.time && x.time > p.time);
-  if (j >= 0) return void list.splice(j, 0, p);
-  let k = -1; list.forEach((x, n) => { if (x.time) k = n; }); list.splice(k + 1, 0, p);
+  let k = -1; list.forEach((x, n) => { if (x.time && x.time <= p.time) k = n; }); // 같은·앞선 시각 일정 바로 뒤
+  list.splice(k + 1, 0, p);
 }
 console.assert((() => { const l = [{ time: '09:00' }, { time: '' }, { time: '13:00' }], p = { time: '10:00' }; placeByTime(l, p); return l[1] === p; })(), 'placeByTime broken');
 // 지도 동선·번호·여정 보기에는 확정된 일정만 (후보는 투표 중)
@@ -1061,11 +1056,39 @@ function viewUrl(p) {
 
 /* ---------- 내 여행 목록 (이 기기에서 열어 본 여행) ---------- */
 function recents() { try { return JSON.parse(readLocal('trips')) || []; } catch { return []; } }
+
+/* ---------- 여행지 사진: 위키백과 대표 사진(키·비용 없음), 도시별로 기기에 기억 ---------- */
+let phCache = (() => { try { return JSON.parse(readLocal('cityPh')) || {}; } catch { return {}; } })(), phTimer = 0;
+const placeOf = x => (x.cities || []).find(Boolean) || (x.title || '').split(/\s+/)[0] || '';
+const BAD_IMG = /\.svg|flag|map|locator|emblem|seal|logo|coat_of_arms|symbol/i; // 국기·지도·문장은 여행 사진이 아님
+async function findPhoto(q) {
+  // '파리'·'제주'처럼 뜻이 여럿인 이름은 '파리시'·'제주시'로 다시 찾음
+  for (const [lang, w] of [['ko', q], ['ko', q + '시'], ['ko', q + '도'], ['en', q]]) {
+    const r = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(w)}?redirect=true`);
+    if (r.status === 404) continue;
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json(), o = j.originalimage, t = j.thumbnail?.source;
+    if (j.type === 'disambiguation' || !o || BAD_IMG.test(o.source)) continue;
+    return o.width > 960 && t ? t.replace(/\/\d+px-/, '/960px-') : o.source;
+  }
+  return '';
+}
+function photoOf(name) {
+  name = (name || '').trim().slice(0, 30);
+  if (!name) return '';
+  if (name in phCache) return phCache[name];
+  phCache[name] = '';
+  findPhoto(name).then(u => {
+    phCache[name] = u; writeLocal('cityPh', JSON.stringify(phCache));
+    if (u) { clearTimeout(phTimer); phTimer = setTimeout(() => document.body.classList.contains('at-home') ? hTab === 'trips' && showHome() : render(), 80); }
+  }, () => { delete phCache[name]; }); // 인터넷이 안 될 때는 다음에 다시 찾음
+  return '';
+}
 function remember() {
   if (!tripId || !loaded) return;
   const l = recents().filter(x => x.id !== tripId);
   l.unshift({ id: tripId, title: trip.title, start: trip.start, end: trip.end, abroad: !!trip.abroad, note: trip.note || '',
-    cover: COVER_RE.test(trip.cover || '') ? trip.cover : '', count: trip.days.reduce((n, d) => n + d.length, 0),
+    cover: COVER_RE.test(trip.cover || '') ? trip.cover : '', cities: [...new Set(trip.cities.filter(Boolean))].slice(0, 5), count: trip.days.reduce((n, d) => n + d.length, 0),
     // 목록용이라 사진은 빼고(기기 저장 공간) 이름·기본 캐릭터만
     members: trip.members.slice(0, 5).map(m => ({ name: m.name, av: /^p\d+$/.test(m.av) ? m.av : '' })) });
   writeLocal('trips', JSON.stringify(l.slice(0, 50)));
@@ -1088,29 +1111,30 @@ function showHome() {
   // 다가오는·진행 중인 여행이 위, 끝난 여행은 아래(최근 것부터)
   const all = recents(), up = all.filter(x => !ended(x)).sort((x, y) => (x.start || '').localeCompare(y.start || ''));
   const past = all.filter(ended).sort((x, y) => y.start.localeCompare(x.start));
-  const GR = ['#62b2e6,#2f7ad6', '#7fd0f0,#3a8fd8', '#8fc6f2,#4f7fd6', '#6fd1c9,#3a8fd8'];
-  const bg = (x, i) => COVER_RE.test(x.cover || '') ? `background-image:url('${x.cover}')` : `background:linear-gradient(135deg,${GR[i % GR.length]})`;
+  const GR = ['#0b5cff', '#0e1116', '#ff5a3c', '#00a37a'];
+  const bg = x => { const u = COVER_RE.test(x.cover || '') ? x.cover : photoOf(placeOf(x)); return u ? `background-image:url('${u}')` : ''; };
+  const has = x => COVER_RE.test(x.cover || '') || !!photoOf(placeOf(x));
+  const mark = '<svg viewBox="0 0 52 40" aria-hidden="true"><path d="M5 6l10 30 11-23 11 23 10-30" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const when = x => { if (!x.start) return ''; const s = new Date(x.start + 'T00:00'), e = new Date(x.end + 'T00:00'), n = span(x.start, x.end);
     return `${md(s)} (${WD[s.getDay()]}) – ${md(e)} (${WD[e.getDay()]}) · ${n ? `${n}박 ${n + 1}일` : '당일'}`; };
   const more = x => `<button class="more" data-del="${esc(x.id)}" aria-label="${esc(x.title)} 더보기">⋯</button>`;
 
   // 맨 위: 인사 + 가장 가까운 여행까지 남은 날
   const p = me(), next = up[0];
-  $('hero').innerHTML = `<div class="hero-t"><small>${p ? esc(p.name) + '님, ' : ''}안녕하세요 👋</small>
-    <b>${!next ? '어디로 떠나 볼까요?<br>새 여행을 만들어 보세요' : span(today(), next.start) <= 0 ? `'${esc(next.title)}'<br>즐거운 여행 중이에요!` : `'${esc(next.title)}'까지<br><em>${dday(next)}</em>`}</b>
-    <span class="grade">${grade(past.length)}</span></div>
-    <div class="hero-m">${mascot('stand', true, 96)}</div>`;
+  $('hero').innerHTML = `<small>${p ? esc(p.name) + '님, ' : ''}안녕하세요</small>
+    <b>${!next ? '어디로 떠나 볼까요?' : span(today(), next.start) <= 0 ? `${esc(next.title)}<br><em>여행 중이에요</em>` : `${esc(next.title)}까지<br><em>${dday(next)}</em>`}</b>
+    <span class="grade">${grade(past.length)}</span>`;
 
   $('tripCards').innerHTML = (up.length ? `<div class="sec">다가오는 여행<small>${up.length}개</small></div><ul>${up.map((x, i) => `<li class="tcard">
       <button class="open" data-id="${esc(x.id)}">
-        <div class="cv" style="${bg(x, i)}">${COVER_RE.test(x.cover || '') ? '' : `<span class="cv-e">${x.abroad ? '✈️' : '🧳'}</span>`}
+        <div class="cv" style="background-color:${GR[i % GR.length]};${bg(x)}">${has(x) ? '' : `<span class="cv-e">${mark}</span>`}
           ${x.start ? `<span class="dd">${dday(x)}</span>` : ''}<span class="rg">${x.abroad ? '해외' : '국내'}</span></div>
         <div class="ti"><b>${esc(x.title || '나의 여행')}</b><small>${when(x)}${x.note ? ' · ' + esc(x.note) : ''}</small>
           <div class="row2"><span class="stack">${(x.members || []).map(m => avHtml(m, 26)).join('')}</span>${x.count != null ? `<span class="cnt">일정 ${x.count}개</span>` : ''}</div></div>
       </button>${more(x)}</li>`).join('')}</ul>`
     : `<div class="home-empty"><b>아직 다가오는 여행이 없어요</b><br>아래 버튼으로 새 여행을 만들고 친구를 초대해 보세요.</div>`)
     + (past.length ? `<div class="sec">지난 여행<small>${past.length}개</small></div><ul>${past.map((x, i) => `<li class="prow">
-      <button class="open" data-id="${esc(x.id)}"><span class="pthumb" style="${bg(x, i)}">${COVER_RE.test(x.cover || '') ? '' : x.abroad ? '✈️' : '🧳'}</span>
+      <button class="open" data-id="${esc(x.id)}"><span class="pthumb" style="background-color:${GR[i % GR.length]};${bg(x)}">${has(x) ? '' : mark}</span>
         <span><b>${esc(x.title || '나의 여행')}</b><small>${when(x)}</small></span></button>${more(x)}</li>`).join('')}</ul>` : '');
 }
 $('tripCards').onclick = e => {
@@ -1530,7 +1554,9 @@ function render() {
   const d = dayDate(cur), items = dayItems(cur);
   $('dayTitle').innerHTML = `${cur + 1}일차<small>${md(d)} (${WD[d.getDay()]})</small>${wxText(cur)}`;
   renderPane();
-  $('cityBtn').textContent = trip.cities[cur] ? `📍 ${trip.cities[cur]} ✏️` : '📍 도시 입력';
+  const city = trip.cities[cur], cph = city && photoOf(city);
+  $('cityBtn').classList.toggle('none', !city);
+  $('cityBtn').innerHTML = city ? `<span class="cph"${cph ? ` style="background-image:url('${cph}')"` : ''}></span>${esc(city)}` : '+ 도시';
   $('cityBtn').setAttribute('aria-label', `${cur + 1}일차 도시 ${trip.cities[cur] ? '수정' : '입력'}`);
 
   $('flights').innerHTML = trip.flights.filter(f => flightDay(f) === cur).map(f => {
@@ -2382,8 +2408,9 @@ function openMenu() {
   if (!tripId) return;
   $('mTitle').textContent = trip.title;
   const ok = COVER_RE.test(trip.cover || '');
-  $('mCover').style.backgroundImage = ok ? `url('${trip.cover}')` : '';
-  $('mCover').textContent = ok ? '' : '대표 사진 없음';
+  const auto = ok ? '' : photoOf(placeOf(trip));
+  $('mCover').style.backgroundImage = ok || auto ? `url('${ok ? trip.cover : auto}')` : '';
+  $('mCover').textContent = ok || auto ? '' : '대표 사진 없음';
   $('mDocs').textContent = docs.length ? `${docs.length}개` : '';
   $('mNotify').textContent = !window.Notification ? '지원 안 됨' : Notification.permission === 'granted' ? '허용됨' : '';
   const myId = me()?.id;
@@ -2434,7 +2461,7 @@ async function saveImage() {
   const x = c.getContext('2d');
   const fitText = (s, w) => { if (x.measureText(s).width <= w) return s; while (s && x.measureText(s + '…').width > w) s = s.slice(0, -1); return s + '…'; };
   x.fillStyle = '#f4f5f7'; x.fillRect(0, 0, W, H);
-  const g = x.createLinearGradient(0, 0, W, 220); g.addColorStop(0, '#62b2e6'); g.addColorStop(1, '#3a8fd8');
+  const g = x.createLinearGradient(0, 0, W, 220); g.addColorStop(0, '#0b5cff'); g.addColorStop(1, '#0b5cff');
   x.fillStyle = g; x.fillRect(0, 0, W, 220);
   x.fillStyle = '#fff'; x.font = F('bold 56'); x.fillText(fitText(trip.title, W - 120), 60, 110);
   x.font = F('600 32'); x.fillText(`${rangeText(trip.start, trip.end)}${trip.members.length ? ' · ' + trip.members.length + '명' : ''}`, 60, 170);
@@ -2447,7 +2474,7 @@ async function saveImage() {
     if (!r.items.length) { x.fillStyle = '#9aa1ab'; x.font = F('28'); x.fillText('일정 없음', 80, y + 40); y += 64; }
     for (const p of r.items) {
       x.fillStyle = '#fff'; x.beginPath(); x.roundRect(48, y, W - 96, 54, 14); x.fill();
-      x.fillStyle = '#253445'; x.font = F('bold 28'); x.fillText(p.time || '--:--', 72, y + 37);
+      x.fillStyle = '#0e1116'; x.font = F('bold 28'); x.fillText(p.time || '--:--', 72, y + 37);
       x.font = F('30'); x.fillText(typeOf(p).e, 180, y + 38);
       x.fillStyle = p.cand ? '#9aa1ab' : '#1a1c20'; x.font = F('600 30');
       x.fillText(fitText(p.name + (p.cand ? ' (후보)' : ''), W - 340), 232, y + 38);
