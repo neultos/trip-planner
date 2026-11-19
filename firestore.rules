@@ -1,8 +1,11 @@
 rules_version = '2';
-// 여행 일정: 추측할 수 없는 32자 주소를 아는 사람(= 링크를 받은 사람)만 읽고 고칠 수 있음.
-// 목록 조회와 삭제는 막아서 남의 여행을 훑어보거나 지울 수 없게 함.
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function str(v, n) { return v is string && v.size() <= n; }
+
+    // 여행 일정: 추측할 수 없는 32자 주소를 아는 사람(= 링크를 받은 사람)만 읽고 고칠 수 있음.
+    // 목록 조회와 삭제는 막아서 남의 여행을 훑어보거나 지울 수 없게 함.
     match /trips/{id} {
       allow get: if id.size() == 32;
       allow list, delete: if false;
@@ -10,6 +13,50 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['data', 'updated'])
         && request.resource.data.data is string
         && request.resource.data.data.size() < 300000;
+    }
+
+    // 로그인한 사람의 프로필·여행 목록·차단 목록: 본인만
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid
+        && (request.method == 'get' || request.method == 'delete'
+            || request.resource.data.keys().hasOnly(['profile', 'alias', 'trips', 'blocked', 'updated']));
+    }
+
+    // 여행카페 글: 누구나 읽고, 로그인한 사람이 자기 이름으로 씀. 고치기·지우기는 쓴 사람만.
+    // 다른 사람은 댓글 수(comments)만 1씩 올리고 내릴 수 있음
+    match /posts/{pid} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'av', 'board', 'city', 'title', 'body', 'photos', 'link', 'trip', 'comments', 'created'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.board in ['qna', 'free', 'log', 'photo', 'blog']
+        && str(request.resource.data.name, 12) && str(request.resource.data.city, 12)
+        && str(request.resource.data.title, 60) && str(request.resource.data.body, 2000)
+        && request.resource.data.photos is list && request.resource.data.photos.size() <= 3
+        && str(request.resource.data.link, 500)
+        && request.resource.data.comments == 0
+        && request.resource.data.created == request.time;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments'])
+        && (request.resource.data.comments == resource.data.comments + 1 || request.resource.data.comments == resource.data.comments - 1);
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+
+      match /comments/{cid} {
+        allow read: if true;
+        allow create: if signedIn()
+          && request.resource.data.keys().hasOnly(['uid', 'name', 'av', 'body', 'created'])
+          && request.resource.data.uid == request.auth.uid
+          && str(request.resource.data.name, 12) && str(request.resource.data.body, 500)
+          && request.resource.data.created == request.time;
+        allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      }
+    }
+
+    // 신고: 로그인한 사람이 넣기만 함 (읽기는 파이어베이스 콘솔에서 운영자만)
+    match /reports/{rid} {
+      allow create: if signedIn() && request.resource.data.by == request.auth.uid
+        && request.resource.data.keys().hasOnly(['post', 'comment', 'by', 'reason', 'created'])
+        && str(request.resource.data.reason, 200);
     }
   }
 }
