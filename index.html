@@ -340,6 +340,10 @@
   .clist button:active, .clist button:focus-visible { background:var(--bg2); }
   .clist small { margin-left:auto; color:var(--muted); font-size:12.5px; }
   .clist .fl { font-size:20px; }
+  .clist .code { font-weight:800; color:var(--accent); width:38px; flex:none; }
+  .paste-btn { display:block; width:100%; min-height:50px; border-radius:12px; border:1.5px dashed var(--accent); color:var(--accent); font-weight:700; font-size:15px; margin-bottom:16px; }
+  #flPasteBox { margin:-6px 0 16px; } #flPasteBox textarea { display:block; width:100%; margin-bottom:8px; }
+  .fl-air { color:var(--accent); font-size:13px; margin-left:4px; }
   .hero small { font-size:15px; font-weight:600; color:var(--muted); }
   .hero b { display:block; font-size:28px; line-height:1.32; font-weight:800; letter-spacing:-.03em; margin-top:8px; word-break:keep-all; }
   .hero em { font-style:normal; color:var(--accent); }
@@ -739,17 +743,18 @@
 <dialog id="flightForm">
   <form method="dialog">
     <h3>✈️ 항공편</h3>
-    <label>편명<input id="flNo" maxlength="12" placeholder="예: KE703" autocomplete="off"></label>
-    <div class="dates">
-      <label>출발 공항<input id="flFrom" maxlength="4" placeholder="ICN" style="text-transform:uppercase"></label>
-      <label>출발 도시<input id="flFromCity" maxlength="20" placeholder="인천"></label>
-    </div>
+    <button type="button" class="paste-btn" id="flPasteBtn">📋 예약 문자·메일 붙여넣어 자동 채우기</button>
+    <div id="flPasteBox" hidden><textarea id="flPaste" rows="4" placeholder="항공권 예약 확인 메일이나 문자를 통째로 붙여 넣으세요. 가는 편·오는 편이 같이 있어도 돼요."></textarea>
+      <button type="button" class="btn primary wide" id="flPasteGo">읽어서 채우기</button></div>
+    <label>편명 <b class="fl-air" id="flAir"></b><input id="flNo" maxlength="12" placeholder="예: KE703" autocomplete="off" style="text-transform:uppercase"></label>
+    <label>출발 공항<input id="flFromQ" maxlength="24" placeholder="도시·공항 이름이나 코드 (예: 인천)" autocomplete="off"></label>
+    <ul class="clist" id="flFromL" hidden></ul>
+    <input type="hidden" id="flFrom"><input type="hidden" id="flFromCity">
     <label style="margin-bottom:6px">출발 날짜 · 시각</label>
     <div class="dt"><button type="button" class="datefield" id="flDepD"></button><input id="flDepT" type="time" aria-label="출발 시각"></div>
-    <div class="dates">
-      <label>도착 공항<input id="flTo" maxlength="4" placeholder="NRT" style="text-transform:uppercase"></label>
-      <label>도착 도시<input id="flToCity" maxlength="20" placeholder="도쿄"></label>
-    </div>
+    <label>도착 공항<input id="flToQ" maxlength="24" placeholder="도시·공항 이름이나 코드 (예: 나리타)" autocomplete="off"></label>
+    <ul class="clist" id="flToL" hidden></ul>
+    <input type="hidden" id="flTo"><input type="hidden" id="flToCity">
     <label style="margin-bottom:6px">도착 날짜 · 시각 (현지 시각)</label>
     <div class="dt"><button type="button" class="datefield" id="flArrD"></button><input id="flArrT" type="time" aria-label="도착 시각"></div>
     <div class="row"><button class="btn danger" type="button" id="flDel">삭제</button><button class="btn" value="cancel" formnovalidate>취소</button><button class="btn primary" value="ok">저장</button></div>
@@ -2445,13 +2450,326 @@ function flDates() {
 }
 $('flDepD').onclick = () => openCal('single', fl.dep, null, d => { if (fl.arr < d || fl.arr === fl.dep) fl.arr = d; fl.dep = d; flDates(); });
 $('flArrD').onclick = () => openCal('single', fl.arr || fl.dep, null, d => { fl.arr = d; flDates(); });
-function openFlight(f) {
+/* ---------- 항공편 입력 도우미: 공항·항공사 목록, 예약 문자 읽기 ---------- */
+// 코드,도시,나라코드,다른 이름(공항 이름 등)
+const AIRPORTS = `ICN,인천,KR,서울 인천국제공항
+GMP,김포,KR,서울 김포공항
+PUS,부산,KR,김해
+CJU,제주,KR,
+TAE,대구,KR,
+CJJ,청주,KR,
+KWJ,광주,KR,
+RSU,여수,KR,
+YNY,양양,KR,
+MWX,무안,KR,
+USN,울산,KR,
+KPO,포항,KR,
+NRT,도쿄,JP,나리타
+HND,도쿄,JP,하네다
+KIX,오사카,JP,간사이
+ITM,오사카,JP,이타미
+FUK,후쿠오카,JP,
+CTS,삿포로,JP,신치토세 홋카이도
+OKA,오키나와,JP,나하
+NGO,나고야,JP,주부 센트레아
+KOJ,가고시마,JP,
+KMJ,구마모토,JP,
+OIT,오이타,JP,벳푸 유후인
+MYJ,마쓰야마,JP,
+TAK,다카마쓰,JP,
+HIJ,히로시마,JP,
+KMQ,고마쓰,JP,가나자와
+FSZ,시즈오카,JP,
+SDJ,센다이,JP,
+NGS,나가사키,JP,
+TPE,타이베이,TW,타오위안
+TSA,타이베이,TW,쑹산
+KHH,가오슝,TW,
+RMQ,타이중,TW,
+HKG,홍콩,HK,첵랍콕
+MFM,마카오,MO,
+PEK,베이징,CN,서우두
+PKX,베이징,CN,다싱
+PVG,상하이,CN,푸둥
+SHA,상하이,CN,훙차오
+TAO,칭다오,CN,
+DLC,다롄,CN,
+SHE,선양,CN,
+YNJ,연길,CN,옌지 백두산
+CAN,광저우,CN,
+SZX,선전,CN,
+CTU,청두,CN,
+XIY,시안,CN,
+DYG,장가계,CN,장자제
+HRB,하얼빈,CN,
+SYX,싼야,CN,하이난
+BKK,방콕,TH,수완나품
+DMK,방콕,TH,돈므앙
+HKT,푸켓,TH,
+CNX,치앙마이,TH,
+USM,코사무이,TH,
+KBV,끄라비,TH,
+SGN,호치민,VN,떤선녓
+HAN,하노이,VN,노이바이
+DAD,다낭,VN,호이안
+CXR,나트랑,VN,깜라인 냐짱
+PQC,푸꾸옥,VN,
+DLI,달랏,VN,
+HPH,하이퐁,VN,
+MNL,마닐라,PH,
+CEB,세부,PH,막탄
+MPH,보라카이,PH,카티클란
+KLO,보라카이,PH,칼리보
+TAG,보홀,PH,팡라오
+CRK,클라크,PH,
+PPS,팔라완,PH,푸에르토프린세사
+SIN,싱가포르,SG,창이
+KUL,쿠알라룸푸르,MY,
+BKI,코타키나발루,MY,
+PEN,페낭,MY,
+LGK,랑카위,MY,
+DPS,발리,ID,덴파사르 응우라라이
+CGK,자카르타,ID,
+VTE,비엔티안,LA,
+LPQ,루앙프라방,LA,
+REP,시엠레아프,KH,
+SAI,시엠레아프,KH,앙코르
+PNH,프놈펜,KH,
+ULN,울란바토르,MN,칭기즈칸
+DEL,뉴델리,IN,델리
+BOM,뭄바이,IN,
+KTM,카트만두,NP,
+MLE,몰디브,MV,말레
+GUM,괌,GU,
+SPN,사이판,MP,
+DXB,두바이,AE,
+AUH,아부다비,AE,
+DOH,도하,QA,카타르
+IST,이스탄불,TR,
+SAW,이스탄불,TR,사비하괵첸
+TAS,타슈켄트,UZ,
+ALA,알마티,KZ,
+TBS,트빌리시,GE,
+VVO,블라디보스토크,RU,
+SVO,모스크바,RU,셰레메티예보
+CAI,카이로,EG,
+RAK,마라케시,MA,
+CPT,케이프타운,ZA,
+JNB,요하네스버그,ZA,
+NBO,나이로비,KE,
+LHR,런던,GB,히스로
+LGW,런던,GB,개트윅
+EDI,에든버러,GB,
+CDG,파리,FR,샤를드골
+ORY,파리,FR,오를리
+NCE,니스,FR,
+FCO,로마,IT,피우미치노
+MXP,밀라노,IT,말펜사
+VCE,베네치아,IT,베니스
+FLR,피렌체,IT,
+NAP,나폴리,IT,
+BCN,바르셀로나,ES,
+MAD,마드리드,ES,
+AGP,말라가,ES,
+LIS,리스본,PT,
+OPO,포르투,PT,
+FRA,프랑크푸르트,DE,
+MUC,뮌헨,DE,
+BER,베를린,DE,
+ZRH,취리히,CH,
+GVA,제네바,CH,
+VIE,빈,AT,비엔나
+SZG,잘츠부르크,AT,
+PRG,프라하,CZ,
+BUD,부다페스트,HU,
+ZAG,자그레브,HR,
+DBV,두브로브니크,HR,
+SPU,스플리트,HR,
+ATH,아테네,GR,
+JTR,산토리니,GR,
+AMS,암스테르담,NL,스히폴
+BRU,브뤼셀,BE,
+CPH,코펜하겐,DK,
+ARN,스톡홀름,SE,
+OSL,오슬로,NO,
+BGO,베르겐,NO,
+HEL,헬싱키,FI,
+KEF,레이캬비크,IS,케플라비크
+WAW,바르샤바,PL,
+KRK,크라쿠프,PL,
+JFK,뉴욕,US,존에프케네디
+EWR,뉴욕,US,뉴어크
+LAX,로스앤젤레스,US,LA
+SFO,샌프란시스코,US,
+SEA,시애틀,US,
+LAS,라스베이거스,US,
+HNL,호놀룰루,US,하와이
+ORD,시카고,US,
+BOS,보스턴,US,
+IAD,워싱턴,US,덜레스
+ATL,애틀랜타,US,
+DFW,댈러스,US,
+MCO,올랜도,US,
+MIA,마이애미,US,
+ANC,앵커리지,US,알래스카
+YVR,밴쿠버,CA,
+YYZ,토론토,CA,
+YUL,몬트리올,CA,
+YYC,캘거리,CA,밴프
+CUN,칸쿤,MX,
+MEX,멕시코시티,MX,
+LIM,리마,PE,
+CUZ,쿠스코,PE,
+GRU,상파울루,BR,
+GIG,리우데자네이루,BR,
+EZE,부에노스아이레스,AR,
+SYD,시드니,AU,
+MEL,멜버른,AU,
+BNE,브리즈번,AU,
+OOL,골드코스트,AU,
+CNS,케언스,AU,
+PER,퍼스,AU,
+AKL,오클랜드,NZ,
+CHC,크라이스트처치,NZ,
+ZQN,퀸스타운,NZ,
+NAN,피지,FJ,난디`.split('\n').map(l => { const [code, city, cc, alias = ''] = l.split(','); return { code, city, cc, alias }; });
+const airportOf = code => AIRPORTS.find(a => a.code === (code || '').toUpperCase());
+const airportLabel = a => `${a.city}${a.alias && !/[A-Z]/.test(a.alias) ? ' ' + a.alias.split(' ')[0] : ''}`;
+function findAirports(q) {
+  const n = norm(q); if (!n) return [];
+  return AIRPORTS.map(a => {
+    const ws = [a.code, a.city, ...a.alias.split(' '), countryByCode(a.cc)?.name || ''];
+    const best = Math.min(...ws.map((w, i) => { const x = norm(w); return !x ? 9 : (x === n ? 0 : x.startsWith(n) ? 1 : x.includes(n) ? 3 : 9) + (i > 2 ? 1 : 0); }));
+    return { a, best };
+  }).filter(x => x.best < 9).sort((x, y) => x.best - y.best).slice(0, 8).map(x => x.a);
+}
+const countryByCode = cc => COUNTRIES.find(c => c.code === cc);
+// 나라의 대표 공항 (첫 항공편 기본 도착지)
+const mainAirport = country => { const c = countryOf(country); return c && AIRPORTS.find(a => a.cc === c.code); };
+
+const AIRLINES = { KE: '대한항공', OZ: '아시아나항공', LJ: '진에어', '7C': '제주항공', TW: '티웨이항공', BX: '에어부산', ZE: '이스타항공', RS: '에어서울',
+  RF: '에어로케이', YP: '에어프레미아', '4V': '플라이강원', JL: '일본항공', NH: 'ANA', MM: '피치항공', GK: '젯스타재팬', BR: '에바항공', CI: '중화항공',
+  IT: '타이거에어 타이완', CX: '캐세이퍼시픽', HX: '홍콩항공', UO: '홍콩익스프레스', CA: '중국국제항공', MU: '중국동방항공', CZ: '중국남방항공',
+  VN: '베트남항공', VJ: '비엣젯', TG: '타이항공', PR: '필리핀항공', '5J': '세부퍼시픽', SQ: '싱가포르항공', TR: '스쿠트', MH: '말레이시아항공',
+  AK: '에어아시아', D7: '에어아시아X', GA: '가루다인도네시아', EK: '에미레이트항공', QR: '카타르항공', EY: '에티하드항공', TK: '터키항공',
+  AF: '에어프랑스', KL: 'KLM', LH: '루프트한자', BA: '영국항공', AY: '핀에어', LO: '폴란드항공', AZ: 'ITA항공', DL: '델타항공', UA: '유나이티드항공',
+  AA: '아메리칸항공', AC: '에어캐나다', HA: '하와이안항공', QF: '콴타스항공', NZ: '에어뉴질랜드', OM: '몽골항공', UX: '에어유로파', SU: '아에로플로트' };
+const airlineOf = no => AIRLINES[(no || '').toUpperCase().replace(/\s/g, '').slice(0, 2)] || '';
+
+// 예약 확인 문자·메일에서 항공편 찾기 → [{ no, from, to, dep:'YYYY-MM-DD', depT, arr, arrT }]
+const MON = { JAN: 1, FEB: 2, MAR: 3, APR: 4, MAY: 5, JUN: 6, JUL: 7, AUG: 8, SEP: 9, OCT: 10, NOV: 11, DEC: 12 };
+function parseFlights(text, baseDate) {
+  const T = ' ' + text.toUpperCase().replace(/ /g, ' ') + ' ';
+  const by = re => [...T.matchAll(re)];
+  const base = new Date((baseDate || today()) + 'T00:00');
+  const ymd = (y, m, d) => {
+    if (!(m >= 1 && m <= 12 && d >= 1 && d <= 31)) return '';
+    if (!y) { y = base.getFullYear(); if (new Date(y, m - 1, d) < new Date(base.getTime() - 60 * 864e5)) y++; } // 연도 없으면 여행 날짜 기준
+    else if (y < 100) y += 2000;
+    return iso(new Date(y, m - 1, d));
+  };
+  // 편명: 아는 항공사 코드 + 숫자 (12월 같은 숫자를 편명으로 착각하지 않게)
+  const nos = by(/(?<![A-Z0-9])([A-Z][A-Z0-9]|[0-9][A-Z])\s?(\d{2,4})(?![0-9:])/g).filter(m => AIRLINES[m[1]]).map(m => ({ i: m.index, no: m[1] + m[2] }));
+  const dates = [
+    ...by(/(20\d\d)\s?[.\-/년]\s?(\d{1,2})\s?[.\-/월]\s?(\d{1,2})/g).map(m => ({ i: m.index, v: ymd(+m[1], +m[2], +m[3]) })),
+    ...by(/(?<![\d/:.\-])(\d{1,2})\/(\d{1,2})(?![\d/])/g).map(m => ({ i: m.index, v: ymd(0, +m[1], +m[2]) })),
+    ...by(/(?<![\d.\-/])(\d{1,2})\s?월\s?(\d{1,2})\s?일/g).map(m => ({ i: m.index, v: ymd(0, +m[1], +m[2]) })),
+    ...by(/(?<!\d)(\d{1,2})\s?(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*\.?,?\s?(\d{4}|\d{2}(?!:|\d))?/g).map(m => ({ i: m.index, v: ymd(+m[3] || 0, MON[m[2]], +m[1]) })),
+    ...by(/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[A-Z]*\.?\s(\d{1,2})(?:,\s?(\d{4}))?(?![\d:])/g).map(m => ({ i: m.index, v: ymd(+m[3] || 0, MON[m[1]], +m[2]) }))
+  ].filter(d => d.v);
+  const times = by(/(오전|오후|AM|PM)?\s?(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?!\d)\s?(AM|PM)?/g).map(m => {
+    let h = +m[2]; const ap = m[1] || m[4];
+    if ((ap === '오후' || ap === 'PM') && h < 12) h += 12; if ((ap === '오전' || ap === 'AM') && h === 12) h = 0;
+    return { i: m.index, v: String(h).padStart(2, '0') + ':' + m[3] };
+  });
+  // 공항: 코드(ICN) 또는 도시·공항 이름(인천, 나리타)
+  const ports = [];
+  for (const a of AIRPORTS) {
+    for (const m of by(new RegExp(`(?<![A-Z])${a.code}(?![A-Z])`, 'g'))) ports.push({ i: m.index, v: a.code, strong: 1 });
+    for (const w of [a.city, ...a.alias.split(' ')].filter(w => /[가-힣]/.test(w) && w.length > 1))
+      for (const m of by(new RegExp(w + '(?!항공|에어)', 'g'))) ports.push({ i: m.index, v: a.code, strong: 0, len: w.length });
+  }
+  // 같은 자리를 가리키는 이름은 하나만 (코드 우선, 그다음 긴 이름)
+  ports.sort((x, y) => x.i - y.i || y.strong - x.strong || (y.len || 0) - (x.len || 0));
+  const pts = []; for (const p of ports) { const l = pts[pts.length - 1]; if (l && (p.i < l.end || (p.v === l.v && p.i - l.end < 12))) continue; pts.push({ ...p, end: p.i + (p.strong ? 3 : p.len) }); }
+  if (!nos.length) nos.push({ i: 0, no: '' });
+  // 정보가 편명 뒤에 오는지 앞에 오는지 보고 구간 나누기
+  const before = nos.length > 1 && times.some(t => t.i < nos[0].i) && !times.some(t => t.i > nos[nos.length - 1].i);
+  return nos.map((n, k) => {
+    const one = nos.length === 1; // 한 편이면 글 전체
+    const lo = one ? 0 : before ? (k ? nos[k - 1].i + 1 : 0) : n.i, hi = one ? T.length : before ? n.i + 1 : (nos[k + 1]?.i ?? T.length);
+    const inR = x => x.i >= lo && x.i < hi;
+    const p = pts.filter(inR), d = dates.filter(inR), t = times.filter(inR);
+    const f = { no: n.no, from: p[0]?.v || '', to: p.find(x => x.v !== p[0]?.v)?.v || '', dep: d[0]?.v || '', depT: t[0]?.v || '', arrT: t[1]?.v || '' };
+    f.arr = d[1]?.v || (f.dep && f.arrT && f.arrT < f.depT ? addDays(f.dep, 1) : f.dep);
+    return f;
+  }).filter(f => f.no || f.from || f.dep);
+}
+{
+  const a = parseFlights('[대한항공] 예약확정\nKE703 인천(ICN) 2026-12-20 09:00 → 나리타(NRT) 2026-12-20 11:25\nKE704 NRT 12/23 12:55 → ICN 15:40', '2026-12-20');
+  const b = parseFlights('가는편 12월 20일(토) 오후 2:10 김해 출발 - 15:45 간사이 도착 BX122', '2026-12-01');
+  console.assert(a.length === 2 && a[1].dep === '2026-12-23' && a[0].no === 'KE703' && a[0].from === 'ICN' && a[0].to === 'NRT' && a[0].depT === '09:00' && a[0].arrT === '11:25'
+    && a[1].from === 'NRT' && a[1].to === 'ICN' && a[1].depT === '12:55', 'parseFlights a', JSON.stringify(a));
+  console.assert(b.length === 1 && b[0].no === 'BX122' && b[0].from === 'PUS' && b[0].to === 'KIX' && b[0].dep === '2026-12-20' && b[0].depT === '14:10' && b[0].arrT === '15:45', 'parseFlights b', JSON.stringify(b));
+}
+let flQueue = [], flFirst = false;
+// 공항 칸: 이름·코드로 검색해서 고름
+function setPort(k, code, city) {
+  const a = airportOf(code), q = $('fl' + k + 'Q');
+  $('fl' + k).value = code || ''; $('fl' + k + 'City').value = city || a?.city || '';
+  q.value = q.dataset.picked = [$('fl' + k + 'City').value, code].filter(Boolean).join(' ');
+  $('fl' + k + 'L').hidden = true;
+}
+function getPort(k) {
+  const q = $('fl' + k + 'Q').value.trim();
+  if (q && q === $('fl' + k + 'Q').dataset.picked) return [$('fl' + k).value, $('fl' + k + 'City').value];
+  const a = airportOf(q) || findAirports(q).find(a => norm(a.city) === norm(q));
+  return a ? [a.code, a.city] : ['', q.slice(0, 20)];
+}
+['From', 'To'].forEach(k => {
+  const q = $('fl' + k + 'Q'), l = $('fl' + k + 'L');
+  q.oninput = () => {
+    const r = q.value === q.dataset.picked ? [] : findAirports(q.value);
+    l.innerHTML = r.map(a => `<li><button type="button" data-ap="${a.code}"><span class="code">${a.code}</span>${esc(airportLabel(a))}<small>${esc(countryByCode(a.cc)?.name || '')}</small></button></li>`).join('');
+    l.hidden = !r.length;
+  };
+  l.onclick = e => { const b = e.target.closest('[data-ap]'); if (b) setPort(k, b.dataset.ap); };
+});
+$('flNo').oninput = () => { $('flAir').textContent = airlineOf($('flNo').value); };
+function fillFlight(p) {
+  if (p.no != null) $('flNo').value = p.no;
+  if (p.from) setPort('From', p.from, p.fromCity); if (p.to) setPort('To', p.to, p.toCity);
+  if (p.dep) { fl.dep = p.dep; fl.arr = p.arr || p.dep; }
+  if (p.depT) $('flDepT').value = p.depT; if (p.arrT != null) $('flArrT').value = p.arrT;
+  $('flAir').textContent = airlineOf($('flNo').value); flDates();
+}
+// 예약 문자: 버튼을 누르면 클립보드를 먼저 읽어 보고, 안 되면 붙여 넣는 칸을 엶
+function usePaste(text) {
+  const legs = parseFlights(text || '', trip.start);
+  if (!legs.length || !(legs[0].from || legs[0].dep)) return false;
+  fillFlight(legs[0]); flQueue = legs.slice(1);
+  $('flPasteBox').hidden = true;
+  toast(legs.length > 1 ? `항공편 ${legs.length}개를 찾았어요 · 저장하면 다음 편이 이어서 열려요` : '항공편을 찾아 채웠어요 · 맞는지 확인해 주세요');
+  return true;
+}
+$('flPasteBtn').onclick = async () => {
+  let t = ''; try { t = await navigator.clipboard.readText(); } catch {}
+  if (t && usePaste(t)) return;
+  $('flPasteBox').hidden = false; $('flPaste').focus();
+};
+$('flPasteGo').onclick = () => { if (!usePaste($('flPaste').value)) toast('항공편을 찾지 못했어요 · 편명·공항·시간이 들어 있는지 확인해 주세요'); };
+function openFlight(f, pre) {
   if (loaded && !isMember()) return showInvite();
   flightEdit = f?.id || null;
-  $('flNo').value = f?.no || ''; $('flFrom').value = f?.from || ''; $('flFromCity').value = f?.fromCity || '';
-  $('flTo').value = f?.to || ''; $('flToCity').value = f?.toCity || '';
+  flFirst = !f && !pre && !trip.flights.length; // 첫 항공편: 저장 뒤 돌아오는 편을 물어봄
+  if (!pre) flQueue = [];
+  $('flNo').value = f?.no || ''; $('flPaste').value = ''; $('flPasteBox').hidden = true; $('flPasteBtn').hidden = !!f;
+  setPort('From', f?.from || '', f?.fromCity || ''); setPort('To', f?.to || '', f?.toCity || '');
   fl.dep = f?.dep?.slice(0, 10) || iso(dayDate(cur)); fl.arr = f?.arr?.slice(0, 10) || fl.dep;
   $('flDepT').value = f?.dep?.slice(11, 16) || '09:00'; $('flArrT').value = f?.arr?.slice(11, 16) || '';
+  if (flFirst) { const a = mainAirport(trip.country); setPort('From', 'ICN'); if (a && a.code !== 'ICN') setPort('To', a.code); fl.dep = fl.arr = trip.start; }
+  if (pre) fillFlight(pre);
+  $('flAir').textContent = airlineOf($('flNo').value);
   flDates();
   $('flDel').hidden = !f;
   $('flightForm').returnValue = '';
@@ -2460,12 +2778,16 @@ function openFlight(f) {
 $('flights').onclick = e => { const b = e.target.closest('[data-f]'); if (b) openFlight(trip.flights.find(f => f.id === b.dataset.f)); };
 $('flightForm').onclose = () => {
   if ($('flightForm').returnValue !== 'ok') return;
-  const up = s => s.trim().toUpperCase().slice(0, 4);
-  const f = { id: flightEdit || newId(), no: $('flNo').value.trim().toUpperCase().slice(0, 12), from: up($('flFrom').value), fromCity: $('flFromCity').value.trim().slice(0, 20),
-    to: up($('flTo').value), toCity: $('flToCity').value.trim().slice(0, 20),
+  const [from, fromCity] = getPort('From'), [to, toCity] = getPort('To');
+  const f = { id: flightEdit || newId(), no: $('flNo').value.trim().toUpperCase().replace(/\s/g, '').slice(0, 12), from, fromCity, to, toCity,
     dep: `${fl.dep}T${$('flDepT').value || '00:00'}`, arr: $('flArrT').value ? `${fl.arr}T${$('flArrT').value}` : '' };
   change(t => { const i = t.flights.findIndex(x => x.id === f.id); i >= 0 ? (t.flights[i] = f) : t.flights.push(f); });
   cur = flightDay(f); render(); toast('항공편을 저장했어요');
+  // 붙여 넣은 다음 편 이어서 열기, 아니면 첫 항공편 뒤에 돌아오는 편 물어보기
+  const next = flQueue.shift();
+  if (next) return setTimeout(() => openFlight(null, next), 350);
+  if (flFirst && trip.days.length > 1 && (f.from || f.to) && confirm('돌아오는 항공편도 추가할까요?'))
+    setTimeout(() => openFlight(null, { no: '', from: f.to, fromCity: f.toCity, to: f.from, toCity: f.fromCity, dep: trip.end, arr: trip.end, depT: '', arrT: '' }), 350);
 };
 $('flDel').onclick = () => {
   if (!confirm('이 항공편을 삭제할까요?')) return;
