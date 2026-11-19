@@ -75,10 +75,10 @@
   #cityBtn { display:flex; align-items:center; gap:6px; padding:4px 11px 4px 4px; border-radius:999px; }
   #cityBtn .cph { width:26px; height:26px; border-radius:50%; background:var(--line) center/cover; flex:none; }
   #cityBtn.none { padding:7px 11px; }
-  #scroll { flex:1; overflow-y:auto; padding:0 20px calc(16px + var(--safe-b)); overscroll-behavior:contain; }
+  #scroll { flex:1; overflow-y:auto; padding:0 20px calc(96px + var(--safe-b)); overscroll-behavior:contain; }
 
   /* 항공편 카드 */
-  .flight { display:flex; align-items:center; width:100%; text-align:left; background:var(--fg); color:#fff; border-radius:16px; padding:14px 16px; margin-bottom:12px; }
+  .flight { display:flex; align-items:center; width:100%; text-align:left; background:linear-gradient(100deg, rgba(14,17,22,.86), rgba(14,17,22,.5)), url("https://commons.wikimedia.org/wiki/Special:FilePath/Airplane_wing_sky_and_clouds.jpg?width=800") center 65%/cover, var(--fg); color:#fff; border-radius:16px; padding:14px 16px; margin-bottom:12px; }
   .fe { flex:1; min-width:0; }
   .fe b { display:block; font-size:22px; letter-spacing:.03em; }
   .fe small { display:block; font-size:12px; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -113,7 +113,7 @@
   .stop, .day { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
   .open .card { background:var(--bg); border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 4px 14px rgba(14,17,22,.08); }
   .sel .card { background:var(--accent-soft); box-shadow:0 0 0 2px var(--accent); }
-  .grip { flex:none; width:26px; align-self:stretch; margin:4px -6px 0 -4px; color:#b9c0c9; display:grid; place-items:center; touch-action:none; cursor:grab; }
+  .grip { flex:none; width:30px; height:38px; align-self:center; margin:0 -8px 0 -4px; color:#b9c0c9; display:grid; place-items:center; touch-action:none; cursor:grab; }
   .hint { list-style:none; text-align:center; font-size:12px; color:var(--muted); padding:2px 8px 10px; line-height:1.5; }
   .stop.dragging { opacity:.3; }
   #dropLine { list-style:none; height:4px; border-radius:2px; background:var(--accent); margin:-6px 0 8px 38px; }
@@ -137,8 +137,8 @@
   .mvdays button b { display:block; font-size:15px; } .mvdays button small { color:var(--muted); font-size:12px; }
   .mvdays button:disabled { opacity:.35; }
   .danger-t { color:#e5484d; }
-  #tabs { display:flex; gap:22px; margin:0 20px 12px; border-bottom:1px solid var(--line); flex:none; }
-  #tabs button { padding:8px 0 10px; font-size:15px; font-weight:700; color:var(--muted); border-bottom:2.5px solid transparent; margin-bottom:-1px; }
+  #tabs { display:flex; gap:0; margin:0 20px 12px; border-bottom:1px solid var(--line); flex:none; }
+  #tabs button { flex:1; padding:8px 0 10px; font-size:15px; font-weight:700; color:var(--muted); border-bottom:2.5px solid transparent; margin-bottom:-1px; }
   #tabs button[aria-pressed="true"] { color:var(--fg); border-color:var(--fg); }
   #sheet.alt #days, #sheet.alt .list-head, #sheet.alt #scroll { display:none; }
   #pane { flex:1; overflow-y:auto; padding:4px 20px calc(16px + var(--safe-b)); overscroll-behavior:contain; }
@@ -182,6 +182,9 @@
   .voterow .stack > * { margin-left:-6px; }
   .grade { display:inline-block; margin-top:14px; background:var(--bg2); color:var(--fg); border-radius:999px; padding:5px 12px; font-size:12.5px; font-weight:700; }
   .empty { text-align:center; color:var(--muted); padding:16px 0 4px; font-size:14px; line-height:1.6; list-style:none; }
+  #addPlace { position:absolute; right:20px; bottom:calc(20px + var(--safe-b)); z-index:5; width:58px; height:58px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; box-shadow:0 8px 20px rgba(11,92,255,.35); transition:transform .15s; }
+  #addPlace:active { transform:scale(.92); }
+  #sheet.alt #addPlace, #selBar:not([hidden]) ~ #addPlace { display:none; }
   .add-place { width:100%; height:52px; border-radius:14px; border:1.5px dashed #c9cfd8; color:var(--accent-ink); font-weight:700; font-size:15px; margin-top:4px; }
 
   /* 여정 보기 */
@@ -305,6 +308,14 @@
   .note { font-size:12.5px; color:var(--muted); line-height:1.6; margin:4px 0 14px; }
   .menu-cover { height:120px; border-radius:16px; background:var(--bg2) center/cover; margin-bottom:14px; display:grid; place-items:center; color:var(--muted); font-size:13px; }
   .menu-list button { display:flex; width:100%; align-items:center; gap:10px; padding:14px 4px; border-bottom:1px solid var(--line); font-size:15px; text-align:left; }
+  .m-head { display:flex; align-items:center; gap:10px; }
+  .m-head h3 { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .m-tiles { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin:16px 0 4px; }
+  .m-tiles button { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:84px; padding:12px 6px; border-radius:14px; background:var(--bg2); font-size:13px; font-weight:600; line-height:1.25; text-align:center; word-break:keep-all; }
+  .m-tiles button:active { background:var(--line); }
+  .m-tiles i { font-style:normal; font-size:24px; line-height:1; }
+  .m-tiles small { color:var(--accent-ink); font-size:11.5px; font-weight:700; }
+  .m-tiles small:empty { display:none; }
   .menu-list small { margin-left:auto; color:var(--muted); font-size:13px; }
   #dList { list-style:none; padding:0; margin:0 0 14px; }
   #dList li { display:flex; align-items:center; border-bottom:1px solid var(--line); }
@@ -617,9 +628,9 @@
   <div id="scroll">
     <div id="flights"></div>
     <ol id="stops"></ol>
-    <button class="add-place" id="addPlace">+ 일정 추가</button>
   </div>
   <div id="selBar" hidden><b id="selN"></b><button id="selMove">📅 다른 날로</button><button id="selDel">🗑 삭제</button><button id="selX" aria-label="선택 취소">취소</button></div>
+  <button id="addPlace" aria-label="일정 추가"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 </section>
 
 <section id="tour" aria-label="여정 보기">
@@ -908,21 +919,20 @@
 <dialog id="menu">
   <form method="dialog">
     <div class="menu-cover" id="mCover">대표 사진 없음</div>
-    <h3 id="mTitle"></h3>
+    <div class="m-head"><h3 id="mTitle"></h3><button type="button" class="mini" data-m="edit">✏️ 수정</button></div>
     <label style="margin-bottom:6px">함께하는 사람</label>
     <div class="mem" id="mMembers"></div>
-    <div class="menu-list">
-      <button type="button" data-m="edit">✏️ 여행 정보 수정</button>
-      <button type="button" data-m="profile">🙂 내 프로필 수정</button>
-      <button type="button" data-m="flight">✈️ 항공편 추가</button>
-      <button type="button" data-m="docs">📎 예약 서류함 <small id="mDocs"></small></button>
-      <button type="button" data-m="cover">🖼️ 대표 사진 바꾸기</button>
-      <button type="button" data-m="image">🖼️ 일정표 이미지로 저장·공유</button>
-      <button type="button" data-m="ics">📅 전체 일정을 캘린더로 내보내기</button>
-      <button type="button" data-m="notify">🔔 알람 알림 허용 <small id="mNotify"></small></button>
-      <button type="button" data-m="export">💾 백업 파일 저장 (JSON)</button>
-      <button type="button" data-m="install">📲 홈 화면에 추가</button>
-      <button type="button" data-m="help">❓ 사용법</button>
+    <div class="m-tiles">
+      <button type="button" data-m="profile"><i>🙂</i>내 프로필</button>
+      <button type="button" data-m="flight"><i>✈️</i>항공편 추가</button>
+      <button type="button" data-m="docs"><i>📎</i>예약 서류함<small id="mDocs"></small></button>
+      <button type="button" data-m="cover"><i>🖼️</i>대표 사진</button>
+      <button type="button" data-m="image"><i>📸</i>일정표 이미지</button>
+      <button type="button" data-m="ics"><i>📅</i>캘린더로 내보내기</button>
+      <button type="button" data-m="notify"><i>🔔</i>알람 알림<small id="mNotify"></small></button>
+      <button type="button" data-m="export"><i>💾</i>백업 저장</button>
+      <button type="button" data-m="install"><i>📲</i>홈 화면에 추가</button>
+      <button type="button" data-m="help"><i>❓</i>사용법</button>
     </div>
     <p class="note">⏰ 알람은 이 앱이 열려 있을 때만 울려요. 꼭 받아야 하는 알람은 '캘린더로 내보내기'를 쓰세요.<br>📎 예약 서류는 이 폰에만 저장되고 친구에게 공유되지 않아요.</p>
     <div class="row"><button class="btn" value="cancel">닫기</button></div>
@@ -1480,7 +1490,7 @@ async function createTrip(t) {
 function openTrip(id) {
   unsub?.(); stopTour();
   tripId = id; cur = 0; loaded = false; docs = []; sel.clear(); openK = null;
-  trip = fix({ ...blank(), title: '불러오는 중…' }); render(); setSheet('mid');
+  trip = fix({ ...blank(), title: '불러오는 중…' }); render();
   loadDocs().then(() => tripId === id && render());
   unsub = fs.onSnapshot(fs.doc(db, 'trips', id), snap => {
     if (!snap.exists()) return toast('없는 일정이에요. 링크를 확인해 주세요');
@@ -1846,7 +1856,7 @@ function pinTap(p) {
   focusCard(p);
 }
 function focusCard(p) {
-  setSheet('mid');
+  if (snap === 'low') setSheet('mid');
   const li = [...$('stops').children].find(x => x.dataset.k === key(p));
   if (li) { li.scrollIntoView({ behavior: 'smooth', block: 'center' }); li.classList.add('flash'); setTimeout(() => li.classList.remove('flash'), 1600); }
   if (hasPos(p)) { useGoogle() ? (gmap.setCenter(G(P(p))), gmap.setZoom(16), gmap.panBy(0, sheetPx() / 2)) : (map.setView(P(p), 16), map.panBy([0, sheetPx() / 2], { animate: false })); }
@@ -1906,6 +1916,7 @@ function render() {
             ${p.memo ? `<p class="memo">${esc(p.memo)}</p>` : ''}
           </div>
           ${by ? `<span class="by" title="${esc(by.name)}님이 추가">${avHtml(by, 20)}</span>` : ''}
+          <button class="grip" aria-label="${esc(p.name)} 끌어서 옮기기" tabindex="-1"><svg width="12" height="18" viewBox="0 0 12 18" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.8"/><circle cx="9" cy="3" r="1.8"/><circle cx="3" cy="9" r="1.8"/><circle cx="9" cy="9" r="1.8"/><circle cx="3" cy="15" r="1.8"/><circle cx="9" cy="15" r="1.8"/></svg></button>
         </div>
         ${open ? `<div class="acts">
           <button data-act="edit" class="pri">✏️ 편집</button>
@@ -1914,7 +1925,6 @@ function render() {
           <button data-act="more" aria-label="더보기">⋯</button>
         </div>` : ''}
       </div>
-      <button class="grip" aria-label="${esc(p.name)} 끌어서 옮기기" tabindex="-1"><svg width="12" height="18" viewBox="0 0 12 18" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.8"/><circle cx="9" cy="3" r="1.8"/><circle cx="3" cy="9" r="1.8"/><circle cx="9" cy="9" r="1.8"/><circle cx="3" cy="15" r="1.8"/><circle cx="9" cy="15" r="1.8"/></svg></button>
     </li>`;
   }).join('') + (items.length > 1 && !sel.size ? '<li class="hint">⋮⋮ 끌어서 순서 바꾸기 · 날짜 탭에 놓으면 그날로 이동 · 꾹 누르면 여러 개 선택</li>' : '')
     : `<li class="empty">아직 일정이 없어요.<br>가고 싶은 곳을 추가해 보세요.</li>`;
@@ -1935,6 +1945,7 @@ $('days').onclick = e => {
 $('stops').onclick = e => {
   const li = e.target.closest('.stop'); if (!li) return;
   const p = findItem(cur, li.dataset.k); if (!p) return;
+  if (e.target.closest('.grip')) return; // 손잡이는 끌기 전용
   const act = e.target.closest('[data-act]')?.dataset.act;
   if (sel.size && act !== 'vote' && act !== 'confirm') return toggleSel(li.dataset.k); // 선택 중에는 누르면 선택/해제
   if (act === 'edit') openItem(p, cur);
@@ -2322,7 +2333,16 @@ function wxText(d) {
 const SNAP = { low: 30, mid: 52, high: 88 }; // dvh
 let snap = 'mid';
 function setSheet(s) { snap = s; document.documentElement.style.setProperty('--sheet', SNAP[s] + 'dvh'); }
-setSheet('mid');
+setSheet(SNAP[readLocal('sheet')] ? readLocal('sheet') : 'mid');
+// 끌어서 놓은 높이에 가장 가까운 단계로. 같은 단계인데 40px 넘게 밀었으면 한 단계 이동 (dy > 0 = 위로)
+function endSheet(dy) {
+  const sh = $('sheet'), vh = sh.offsetHeight / innerHeight * 100, O = ['low', 'mid', 'high'];
+  sh.classList.remove('dragging'); sh.style.height = '';
+  let k = O.reduce((a, x) => Math.abs(SNAP[x] - vh) < Math.abs(SNAP[a] - vh) ? x : a, 'mid');
+  if (k === snap && Math.abs(dy) > 40) k = O[Math.max(0, Math.min(2, O.indexOf(snap) + (dy > 0 ? 1 : -1)))];
+  userSheet(k);
+}
+function userSheet(k) { setSheet(k); writeLocal('sheet', k); setTimeout(() => fit(routeItems(cur)), 260); }
 (() => {
   const g = $('grip'), sh = $('sheet');
   let y0, h0;
@@ -2330,13 +2350,36 @@ setSheet('mid');
   g.addEventListener('pointermove', e => { if (y0 == null) return; sh.style.height = Math.max(120, h0 + y0 - e.clientY) + 'px'; });
   g.addEventListener('pointerup', e => {
     if (y0 == null) return;
-    const dy = y0 - e.clientY, vh = sh.offsetHeight / innerHeight * 100;
-    sh.classList.remove('dragging'); sh.style.height = ''; y0 = null;
-    if (Math.abs(dy) < 6) return setSheet(snap === 'high' ? 'mid' : 'high'); // 탭 = 펼치기/접기
-    setSheet(Object.keys(SNAP).reduce((a, k) => Math.abs(SNAP[k] - vh) < Math.abs(SNAP[a] - vh) ? k : a, 'mid'));
-    setTimeout(() => fit(routeItems(cur)), 260);
+    const dy = y0 - e.clientY; y0 = null;
+    if (Math.abs(dy) < 6) { sh.classList.remove('dragging'); sh.style.height = ''; return userSheet(snap === 'high' ? 'mid' : 'high'); } // 탭 = 펼치기/접기
+    endSheet(dy);
   });
-  g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSheet(snap === 'high' ? 'mid' : 'high'); } };
+  g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); userSheet(snap === 'high' ? 'mid' : 'high'); } };
+
+  // 시트 어디서든 위아래로 밀면 높이 조절. 목록이 맨 위일 때 아래로 밀면 내려가고, 다 펼친 뒤에는 목록이 스크롤됨
+  const wide = matchMedia('(min-width:820px)');
+  let t = null;
+  sh.addEventListener('touchstart', e => {
+    t = null;
+    if (wide.matches || e.touches.length > 1 || drag || e.target.closest('#grip, .grip, #days, input, textarea, select')) return;
+    t = { y0: e.touches[0].clientY, x0: e.touches[0].clientX, y: e.touches[0].clientY, h: sh.offsetHeight, s: e.target.closest('#scroll, #pane'), mode: '' };
+  }, { passive: true });
+  sh.addEventListener('touchmove', e => {
+    if (!t || drag || press?.armed) return;
+    t.y = e.touches[0].clientY;
+    const dy = t.y - t.y0, dx = e.touches[0].clientX - t.x0;
+    if (!t.mode) {
+      if (Math.abs(dy) < 6 || Math.abs(dy) < Math.abs(dx)) return;
+      const atTop = !t.s || t.s.scrollTop <= 0;
+      t.mode = (dy < 0 ? snap !== 'high' : atTop && snap !== 'low') ? 'sheet' : 'scroll';
+      if (t.mode === 'sheet') sh.classList.add('dragging');
+    }
+    if (t.mode !== 'sheet') return;
+    if (e.cancelable) e.preventDefault();
+    sh.style.height = Math.min(innerHeight * .92, Math.max(120, t.h - dy)) + 'px';
+  }, { passive: false });
+  const end = () => { if (t?.mode === 'sheet') endSheet(t.y0 - t.y); t = null; };
+  sh.addEventListener('touchend', end); sh.addEventListener('touchcancel', end);
 })();
 
 /* ---------- 장소 검색 ---------- */
