@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#62b2e6">
-<title>hariple · 여행 일정 지도</title>
+<title>위트립 · 여행 일정 지도</title>
 <meta name="description" content="여행마다 일정을 날짜별로 짜고, 지도로 보고, 친구와 함께 고치는 여행 플래너">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="hariple">
-<meta property="og:title" content="hariple · 친구와 함께 짜는 여행 일정">
+<meta property="og:site_name" content="위트립">
+<meta property="og:title" content="위트립 · 친구와 함께 짜는 여행 일정">
 <meta property="og:description" content="날짜별 일정을 지도로 보고, 링크 하나로 친구를 초대해 같이 고쳐요. 항공편·예약 서류·알람까지 한곳에.">
 <meta property="og:image" content="https://neultos.github.io/trip-planner/og.png">
 <meta property="og:image:width" content="1200">
@@ -21,7 +21,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="hariple">
+<meta name="apple-mobile-web-app-title" content="위트립">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
@@ -449,9 +449,9 @@
 
 <section id="home" aria-label="내 여행">
   <div class="home-head">
-    <span class="brand" role="img" aria-label="hariple">
-      <svg viewBox="0 0 100 100" width="34" height="34" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#62b2e6"/><g fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"><path d="M30 31v42"/><path d="M30 57c0-10 7-17 16-17s16 7 16 17v16"/></g><circle cx="61" cy="27" r="7" fill="#fff"/></svg>
-      <b>hariple</b>
+    <span class="brand" role="img" aria-label="위트립">
+      <svg viewBox="0 0 100 100" width="34" height="34" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#62b2e6"/><path d="M22 33l13 36 15-28 15 28 13-36" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <b>위트립</b>
     </span>
     <button class="mini" id="homeHelp">사용법</button>
     <button id="meBtn" aria-label="내 프로필"></button>
@@ -1265,7 +1265,7 @@ function px(rows) {
   }));
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 12 12" width="44" height="44" shape-rendering="crispEdges">${r}</svg>`;
 }
-// hariple 백팩 캐릭터 (frame: stand | a | b 걷기 2프레임, wave: 손 흔들기)
+// 위트립 백팩 캐릭터 (frame: stand | a | b 걷기 2프레임, wave: 손 흔들기)
 // shortcut: 대표가 준 캐릭터 그림을 보고 SVG로 다시 그린 것 — 원본 PNG를 받으면 이미지로 교체
 function mascot(frame = 'stand', wave = false, size = 52) {
   const N = '#1b2f55', feet = { stand: [[38, 93], [62, 93]], a: [[31, 91], [66, 94]], b: [[36, 94], [60, 90]] }[frame];
@@ -1285,7 +1285,7 @@ function mascot(frame = 'stand', wave = false, size = 52) {
       <ellipse cx="40" cy="45" rx="3.4" ry="4.4" fill="${N}"/><ellipse cx="60" cy="45" rx="3.4" ry="4.4" fill="${N}"/>
       <path d="M44 52q6 6 12 0" fill="none" stroke="${N}" stroke-width="3.5" stroke-linecap="round"/>
       <rect x="29" y="60" width="44" height="24" rx="9" fill="#2f7ad6" stroke="${N}" stroke-width="4"/>
-      <path d="M46 66v13M46 74q0-5 5-5t5 5v5" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M42 67l3.5 12 4.5-8 4.5 8 3.5-12" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M67 62h4l1 6q-3 3.5-6 0z" fill="#f2b632" stroke="${N}" stroke-width="1.6"/>
     </g></svg>`;
 }
@@ -2203,7 +2203,7 @@ async function saveImage() {
     }
     y += 20;
   }
-  x.fillStyle = '#9aa1ab'; x.font = F('600 26'); x.fillText('hariple · 친구와 함께 짜는 여행 일정', 60, H - 40);
+  x.fillStyle = '#9aa1ab'; x.font = F('600 26'); x.fillText('위트립 · 친구와 함께 짜는 여행 일정', 60, H - 40);
   const blob = await new Promise(res => c.toBlob(res, 'image/png'));
   if (!blob) return toast('이미지를 만들지 못했어요');
   const file = new File([blob], `${trip.title.replace(/[\\/:*?"<>|]/g, '_')}.png`, { type: 'image/png' });

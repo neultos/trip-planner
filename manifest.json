@@ -1,6 +1,6 @@
 {
-  "name": "hariple · 여행 일정 지도",
-  "short_name": "hariple",
+  "name": "위트립 · 여행 일정 지도",
+  "short_name": "위트립",
   "description": "여행마다 일정을 날짜별로 짜고, 지도로 보고, 친구와 함께 고치는 앱",
   "start_url": "./",
   "scope": "./",
