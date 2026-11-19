@@ -107,6 +107,36 @@
   .acts { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
   .acts a, .acts button { font-size:12.5px; font-weight:600; padding:6px 10px; border-radius:8px; background:var(--bg); color:var(--fg); text-decoration:none; }
   .acts .go { color:var(--accent-ink); }
+  .acts .pri { background:var(--accent); color:#fff; }
+  .acts [data-act="more"] { margin-left:auto; padding:6px 12px; }
+  .row1 .by { flex:none; align-self:center; }
+  .stop, .day { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  .open .card { background:var(--bg); box-shadow:0 0 0 1.5px var(--accent), 0 4px 14px rgba(27,47,85,.08); }
+  .sel .card { background:var(--accent-soft); box-shadow:0 0 0 2px var(--accent); }
+  .grip { flex:none; width:26px; align-self:stretch; margin:4px -6px 0 -4px; color:#b9c0c9; display:grid; place-items:center; touch-action:none; cursor:grab; }
+  .hint { list-style:none; text-align:center; font-size:12px; color:var(--muted); padding:2px 8px 10px; line-height:1.5; }
+  .stop.dragging { opacity:.3; }
+  #dropLine { list-style:none; height:4px; border-radius:2px; background:var(--accent); margin:-6px 0 8px 38px; }
+  .ghost { position:fixed; left:0; top:0; z-index:2000; pointer-events:none; opacity:.95; transform-origin:0 0; }
+  .ghost .card { box-shadow:0 12px 28px rgba(27,47,85,.28); background:var(--bg); }
+  .gcount { position:absolute; right:-8px; top:-8px; min-width:26px; height:26px; border-radius:13px; background:var(--accent); color:#fff; font-weight:800; font-size:13px; display:grid; place-items:center; padding:0 7px; }
+  .gday .day { box-shadow:0 10px 24px rgba(27,47,85,.3); }
+  body.drag-on, body.drag-on * { cursor:grabbing !important; }
+  .day.drop { background:var(--accent) !important; color:#fff; transform:scale(1.08); }
+  .day.drop small { color:#fff; }
+  .day.dropl { box-shadow:-4px 0 0 var(--accent); } .day.dropr { box-shadow:4px 0 0 var(--accent); }
+  .day.lift { transform:scale(1.08); box-shadow:0 6px 16px rgba(27,47,85,.25); }
+  .day.dragging { opacity:.3; }
+  #selBar { flex:none; display:flex; align-items:center; gap:6px; padding:10px 12px calc(10px + var(--safe-b)); border-top:1px solid var(--line); background:var(--bg); }
+  #selBar[hidden] { display:none; }
+  #selBar b { flex:1; font-size:14px; padding-left:4px; }
+  #selBar button { font-size:13.5px; font-weight:700; padding:9px 12px; border-radius:10px; background:var(--bg2); }
+  #selBar #selMove { background:var(--accent); color:#fff; }
+  .mvdays { display:grid; grid-template-columns:1fr 1fr; gap:8px; max-height:50dvh; overflow-y:auto; }
+  .mvdays button { text-align:left; padding:12px; border-radius:12px; background:var(--bg2); }
+  .mvdays button b { display:block; font-size:15px; } .mvdays button small { color:var(--muted); font-size:12px; }
+  .mvdays button:disabled { opacity:.35; }
+  .danger-t { color:#e5484d; }
   #tabs { display:flex; gap:4px; margin:0 16px 8px; background:var(--bg2); border-radius:12px; padding:3px; flex:none; }
   #tabs button { flex:1; padding:7px 0; border-radius:9px; font-size:13.5px; font-weight:700; color:var(--muted); }
   #tabs button[aria-pressed="true"] { background:var(--bg); color:var(--fg); box-shadow:0 1px 3px rgba(0,0,0,.12); }
@@ -351,6 +381,13 @@
   #hNav i { font-style:normal; font-size:21px; filter:grayscale(1); opacity:.6; }
   #hNav [aria-pressed="true"] { color:var(--accent-ink); }
   #hNav [aria-pressed="true"] i { filter:none; opacity:1; }
+  .tip { display:flex; align-items:center; background:var(--bg); border-radius:16px; margin:-14px 0 22px; padding:4px 4px 4px 0; box-shadow:0 2px 10px rgba(27,47,85,.05); }
+  .tip.login { background:#fee500; color:#191919; }
+  .tip-go { flex:1; min-width:0; display:flex; align-items:center; gap:10px; text-align:left; padding:8px 0 8px 14px; }
+  .tip-go .ic { font-size:20px; } .tip-go b { display:block; font-size:14px; } .tip-go small { font-size:12px; opacity:.7; }
+  .tip-x { width:36px; height:36px; border-radius:50%; color:inherit; opacity:.5; font-size:14px; }
+  .plinks { display:flex; gap:8px; margin-top:12px; }
+  .plinks button { flex:1; padding:10px; border-radius:10px; background:var(--bg2); font-size:13px; font-weight:600; }
   .login-card { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:#fee500; color:#191919; border-radius:18px; padding:14px 16px; margin:-12px 0 24px; }
   .login-card + .install { margin-top:-12px; }
   .login-card .ic { font-size:24px; } .login-card b { display:block; font-size:15px; } .login-card small { font-size:12.5px; opacity:.75; }
@@ -362,7 +399,7 @@
   .sso.google b { color:#4285f4; font-family:Arial, sans-serif; }
   .pauth { margin-top:16px; padding-top:14px; border-top:1px solid var(--line); font-size:13.5px; color:var(--muted); }
   .pauth .row { margin-top:8px; }
-  /* 여행카페 · 여행 글 */
+  /* 위톡 · 여행 글 */
   .ctop { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; margin:0 -16px 10px; padding:0 16px; }
   .ctop::-webkit-scrollbar { display:none; }
   .ctop button { flex:none; padding:8px 13px; border-radius:999px; background:var(--bg); font-size:13.5px; font-weight:700; color:var(--muted); }
@@ -453,15 +490,12 @@
       <svg viewBox="0 0 100 100" width="34" height="34" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#62b2e6"/><path d="M22 33l13 36 15-28 15 28 13-36" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <b>위트립</b>
     </span>
-    <button class="mini" id="homeHelp">사용법</button>
     <button id="meBtn" aria-label="내 프로필"></button>
   </div>
   <div id="hTrips">
     <div class="hero" id="hero"></div>
-    <button class="login-card" id="loginCard" hidden><span class="ic">🔐</span><span><b>로그인하고 어디서나 내 여행 보기</b><small>카카오·구글로 시작하면 폰을 바꾸거나 카톡에서 열어도 그대로예요</small></span><i>›</i></button>
-    <button class="install" id="installBtn"><span class="ic">📲</span><span><b>홈 화면에 추가하기</b><small>앱처럼 아이콘을 눌러 바로 열 수 있어요</small></span><i>›</i></button>
+    <div id="tip"></div>
     <div id="tripCards"></div>
-    <div class="home-foot"><button id="homeImport">백업 파일 불러오기</button></div>
   </div>
   <div id="hCafe" hidden></div>
   <div id="hBlog" hidden></div>
@@ -469,7 +503,7 @@
 <button class="fab" id="newTripBtn">+ 새 여행 만들기</button>
 <nav id="hNav" aria-label="홈 메뉴">
   <button data-h="trips" aria-pressed="true"><i>🧳</i>내 여행</button>
-  <button data-h="cafe" aria-pressed="false"><i>☕</i>여행카페</button>
+  <button data-h="cafe" aria-pressed="false"><i>💬</i>위톡</button>
   <button data-h="blog" aria-pressed="false"><i>📰</i>여행 글</button>
 </nav>
 
@@ -503,6 +537,7 @@
     <ol id="stops"></ol>
     <button class="add-place" id="addPlace">+ 일정 추가</button>
   </div>
+  <div id="selBar" hidden><b id="selN"></b><button id="selMove">📅 다른 날로</button><button id="selDel">🗑 삭제</button><button id="selX" aria-label="선택 취소">취소</button></div>
 </section>
 
 <section id="tour" aria-label="여정 보기">
@@ -558,6 +593,30 @@
     <label>메모<textarea id="iMemo" rows="3" maxlength="500" placeholder="예약번호 대신 '메일 확인' 처럼 적어 두세요 (친구에게도 보여요)"></textarea></label>
     <button type="button" class="btn wide" id="iDocs">📎 첨부 파일 (이 폰에만 저장)</button>
     <div class="row"><button class="btn danger" type="button" id="iDel">삭제</button><button class="btn" value="cancel" formnovalidate>취소</button><button class="btn primary" value="ok">저장</button></div>
+  </form>
+</dialog>
+
+<!-- 일정 더보기 -->
+<dialog id="itemAct">
+  <form method="dialog">
+    <h3 id="iaTitle"></h3>
+    <div class="menu-list">
+      <button type="button" data-ia="map">🗺️ 구글 지도에서 보기</button>
+      <button type="button" data-ia="ics">📅 내 캘린더에 추가</button>
+      <button type="button" data-ia="docs">📎 첨부 파일</button>
+      <button type="button" data-ia="move">↪️ 다른 날로 옮기기</button>
+      <button type="button" data-ia="del" class="danger-t">🗑 삭제</button>
+    </div>
+    <div class="row"><button class="btn" value="cancel">닫기</button></div>
+  </form>
+</dialog>
+
+<!-- 다른 날로 옮기기 -->
+<dialog id="moveDlg">
+  <form method="dialog">
+    <h3 id="mvHead">어느 날로 옮길까요?</h3>
+    <div class="mvdays" id="mvDays"></div>
+    <div class="row"><button class="btn" value="cancel">취소</button></div>
   </form>
 </dialog>
 
@@ -644,6 +703,7 @@
     <label style="margin-bottom:0">프로필 사진</label>
     <div class="avgrid" id="pAv"></div>
     <div class="pauth" id="pAuth"></div>
+    <div class="plinks"><button type="button" id="homeHelp">❓ 사용법</button><button type="button" id="homeImport">💾 백업 파일 불러오기</button></div>
     <div class="row"><button class="btn" value="cancel" formnovalidate>취소</button><button class="btn primary" value="ok">저장</button></div>
   </form>
 </dialog>
@@ -652,7 +712,7 @@
 <dialog id="loginDlg">
   <form method="dialog">
     <h3>로그인</h3>
-    <p class="note" style="margin-top:0">로그인하면 어떤 폰·브라우저에서 열어도 내 여행과 프로필이 그대로 보여요. 여행카페 글쓰기도 로그인이 필요해요.</p>
+    <p class="note" style="margin-top:0">로그인하면 어떤 폰·브라우저에서 열어도 내 여행과 프로필이 그대로 보여요. 위톡 글쓰기도 로그인이 필요해요.</p>
     <button type="button" class="sso kakao" data-login="kakao"><b>💬</b>카카오로 시작하기</button>
     <button type="button" class="sso google" data-login="google"><b>G</b>Google로 시작하기</button>
     <p class="note" id="lgInapp" hidden>⚠️ 카카오톡 안에서는 구글 로그인이 막혀 있어요. 구글로 하려면 <button type="button" class="text-link" id="lgOut">다른 브라우저로 열기</button>를 눌러 주세요.</p>
@@ -660,7 +720,7 @@
   </form>
 </dialog>
 
-<!-- 여행카페 글쓰기 -->
+<!-- 위톡 글쓰기 -->
 <dialog id="writeDlg">
   <form method="dialog">
     <h3 id="wHead">글쓰기</h3>
@@ -678,7 +738,7 @@
 <input type="file" id="filePhoto" accept="image/*" multiple hidden>
 <datalist id="cityList"></datalist>
 
-<!-- 여행카페 글 보기 -->
+<!-- 위톡 글 보기 -->
 <dialog id="postDlg" class="tall">
   <form method="dialog">
     <div id="pdBody"></div>
@@ -890,7 +950,7 @@ function dayDate(i) { const d = new Date(trip.start + 'T00:00'); d.setDate(d.get
 console.assert(span('2026-12-30', '2027-01-02') === 3 && addDays('2026-02-28', 1) === '2026-03-01', 'date math broken');
 
 /* ---------- 여행 데이터 ---------- */
-const blank = () => ({ title: '나의 여행', start: today(), end: addDays(today(), 2), days: [[], [], []], flights: [], cities: [] });
+const blank = () => ({ title: '나의 여행', start: today(), end: addDays(today(), 2), days: [[], [], []], flights: [], cities: [], ordered: true });
 const fix = t => {
   if (!Array.isArray(t.days) || !t.days.length) t.days = [[]];
   if (!t.end) t.end = addDays(t.start, t.days.length - 1); // 예전 일정(오는 날 없음)
@@ -899,6 +959,8 @@ const fix = t => {
   if (!Array.isArray(t.members)) t.members = [];
   if (!Array.isArray(t.expenses)) t.expenses = [];
   if (!Array.isArray(t.checklist)) t.checklist = [];
+  // 예전 여행은 시간순으로 보여 줬으므로, 직접 순서(드래그)로 바꿀 때 그 순서를 한 번 저장
+  if (!t.ordered) { t.days = t.days.map(d => timeSort(Array.isArray(d) ? d : [])); t.ordered = true; }
   return t;
 };
 // 백업 파일·예전 링크처럼 밖에서 들어온 일정은 아는 필드만, 길이 제한해서 받음
@@ -955,9 +1017,19 @@ const key = p => p.id || `${p.name}|${p.lat}|${p.lng}`; // 예전 항목은 id�
 const hasPos = p => Number.isFinite(p.lat) && Number.isFinite(p.lng);
 const typeOf = p => TYPES[p.type] || TYPES.기타;
 const findItem = (d, k) => (trip.days[d] || []).find(x => key(x) === k);
-// 시간 있는 일정은 시간순, 시간 없는 일정은 그 뒤에 넣은 순서대로
-const dayItems = d => (trip.days[d] || []).map((p, i) => [p, i])
-  .sort((a, b) => (!a[0].time - !b[0].time) || (a[0].time || '').localeCompare(b[0].time || '') || a[1] - b[1]).map(x => x[0]);
+// 일정 순서 = 배열 순서 (드래그로 바꿈)
+const dayItems = d => [...(trip.days[d] || [])];
+// 예전 정렬: 시간 있는 일정은 시간순, 시간 없는 일정은 그 뒤에 넣은 순서대로
+function timeSort(l) { return l.map((p, i) => [p, i]).sort((a, b) => (!a[0].time - !b[0].time) || (a[0].time || '').localeCompare(b[0].time || '') || a[1] - b[1]).map(x => x[0]); }
+// 시간을 정한 일정은 시간 순서에 맞는 자리에 넣고, 시간이 없으면 맨 뒤에
+function placeByTime(list, p) {
+  const i = list.indexOf(p); if (i >= 0) list.splice(i, 1);
+  if (!p.time) return void list.push(p);
+  const j = list.findIndex(x => x.time && x.time > p.time);
+  if (j >= 0) return void list.splice(j, 0, p);
+  let k = -1; list.forEach((x, n) => { if (x.time) k = n; }); list.splice(k + 1, 0, p);
+}
+console.assert((() => { const l = [{ time: '09:00' }, { time: '' }, { time: '13:00' }], p = { time: '10:00' }; placeByTime(l, p); return l[1] === p; })(), 'placeByTime broken');
 // 지도 동선·번호·여정 보기에는 확정된 일정만 (후보는 투표 중)
 const routeItems = d => dayItems(d).filter(p => hasPos(p) && !p.cand);
 // 투표는 지금 멤버의 표만 셈
@@ -1010,7 +1082,7 @@ console.assert(grade(0).startsWith('🌱') && grade(4).includes('2번') && grade
 function showHome() {
   unsub?.(); unsub = null; tripId = null; loaded = false; stopTour();
   document.body.classList.add('at-home'); $('invite').classList.remove('on'); renderMe();
-  $('loginCard').hidden = !auth || !!user;
+  renderTip();
   homeTab(hTab);
   const ended = x => x.end && span(today(), x.end) < 0;
   // 다가오는·진행 중인 여행이 위, 끝난 여행은 아래(최근 것부터)
@@ -1082,7 +1154,7 @@ async function createTrip(t) {
 }
 function openTrip(id) {
   unsub?.(); stopTour();
-  tripId = id; cur = 0; loaded = false; docs = [];
+  tripId = id; cur = 0; loaded = false; docs = []; sel.clear(); openK = null;
   trip = fix({ ...blank(), title: '불러오는 중…' }); render(); setSheet('mid');
   loadDocs().then(() => tripId === id && render());
   unsub = fs.onSnapshot(fs.doc(db, 'trips', id), snap => {
@@ -1479,8 +1551,9 @@ function render() {
     if (num) { if (prev) { const m = hav(P(prev), P(p));
       gap = `<li class="gap" aria-hidden="true">↓ 직선 ${distText(m)}${m < 2000 ? ` · 걸어서 약 ${Math.max(1, Math.round(m * 1.3 / 75))}분` : ''}</li>`; } prev = p; }
     const vs = votesOf(p), mine = vs.includes(myId);
-    return gap + `<li class="stop${p.cand ? ' cand' : ''}" data-k="${esc(key(p))}">
-      <span class="num${num ? '' : ' off'}" style="background:${p.cand ? '#9aa1ab' : color(cur)}">${num || (p.cand ? '?' : '·')}</span>
+    const k = key(p), isSel = sel.has(k), open = !sel.size && openK === k;
+    return gap + `<li class="stop${p.cand ? ' cand' : ''}${isSel ? ' sel' : ''}${open ? ' open' : ''}" data-k="${esc(k)}">
+      <span class="num${num || isSel ? '' : ' off'}" style="background:${isSel ? 'var(--accent)' : p.cand ? '#9aa1ab' : color(cur)}">${isSel ? '✓' : num || (p.cand ? '?' : '·')}</span>
       <div class="card">
         ${p.cand ? `<div class="voterow"><span class="vlabel">🗳 후보 · 투표 중</span>
           <button data-act="vote" class="vote${mine ? ' on' : ''}" aria-pressed="${mine}" aria-label="가고 싶어요 ${vs.length}명">👍 ${vs.length}</button>
@@ -1489,23 +1562,25 @@ function render() {
         <div class="row1" data-act="focus">
           <span class="ticon" style="background:${T.c}22">${T.e}</span>
           <div class="t">
-            <div class="l1">${p.time ? `<time>${esc(p.time)}</time>` : ''}<b>${esc(p.name)}</b>${p.alarm ? `<span class="pill">⏰ ${esc(p.alarm)}</span>` : ''}</div>
+            <div class="l1">${p.time ? `<time>${esc(p.time)}</time>` : ''}<b>${esc(p.name)}</b>${p.alarm ? `<span class="pill">⏰ ${esc(p.alarm)}</span>` : ''}${cnt ? `<span class="pill">📎${cnt}</span>` : ''}</div>
             <small>${esc(p.type || '기타')}${p.move ? ` · ${esc(p.move)}` : ''}${p.addr || p.place ? ' · ' + esc(p.place || p.addr) : ''}</small>
             ${p.memo ? `<p class="memo">${esc(p.memo)}</p>` : ''}
           </div>
+          ${by ? `<span class="by" title="${esc(by.name)}님이 추가">${avHtml(by, 20)}</span>` : ''}
         </div>
-        <div class="acts">
-          <a class="go" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">길찾기</a>
-          <a href="${esc(viewUrl(p))}" target="_blank" rel="noopener">지도</a>
-          <a href="https://m.search.naver.com/search.naver?where=m_blog&query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">후기</a>
-          <button data-act="ics">캘린더</button>
-          <button data-act="docs">첨부${cnt ? ' ' + cnt : ''}</button>
-          <button data-act="edit">편집</button>
-          ${by ? `<span class="by" title="${esc(by.name)}님이 추가">${avHtml(by, 22)}</span>` : ''}
-        </div>
+        ${open ? `<div class="acts">
+          <button data-act="edit" class="pri">✏️ 편집</button>
+          <a class="go" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">🧭 길찾기</a>
+          <a href="https://m.search.naver.com/search.naver?where=m_blog&query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">📝 후기</a>
+          <button data-act="more" aria-label="더보기">⋯</button>
+        </div>` : ''}
       </div>
+      <button class="grip" aria-label="${esc(p.name)} 끌어서 옮기기" tabindex="-1"><svg width="12" height="18" viewBox="0 0 12 18" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.8"/><circle cx="9" cy="3" r="1.8"/><circle cx="3" cy="9" r="1.8"/><circle cx="9" cy="9" r="1.8"/><circle cx="3" cy="15" r="1.8"/><circle cx="9" cy="15" r="1.8"/></svg></button>
     </li>`;
-  }).join('') : `<li class="empty">아직 일정이 없어요.<br>가고 싶은 곳을 추가해 보세요.</li>`;
+  }).join('') + (items.length > 1 && !sel.size ? '<li class="hint">⋮⋮ 끌어서 순서 바꾸기 · 날짜 탭에 놓으면 그날로 이동 · 꾹 누르면 여러 개 선택</li>' : '')
+    : `<li class="empty">아직 일정이 없어요.<br>가고 싶은 곳을 추가해 보세요.</li>`;
+  $('selBar').hidden = !sel.size;
+  $('selN').textContent = `${sel.size}개 선택`;
 
   if (touring) renderTour();
   drawMap();
@@ -1513,7 +1588,7 @@ function render() {
 
 $('days').onclick = e => {
   const b = e.target.closest('.day'); if (!b) return;
-  cur = +b.dataset.i; needFit = true; render();
+  cur = +b.dataset.i; needFit = true; sel.clear(); openK = null; render();
   $('days').querySelector('.on')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
   $('scroll').scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -1521,10 +1596,10 @@ $('stops').onclick = e => {
   const li = e.target.closest('.stop'); if (!li) return;
   const p = findItem(cur, li.dataset.k); if (!p) return;
   const act = e.target.closest('[data-act]')?.dataset.act;
+  if (sel.size && act !== 'vote' && act !== 'confirm') return toggleSel(li.dataset.k); // 선택 중에는 누르면 선택/해제
   if (act === 'edit') openItem(p, cur);
-  else if (act === 'ics') downloadIcs([icsEvent(p, cur)], p.name);
-  else if (act === 'docs') openDocs(p, cur);
-  else if (act === 'focus') focusCard(p);
+  else if (act === 'more') { itemAct = { p, d: cur }; $('iaTitle').textContent = p.name; $('itemAct').showModal(); }
+  else if (act === 'focus') { openK = openK === li.dataset.k ? null : li.dataset.k; render(); focusCard(p); }
   else if (act === 'vote') {
     const id = me()?.id, k = key(p), d = cur, on = !votesOf(p).includes(id);
     change(t => { const x = (t.days[d] || []).find(y => key(y) === k); if (!x || !id) return;
@@ -1536,6 +1611,182 @@ $('stops').onclick = e => {
     toast('일정으로 확정했어요');
   }
 };
+/* ---------- 선택 · 옮기기 · 끌어서 놓기 ---------- */
+let sel = new Set(), openK = null, itemAct = null, moveKeys = null, suppressUntil = 0;
+function toggleSel(k, on) {
+  if (on ?? !sel.has(k)) sel.add(k); else sel.delete(k);
+  openK = null; render();
+}
+const keysInOrder = keys => dayItems(cur).map(key).filter(k => keys.includes(k));
+// 옮기기: 다른 날이면 그날 맨 뒤에, 같은 날이면 anchor(이 일정 앞) 자리에. 친구가 동시에 고쳐도 id 기준이라 안전
+function moveItems(keys, toDay, anchor = null) {
+  const d = cur;
+  change(t => {
+    const from = t.days[d] || [], moved = from.filter(x => keys.includes(key(x)));
+    if (!moved.length) return;
+    t.days[d] = from.filter(x => !keys.includes(key(x)));
+    const to = (t.days[toDay] ??= []), i = anchor ? to.findIndex(x => key(x) === anchor) : -1;
+    to.splice(i >= 0 ? i : to.length, 0, ...moved);
+  });
+  sel.clear(); openK = null;
+  if (toDay !== d) toast(`${keys.length}개를 ${toDay + 1}일차로 옮겼어요`);
+}
+function openMove(keys) {
+  moveKeys = keys;
+  $('mvHead').textContent = `${keys.length}개를 어느 날로 옮길까요?`;
+  $('mvDays').innerHTML = trip.days.map((_, i) => { const d = dayDate(i); return `<button type="button" data-mv="${i}"${i === cur ? ' disabled' : ''}><b>${i + 1}일차</b><small>${md(d)} (${WD[d.getDay()]})${trip.cities[i] ? ' · ' + esc(trip.cities[i]) : ''}</small></button>`; }).join('');
+  $('moveDlg').showModal();
+}
+$('mvDays').onclick = e => { const b = e.target.closest('[data-mv]'); if (!b || !moveKeys) return; $('moveDlg').close(); moveItems(moveKeys, +b.dataset.mv); moveKeys = null; };
+$('selX').onclick = () => { sel.clear(); render(); };
+$('selMove').onclick = () => openMove(keysInOrder([...sel]));
+$('selDel').onclick = () => {
+  const keys = [...sel], d = cur;
+  if (!confirm(`선택한 일정 ${keys.length}개를 삭제할까요?`)) return;
+  change(t => { t.days[d] = (t.days[d] || []).filter(x => !keys.includes(key(x))); });
+  sel.clear(); render(); toast('삭제했어요');
+};
+$('itemAct').onclick = e => {
+  const a = e.target.closest('[data-ia]')?.dataset.ia; if (!a || !itemAct) return;
+  const { p, d } = itemAct; $('itemAct').close();
+  if (a === 'map') open(viewUrl(p), '_blank', 'noopener');
+  if (a === 'ics') downloadIcs([icsEvent(p, d)], p.name);
+  if (a === 'docs') openDocs(p, d);
+  if (a === 'move') openMove([key(p)]);
+  if (a === 'del' && confirm(`'${p.name}' 일정을 삭제할까요?`)) {
+    const k = key(p); change(t => { t.days[d] = (t.days[d] || []).filter(x => key(x) !== k); }); toast('삭제했어요');
+  }
+};
+
+// 끌기: ⋮⋮ 손잡이는 바로, 카드는 꾹 누른(선택) 다음 움직이면 시작. 날짜 탭은 꾹 눌러 순서 바꾸기
+let press = null, drag = null;
+const LONG = 420;
+function pressStart(e, kind, el) {
+  if (e.button > 0 || drag) return;
+  press = { kind, el, x: e.clientX, y: e.clientY, armed: false };
+  if (kind === 'grip') { press.armed = true; return; }
+  press.timer = setTimeout(() => {
+    if (!press) return;
+    press.armed = true; navigator.vibrate?.(12);
+    if (kind === 'item') toggleSel(el.dataset.k, true);
+    else el.classList.add('lift');
+  }, LONG);
+}
+$('stops').addEventListener('pointerdown', e => {
+  const li = e.target.closest('.stop'); if (!li) return;
+  if (e.target.closest('.grip')) { e.preventDefault(); return pressStart(e, 'grip', li); }
+  if (e.target.closest('a, button, .voterow')) return;
+  pressStart(e, 'item', li);
+});
+$('days').addEventListener('pointerdown', e => { const b = e.target.closest('.day'); if (b) pressStart(e, 'day', b); });
+addEventListener('pointermove', e => {
+  if (drag) return dragMove(e);
+  if (!press) return;
+  const moved = Math.hypot(e.clientX - press.x, e.clientY - press.y);
+  if (!press.armed) { if (moved > 8) { clearTimeout(press.timer); press = null; } return; } // 스크롤
+  if (moved > 5) dragStart(e);
+});
+addEventListener('pointerup', () => { if (drag || press?.armed && press.kind !== 'grip') suppressUntil = Date.now() + 400; if (drag) dragEnd(); pressEnd(); });
+addEventListener('pointercancel', () => { if (drag) dragEnd(true); pressEnd(); });
+function pressEnd() { if (!press) return; clearTimeout(press.timer); press.el.classList.remove('lift'); press = null; }
+// 꾹 누른 뒤에는 화면이 스크롤되지 않게 (touchmove를 막아야 손가락을 따라 움직임)
+document.addEventListener('touchmove', e => { if (drag || press?.armed) e.preventDefault(); }, { passive: false });
+document.addEventListener('contextmenu', e => { if (e.target.closest('#stops, #days')) e.preventDefault(); });
+// 꾹 누르기·끌기 뒤에 따라오는 click은 무시
+document.addEventListener('click', e => { if (Date.now() < suppressUntil) { suppressUntil = 0; e.stopPropagation(); e.preventDefault(); } }, true);
+
+function dragStart(e) {
+  const { kind, el } = press;
+  let keys = null, src = el;
+  if (kind === 'day') {
+    drag = { kind, from: +el.dataset.i, to: null };
+  } else {
+    const k = el.dataset.k;
+    keys = sel.has(k) ? keysInOrder([...sel]) : [k];
+    drag = { kind: 'item', keys, day: null, anchor: undefined };
+  }
+  clearTimeout(press.timer);
+  const r = src.getBoundingClientRect(), g = document.createElement('div');
+  g.className = 'ghost' + (kind === 'day' ? ' gday' : '');
+  g.innerHTML = kind === 'day' ? src.outerHTML : (src.querySelector('.card')?.outerHTML || '') + (keys.length > 1 ? `<span class="gcount">${keys.length}</span>` : '');
+  g.style.width = r.width + 'px';
+  document.body.append(g);
+  Object.assign(drag, { g, dx: e.clientX - r.left, dy: e.clientY - r.top });
+  if (kind === 'item') $('stops').querySelectorAll('.stop').forEach(li => li.classList.toggle('dragging', keys.includes(li.dataset.k)));
+  else el.classList.add('dragging');
+  document.body.classList.add('drag-on');
+  drag.timer = setInterval(autoScroll, 16);
+  dragMove(e);
+}
+function dragMove(e) {
+  drag.x = e.clientX; drag.y = e.clientY;
+  drag.g.style.transform = `translate(${e.clientX - drag.dx}px, ${e.clientY - drag.dy}px)`;
+  findTarget();
+}
+function findTarget() {
+  const { x, y } = drag;
+  document.querySelectorAll('.day.drop, .day.dropl, .day.dropr').forEach(b => b.classList.remove('drop', 'dropl', 'dropr'));
+  $('dropLine')?.remove();
+  const el = document.elementFromPoint(x, y), day = el?.closest('#days .day');
+  if (drag.kind === 'day') {
+    drag.to = null;
+    if (day && +day.dataset.i !== drag.from) {
+      const r = day.getBoundingClientRect(), i = +day.dataset.i, after = x > r.left + r.width / 2;
+      day.classList.add(after ? 'dropr' : 'dropl');
+      drag.to = after ? i + 1 : i; // 이 자리(앞) 번호
+    }
+    return;
+  }
+  drag.day = null; drag.anchor = undefined;
+  if (day) { if (+day.dataset.i !== cur) { day.classList.add('drop'); drag.day = +day.dataset.i; } return; }
+  const sr = $('scroll').getBoundingClientRect();
+  if (y < sr.top || y > sr.bottom || x < sr.left || x > sr.right) return;
+  const rest = [...$('stops').querySelectorAll('.stop:not(.dragging)')];
+  const before = rest.find(li => { const r = li.getBoundingClientRect(); return y < r.top + r.height / 2; });
+  const line = document.createElement('li'); line.id = 'dropLine';
+  (before ? before.parentNode.insertBefore(line, before.previousElementSibling?.classList.contains('gap') ? before.previousElementSibling : before)
+    : $('stops').insertBefore(line, $('stops').querySelector('.hint')));
+  drag.anchor = before ? before.dataset.k : null;
+}
+function autoScroll() {
+  if (!drag) return;
+  const s = $('scroll'), r = s.getBoundingClientRect(), dr = $('days').getBoundingClientRect();
+  let moved = false;
+  if (drag.kind === 'item' && drag.x > r.left && drag.x < r.right) {
+    if (drag.y < r.top + 50 && drag.y > r.top - 10 && s.scrollTop > 0) { s.scrollTop -= 8; moved = true; }
+    if (drag.y > r.bottom - 50) { s.scrollTop += 8; moved = true; }
+  }
+  if (drag.y > dr.top && drag.y < dr.bottom) { // 날짜 탭 줄 양끝에 대면 옆으로 넘김
+    if (drag.x < dr.left + 40) { $('days').scrollLeft -= 8; moved = true; }
+    if (drag.x > dr.right - 40) { $('days').scrollLeft += 8; moved = true; }
+  }
+  if (moved) findTarget();
+}
+function dragEnd(cancel = false) {
+  const d = drag; drag = null;
+  clearInterval(d.timer); d.g.remove(); $('dropLine')?.remove();
+  document.body.classList.remove('drag-on');
+  document.querySelectorAll('.dragging, .drop, .dropl, .dropr, .lift').forEach(x => x.classList.remove('dragging', 'drop', 'dropl', 'dropr', 'lift'));
+  if (cancel) return render();
+  if (d.kind === 'day') { if (d.to != null) moveDay(d.from, d.to); else render(); return; }
+  if (d.day != null) return moveItems(d.keys, d.day);
+  if (d.anchor !== undefined && !d.keys.includes(d.anchor)) return moveItems(d.keys, cur, d.anchor);
+  render();
+}
+// 날짜 순서 바꾸기: 일정·도시·가계부 날짜가 함께 움직이고, 날짜(달력)는 자리에 남음
+function moveDay(from, to) {
+  if (to > from) to--; if (to === from) return render();
+  change(t => {
+    const perm = t.days.map((_, i) => i), [x] = perm.splice(from, 1); perm.splice(to, 0, x);
+    const inv = []; perm.forEach((old, nw) => { inv[old] = nw; });
+    t.days = perm.map(i => t.days[i] || []); t.cities = perm.map(i => t.cities[i] || '');
+    t.expenses.forEach(e => { if (Number.isInteger(e.day) && inv[e.day] != null) e.day = inv[e.day]; });
+  });
+  if (cur === from) cur = to; else if (from < cur && to >= cur) cur--; else if (from > cur && to <= cur) cur++;
+  needFit = true; render();
+  toast(`${from + 1}일차 일정을 ${to + 1}일차로 옮겼어요`);
+}
+
 /* ---------- 일차 정보(도시) 팝업 ---------- */
 let dayEdit = 0;
 $('cityBtn').onclick = () => {
@@ -1849,16 +2100,17 @@ $('itemForm').onclose = () => {
     cand: $('iCand').firstElementChild.getAttribute('aria-pressed') === 'true' };
   if (itemEdit.isNew) {
     const p = { ...vals, id: newId(), by: me()?.id };
-    change(t => { (t.days[nd] ??= []).push(p); });
+    change(t => { placeByTime(t.days[nd] ??= [], p); });
     if (nd !== cur) { cur = nd; needFit = true; render(); }
     return toast('추가했어요');
   }
   const id = findItem(day, k)?.id || newId();
   if (k !== id) reKeyDocs(k, id); // 예전 항목에 id를 붙이면 첨부 파일도 따라감
-  change(t => {
+  change(t => { // 같은 날·같은 시간이면 제자리, 시간이나 날짜가 바뀌면 시간에 맞는 자리로
     const from = t.days[day] || [], i = from.findIndex(x => key(x) === k);
-    const base = i >= 0 ? from.splice(i, 1)[0] : {};
-    (t.days[nd] ??= []).push({ ...base, ...vals, id });
+    const base = i >= 0 ? from[i] : {}, q = { ...base, ...vals, id };
+    if (nd === day && i >= 0 && (base.time || '') === vals.time) from[i] = q;
+    else { if (i >= 0) from.splice(i, 1); placeByTime(t.days[nd] ??= [], q); }
   });
   if (nd !== cur) { cur = nd; needFit = true; render(); }
   toast('저장했어요');
@@ -2223,8 +2475,8 @@ $('fileCover').onchange = async e => {
     toast('대표 사진을 바꿨어요');
   } catch { toast('이 사진은 쓸 수 없어요. 다른 사진을 골라 주세요'); }
 };
-$('homeHelp').onclick = () => $('help').showModal();
-$('homeImport').onclick = () => $('fileJson').click();
+$('homeHelp').onclick = () => { $('profileDlg').close(); $('help').showModal(); };
+$('homeImport').onclick = () => { $('profileDlg').close(); $('fileJson').click(); };
 $('fileJson').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   if (!db) return toast('서버에 연결하는 중이에요. 잠시 후 다시 해 주세요');
@@ -2259,7 +2511,7 @@ function editProfile(forJoin) {
   const p = me() || { id: newId() + newId(), name: '', av: 'p' + Math.floor(Math.random() * AV.length) };
   pAvSel = p.av; $('pName').value = p.name;
   $('pHead').textContent = forJoin ? '함께할 프로필을 만들어 주세요' : '내 프로필';
-  $('pAuth').innerHTML = forJoin ? '' : authHtml();
+  $('pAuth').innerHTML = forJoin ? '' : authHtml(); $('homeHelp').parentElement.hidden = forJoin;
   drawAvGrid();
   $('profileDlg').returnValue = '';
   $('profileDlg').showModal();
@@ -2370,7 +2622,7 @@ document.addEventListener('click', e => { const k = e.target.closest('[data-logi
   if (e.target.closest('#invLogin')) joinAfterLogin = true;
   login(k); });
 $('lgOut').onclick = () => { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); };
-$('loginCard').onclick = openLogin;
+
 
 const mergeTrips = (remote, local) => { const ids = new Set(local.map(x => x.id)); return local.concat(remote.filter(x => x && typeof x.id === 'string' && !ids.has(x.id))).slice(0, 50); };
 const tripsForCloud = l => l.map(({ cover, ...x }) => x); // 대표 사진은 용량이 커서 기기에만
@@ -2432,7 +2684,7 @@ $('pAuth').onclick = async e => {
   if (a === 'logout' && confirm('로그아웃할까요?\n이 기기의 여행 목록은 그대로 남아요.')) { await fa.signOut(auth); toast('로그아웃했어요'); }
 };
 
-/* ---------- 홈 탭: 내 여행 / 여행카페 / 여행 글 ---------- */
+/* ---------- 홈 탭: 내 여행 / 위톡 / 여행 글 ---------- */
 let hTab = 'trips';
 function homeTab(t) {
   hTab = t;
@@ -2445,7 +2697,7 @@ function homeTab(t) {
 }
 $('hNav').onclick = e => { const b = e.target.closest('[data-h]'); if (!b) return; homeTab(b.dataset.h); $('home').scrollTo(0, 0); };
 
-/* ---------- 여행카페 (posts 컬렉션, 글마다 comments 하위 컬렉션) ---------- */
+/* ---------- 위톡 = 커뮤니티 (posts 컬렉션, 글마다 comments 하위 컬렉션) ---------- */
 const BOARDS = { qna: '묻고답해요', free: '자유수다', log: '여행록', photo: '여행사진', blog: '블로그 글' };
 let posts = null, lastPost = null, morePosts = true, cafeBoard = 'all', cafeCity = '', openPostId = null, writeBoard = 'qna', wPhotos = [];
 let blocked = new Set((() => { try { return JSON.parse(readLocal('blocked')) || []; } catch { return []; } })());
@@ -2481,7 +2733,7 @@ function renderCafe() {
   if (!posts) { $('hCafe').innerHTML = '<p class="muted" style="text-align:center;padding:40px 0">불러오는 중…</p>'; return; }
   const list = posts.filter(visible), cities = [...new Set(list.map(p => p.city).filter(Boolean))].slice(0, 12);
   const shown = list.filter(p => (cafeBoard === 'all' || (cafeBoard === 'mine' ? p.uid === user?.uid : p.board === cafeBoard)) && (!cafeCity || p.city === cafeCity));
-  $('hCafe').innerHTML = `<div class="sec">여행카페<small>여행자끼리 묻고 나눠요</small></div>
+  $('hCafe').innerHTML = `<div class="sec">위톡<small>위트립 여행자들의 수다방</small></div>
     <div class="ctop" id="cBoards">${[['all', '전체'], ...Object.entries(BOARDS), ['mine', '내 글']].map(([k, v]) => `<button data-b="${k}" aria-pressed="${k === cafeBoard}">${v}</button>`).join('')}</div>
     ${cities.length ? `<div class="ctop city" id="cCities"><button data-c="" aria-pressed="${!cafeCity}">모든 도시</button>${cities.map(c => `<button data-c="${esc(c)}" aria-pressed="${c === cafeCity}">${esc(c)}</button>`).join('')}</div>` : ''}
     ${shown.map(postCard).join('') || `<div class="home-empty"><b>${list.length ? '이 조건의 글이 없어요' : '아직 글이 없어요'}</b><br>첫 글을 남겨 보세요. 궁금한 점, 다녀온 일정, 사진 모두 좋아요.</div>`}
@@ -2662,8 +2914,7 @@ let tt;
 let installEvt = null;
 const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; });
-addEventListener('appinstalled', () => { installEvt = null; $('installBtn').hidden = true; toast('홈 화면에 추가했어요'); });
-$('installBtn').hidden = standalone();
+addEventListener('appinstalled', () => { installEvt = null; writeLocal('tipOff', (readLocal('tipOff') || '') + ' install'); renderTip(); toast('홈 화면에 추가했어요'); });
 async function install() {
   if (installEvt) { installEvt.prompt(); await installEvt.userChoice; installEvt = null; return; }
   const ua = navigator.userAgent, ios = /iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
@@ -2671,7 +2922,21 @@ async function install() {
   $('instIos').hidden = !ios; $('instAnd').hidden = ios;
   $('installDlg').showModal();
 }
-$('installBtn').onclick = install;
+// 메인의 안내 띠는 한 번에 하나만 (로그인 → 홈 화면 추가 순), ✕로 다시 안 보이게
+function renderTip() {
+  const off = readLocal('tipOff') || '';
+  const t = auth && !user && !off.includes('login') ? ['login', '🔐', '로그인하고 어디서나 내 여행 보기', '카카오·구글로 시작해요']
+    : !standalone() && !off.includes('install') ? ['install', '📲', '홈 화면에 추가하기', '앱처럼 바로 열 수 있어요'] : null;
+  $('tip').innerHTML = t ? `<div class="tip ${t[0]}"><button class="tip-go" data-tip="${t[0]}"><span class="ic">${t[1]}</span><span><b>${t[2]}</b><small>${t[3]}</small></span></button>
+    <button class="tip-x" data-tipx="${t[0]}" aria-label="안내 닫기">✕</button></div>` : '';
+}
+$('tip').onclick = e => {
+  const x = e.target.closest('[data-tipx]')?.dataset.tipx;
+  if (x) { writeLocal('tipOff', (readLocal('tipOff') || '') + ' ' + x); return renderTip(); }
+  const g = e.target.closest('[data-tip]')?.dataset.tip;
+  if (g === 'login') openLogin(); if (g === 'install') install();
+};
+
 
 /* ---------- 팝업 바깥(어두운 부분)을 누르면 닫기 ---------- */
 document.addEventListener('click', e => {
