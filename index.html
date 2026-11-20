@@ -323,7 +323,12 @@
   .m-head h3 { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .m-tiles { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin:16px 0 4px; }
   .m-tiles button { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:84px; padding:12px 6px; border-radius:14px; background:var(--bg2); font-size:13px; font-weight:600; line-height:1.25; text-align:center; word-break:keep-all; }
-  .m-tiles button:active { background:var(--line); }
+  .m-tiles a { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:64px; padding:10px 6px; border-radius:14px; background:var(--bg2); font-size:13px; font-weight:600; text-align:center; word-break:keep-all; color:inherit; text-decoration:none; }
+  .m-tiles button:active, .m-tiles a:active { background:var(--line); }
+  #bookDlg h4 { margin:18px 0 0; font-size:15px; } #bookDlg h4 small { display:block; color:var(--muted); font-size:12.5px; font-weight:500; margin-top:2px; }
+  #bookDlg .m-tiles { margin-top:10px; }
+  .book-row { list-style:none; display:flex; gap:8px; padding:4px 0 12px; }
+  .book-row button { flex:1; padding:12px 8px; border-radius:14px; background:var(--bg2); font-size:13.5px; font-weight:600; }
   .m-tiles i { font-style:normal; font-size:24px; line-height:1; }
   .m-tiles small { color:var(--accent-ink); font-size:11.5px; font-weight:700; }
   .m-tiles small:empty { display:none; }
@@ -797,9 +802,20 @@
     <div class="pick">
       <button type="button" data-add="place"><span class="ic">📍</span><span><b>장소 검색해서 추가</b><small>식당·숙소·명소·카페를 지도에서 찾아요</small></span></button>
       <button type="button" data-add="flight"><span class="ic">✈️</span><span><b>항공편 추가</b><small>편명, 출발·도착 공항과 시간을 적어요</small></span></button>
+      <button type="button" data-add="book"><span class="ic">🏨</span><span><b>숙소·항공권 찾기</b><small>부킹닷컴·트립닷컴·스카이스캐너 등에서 날짜 넣어 비교</small></span></button>
       <button type="button" data-add="memo"><span class="ic">✏️</span><span><b>직접 입력</b><small>이동·휴식·메모처럼 검색 없이 적어요</small></span></button>
     </div>
     <div class="row"><button class="btn" value="cancel">취소</button></div>
+  </form>
+</dialog>
+
+<!-- 숙소·항공권 찾기: 여행 날짜·도시를 채워 비교 사이트로 -->
+<dialog id="bookDlg">
+  <form method="dialog">
+    <h3>🏨 숙소 · ✈️ 항공권 찾기</h3>
+    <p class="note" style="margin:4px 0 0">여행 날짜와 도시를 넣어서 열어요. 가격은 사이트마다 달라서 2~3곳을 비교해 보세요.</p>
+    <div id="bookBody"></div>
+    <div class="row"><button class="btn" value="cancel">닫기</button></div>
   </form>
 </dialog>
 
@@ -935,6 +951,7 @@
     <div class="mem" id="mMembers"></div>
     <div class="m-tiles">
       <button type="button" data-m="profile"><i>🙂</i>내 프로필</button>
+      <button type="button" data-m="book"><i>🏨</i>숙소·항공권 찾기</button>
       <button type="button" data-m="flight"><i>✈️</i>항공편 추가</button>
       <button type="button" data-m="docs"><i>📎</i>예약 서류함<small id="mDocs"></small></button>
       <button type="button" data-m="cover"><i>🖼️</i>대표 사진</button>
@@ -1941,6 +1958,9 @@ function render() {
     </li>`;
   }).join('') + (items.length > 1 && !sel.size ? '<li class="hint">⋮⋮ 끌어서 순서 바꾸기 · 날짜 탭에 놓으면 그날로 이동 · 꾹 누르면 여러 개 선택</li>' : '')
     : `<li class="empty">아직 일정이 없어요.<br>가고 싶은 곳을 추가해 보세요.</li>`;
+  // 이날 밤 숙소가 없거나 첫날 항공편이 없으면 찾기 버튼
+  const needStay = loaded && cur < trip.days.length - 1 && !items.some(p => p.type === '숙소'), needFly = loaded && trip.abroad && cur === 0 && !trip.flights.length;
+  if (!sel.size && (needStay || needFly)) $('stops').insertAdjacentHTML('beforeend', `<li class="book-row">${needFly ? '<button data-book="fly">✈️ 항공권 찾기</button>' : ''}${needStay ? '<button data-book="stay">🏨 오늘 밤 숙소 찾기</button>' : ''}</li>`);
   $('selBar').hidden = !sel.size;
   $('selN').textContent = `${sel.size}개 선택`;
 
@@ -1956,6 +1976,7 @@ $('days').onclick = e => {
   $('scroll').scrollTo({ top: 0, behavior: 'smooth' });
 };
 $('stops').onclick = e => {
+  const bk = e.target.closest('[data-book]'); if (bk) return openBook(bk.dataset.book === 'stay' ? cur : -1);
   const li = e.target.closest('.stop'); if (!li) return;
   const p = findItem(cur, li.dataset.k); if (!p) return;
   if (e.target.closest('.grip')) return; // 손잡이는 끌기 전용
@@ -2179,6 +2200,7 @@ $('addDlg').onclick = e => {
   $('addDlg').close();
   if (a === 'place') openSearch();
   if (a === 'flight') openFlight(null);
+  if (a === 'book') openBook();
   if (a === 'memo') openItem({ type: '기타' }, cur, true);
 };
 
@@ -2543,6 +2565,65 @@ $('iDel').onclick = () => {
   toast('삭제했어요');
 };
 $('iDocs').onclick = () => openDocs(itemEdit.p, itemEdit.day);
+
+/* ---------- 숙소·항공권 찾기 (비교 사이트로 날짜·도시를 채워 연결) ---------- */
+// shortcut: 제휴 ID 없이 검색 링크만 씀(아고다는 도시 ID가 있어야 검색돼서 뺌), 제휴 승인되면 ID를 붙여 수익화
+const STAY_SITES = [
+  ['부킹닷컴', (c, a, b, n) => `https://www.booking.com/searchresults.ko.html?ss=${c}&checkin=${a}&checkout=${b}&group_adults=${n}&no_rooms=1`],
+  ['트립닷컴', (c, a, b, n) => `https://kr.trip.com/hotels/list?keyword=${c}&checkin=${a.replace(/-/g, '/')}&checkout=${b.replace(/-/g, '/')}&adult=${n}&crn=1`],
+  ['호텔스닷컴', (c, a, b, n) => `https://kr.hotels.com/Hotel-Search?destination=${c}&startDate=${a}&endDate=${b}&adults=${n}`],
+  ['익스피디아', (c, a, b, n) => `https://www.expedia.co.kr/Hotel-Search?destination=${c}&startDate=${a}&endDate=${b}&adults=${n}`],
+  ['에어비앤비', (c, a, b, n) => `https://www.airbnb.co.kr/s/${c}/homes?checkin=${a}&checkout=${b}&adults=${n}`],
+];
+const STAY_KR = [
+  ['여기어때', (c, a, b, n) => `https://www.yeogi.com/domestic-accommodations?keyword=${c}&checkIn=${a}&checkOut=${b}&personal=${n}`],
+  ['야놀자', c => `https://nol.yanolja.com/results?keyword=${c}`],
+];
+const ymd = d => d.replace(/-/g, '');
+const FLY_SITES = [
+  ['스카이스캐너', (f, t, a, b, n) => `https://www.skyscanner.co.kr/transport/flights/${f}/${t}/${ymd(a).slice(2)}/${b ? ymd(b).slice(2) + '/' : ''}?adultsv2=${n}`],
+  ['네이버 항공권', (f, t, a, b, n, kr) => `https://flight.naver.com/flights/${kr ? 'domestic' : 'international'}/${f}-${t}-${ymd(a)}${b ? `/${t}-${f}-${ymd(b)}` : ''}?adult=${n}&fareType=Y`],
+  ['구글 항공권', (f, t, a, b) => `https://www.google.com/travel/flights?hl=ko&q=${encodeURIComponent(`Flights from ${f} to ${t} on ${a}${b ? ' through ' + b : ''}`)}`],
+  ['카약', (f, t, a, b, n) => `https://www.kayak.co.kr/flights/${f}-${t}/${a}${b ? '/' + b : ''}/${n}adults`],
+  ['트립닷컴', (f, t, a, b, n) => `https://kr.trip.com/flights/showfarefirst?dcity=${f.toLowerCase()}&acity=${t.toLowerCase()}&ddate=${a}${b ? '&rdate=' + b : ''}&triptype=${b ? 'rt' : 'ow'}&class=y&quantity=${n}`],
+];
+const bookTiles = list => `<div class="m-tiles">${list.map(([n, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)}</a>`).join('')}</div>`;
+// 연속으로 같은 도시에 묵는 밤끼리 묶음 → [{ city, i, j }] (i일차 밤 ~ j일차 밤)
+function stays() {
+  let last = trip.cities.find(Boolean) || countryOf(trip.country)?.city || trip.title;
+  const out = [];
+  for (let i = 0; i < trip.days.length - 1; i++) {
+    const c = (trip.cities[i] || last).trim(); last = c;
+    const g = out.at(-1); g && g.city === c ? (g.j = i) : out.push({ city: c, i, j: i });
+  }
+  return out;
+}
+// only: 그날 밤 숙소만(일차 번호), -1이면 항공권만, 없으면 전체
+function openBook(only = null) {
+  const n = trip.members.length > 1 ? trip.members.length : 2, kr = !trip.abroad || countryOf(trip.country)?.code === 'KR';
+  const day = i => addDays(trip.start, i), mdd = s => md(new Date(s + 'T00:00'));
+  let h = '';
+  if (only == null || only < 0) { // 등록한 항공편 기준, 없으면 인천(국내는 김포) → 나라 대표 공항 또는 도시 공항
+    const fs = [...trip.flights].sort((a, b) => (a.dep || '').localeCompare(b.dep || '')), f0 = fs[0];
+    const from = f0?.from || (kr ? 'GMP' : 'ICN');
+    const to = f0?.to || (kr ? trip.cities.map(c => c && findAirports(c)[0]?.code).find(c => c && c !== 'GMP' && c !== 'ICN') : mainAirport(trip.country)?.code);
+    const a = f0?.dep?.slice(0, 10) || trip.start, b = trip.days.length > 1 ? (fs.length > 1 && fs.at(-1).dep?.slice(0, 10)) || trip.end : '';
+    h += to ? `<h4>✈️ 항공권 · ${esc(from)} → ${esc(to)}<small>${mdd(a)}${b ? ' ~ ' + mdd(b) + ' 왕복' : ' 편도'} · ${n}명</small></h4>`
+      + bookTiles(FLY_SITES.map(([s, u]) => [s, u(from, to, a, b, n, kr)]))
+      : '<h4>✈️ 항공권<small>도착 공항을 모르겠어요. 일차 도시를 넣거나 항공편을 추가해 주세요.</small></h4>';
+  }
+  if (only == null || only >= 0) {
+    const list = stays().filter(g => only == null || (only >= g.i && only <= g.j));
+    if (only != null && list[0]) list[0] = { ...list[0], i: only, j: only }; // 그날 밤만
+    for (const g of list) {
+      const a = day(g.i), b = day(g.j + 1), c = encodeURIComponent(g.city);
+      h += `<h4>🏨 ${esc(g.city)} 숙소<small>${mdd(a)} ~ ${mdd(b)} · ${g.j - g.i + 1}박 · ${n}명</small></h4>`
+        + bookTiles([...(kr ? STAY_KR : []), ...STAY_SITES].map(([s, u]) => [s, u(c, a, b, n)]));
+    }
+  }
+  $('bookBody').innerHTML = h || '<p class="note">당일치기 여행이라 숙소가 필요 없어요.</p>';
+  $('bookDlg').showModal();
+}
 
 /* ---------- 항공편 ---------- */
 // 출발일이 여행 기간 밖이면 첫날/마지막 날에 보여 줌
@@ -3261,6 +3342,7 @@ $('menu').onclick = async e => {
   if (m === 'cover') $('fileCover').click();
   if (m === 'help') $('help').showModal();
   if (m === 'install') install();
+  if (m === 'book') openBook();
   if (m === 'image') saveImage();
   if (m === 'ics') {
     const ev = trip.days.flatMap((d, i) => d.map(p => icsEvent(p, i))).concat(trip.flights.map(flightEvent));
