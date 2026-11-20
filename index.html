@@ -113,6 +113,16 @@
   .acts .go { color:var(--accent-ink); }
   .acts .pri { background:var(--accent); color:#fff; }
   .acts [data-act="more"] { margin-left:auto; padding:6px 12px; }
+  .pinfo { margin-top:10px; font-size:13px; line-height:1.55; }
+  .pinfo:empty { display:none; }
+  .pinfo .ph { height:150px; border-radius:12px; background:var(--bg2) center/cover; margin-bottom:4px; }
+  .pinfo .cr { display:block; font-size:10.5px; color:var(--muted); margin-bottom:6px; }
+  .pinfo p { margin:3px 0; }
+  .pinfo a { color:var(--accent-ink); text-decoration:none; font-weight:600; }
+  .pinfo .sum { color:var(--muted); }
+  .pinfo details summary { cursor:pointer; color:var(--muted); font-size:12px; }
+  .pinfo details div { color:var(--muted); font-size:12px; padding:4px 0 0 4px; }
+  .pinfo .open { color:#16a34a; font-weight:700; } .pinfo .closed { color:#dc2626; font-weight:700; }
   .row1 .by { flex:none; align-self:center; }
   .stop, .day { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
   .open .card { background:var(--bg); border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 4px 14px rgba(14,17,22,.08); }
@@ -1953,7 +1963,7 @@ function render() {
           <a class="go" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">🧭 길찾기</a>
           <a href="https://m.search.naver.com/search.naver?where=m_blog&query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">📝 후기</a>
           <button data-act="more" aria-label="더보기">⋯</button>
-        </div>` : ''}
+        </div>${p.gid ? `<div class="pinfo" data-gid="${esc(p.gid)}">${pinfo.get(p.gid) || '<small class="cr">장소 정보 불러오는 중…</small>'}</div>` : ''}` : ''}
       </div>
     </li>`;
   }).join('') + (items.length > 1 && !sel.size ? '<li class="hint">⋮⋮ 끌어서 순서 바꾸기 · 날짜 탭에 놓으면 그날로 이동 · 꾹 누르면 여러 개 선택</li>' : '')
@@ -1964,6 +1974,7 @@ function render() {
   $('selBar').hidden = !sel.size;
   $('selN').textContent = `${sel.size}개 선택`;
 
+  $('stops').querySelectorAll('.pinfo[data-gid]').forEach(e => loadPinfo(e.dataset.gid));
   if (touring) renderTour();
   drawMap();
 }
@@ -2416,6 +2427,38 @@ function userSheet(k) { setSheet(k); writeLocal('sheet', k); setTimeout(() => fi
   const end = () => { if (t?.mode === 'sheet') endSheet(t.y0 - t.y); t = null; };
   sh.addEventListener('touchend', end); sh.addEventListener('touchcancel', end);
 })();
+
+/* ---------- 구글 장소 정보 (일정 카드를 펼치면) ---------- */
+// 구글 약관상 장소 정보는 저장하지 않고 열 때마다 받아 옴 (이번 실행 동안만 메모리에)
+const pinfo = new Map();
+async function loadPinfo(gid) {
+  if (pinfo.has(gid)) return;
+  if (!window.google?.maps?.places?.Place) { // 구글 지도를 못 불러온 경우
+    return document.querySelectorAll(`.pinfo[data-gid="${CSS.escape(gid)}"]`).forEach(e => e.innerHTML = `<a href="https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(gid)}" target="_blank" rel="noopener">Google 지도에서 장소 정보 보기 ›</a>`);
+  }
+  pinfo.set(gid, '');
+  let h;
+  try {
+    const pl = new google.maps.places.Place({ id: gid, requestedLanguage: 'ko' });
+    await pl.fetchFields({ fields: ['rating', 'userRatingCount', 'regularOpeningHours', 'nationalPhoneNumber', 'websiteURI', 'googleMapsURI', 'photos', 'editorialSummary'] });
+    const ph = pl.photos?.[0], au = ph?.authorAttributions?.[0];
+    const wk = pl.regularOpeningHours?.weekdayDescriptions || [], today = wk[(new Date().getDay() + 6) % 7];
+    let open = null; try { open = wk.length ? await pl.isOpen() : null; } catch {}
+    h = (ph ? `<div class="ph" style="background-image:url('${esc(ph.getURI({ maxWidth: 800 }))}')"></div><small class="cr">사진: ${au ? `<a href="${esc(au.uri || '#')}" target="_blank" rel="noopener">${esc(au.displayName)}</a>` : 'Google'}</small>` : '')
+      + (pl.editorialSummary ? `<p class="sum">${esc(pl.editorialSummary)}</p>` : '')
+      + (pl.rating ? `<p>⭐ <b>${pl.rating.toFixed(1)}</b> <span class="sum">리뷰 ${(pl.userRatingCount || 0).toLocaleString()}개</span></p>` : '')
+      + (today ? `<details><summary>🕒 ${open === true ? '<span class="open">영업 중</span> · ' : open === false ? '<span class="closed">영업 종료</span> · ' : ''}${esc(today)}</summary><div>${wk.map(esc).join('<br>')}</div></details>` : '')
+      + (pl.nationalPhoneNumber ? `<p>📞 <a href="tel:${esc(pl.nationalPhoneNumber.replace(/[^\d+]/g, ''))}">${esc(pl.nationalPhoneNumber)}</a></p>` : '')
+      + (pl.websiteURI ? `<p>🌐 <a href="${esc(pl.websiteURI)}" target="_blank" rel="noopener">${esc(pl.websiteURI.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '').slice(0, 40))}</a></p>` : '')
+      + `<p><a href="${esc(pl.googleMapsURI || `https://www.google.com/maps/place/?q=place_id:${gid}`)}" target="_blank" rel="noopener">Google 지도에서 리뷰·사진 더 보기 ›</a></p>`;
+  } catch (err) {
+    console.warn('place details', err);
+    pinfo.delete(gid);
+    h = `<a href="https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(gid)}" target="_blank" rel="noopener">Google 지도에서 장소 정보 보기 ›</a>`;
+  }
+  if (pinfo.has(gid)) pinfo.set(gid, h);
+  document.querySelectorAll(`.pinfo[data-gid="${CSS.escape(gid)}"]`).forEach(e => e.innerHTML = h);
+}
 
 /* ---------- 장소 검색 ---------- */
 async function osmSearch(q) {
