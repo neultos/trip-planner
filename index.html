@@ -119,7 +119,7 @@
   .pinfo .cr { display:block; font-size:10.5px; color:var(--muted); margin-bottom:6px; }
   .pinfo p { margin:3px 0; }
   .pinfo a { color:var(--accent-ink); text-decoration:none; font-weight:600; }
-  .pinfo .sum { color:var(--muted); }
+  .pinfo .pd { color:var(--muted); }
   .pinfo details summary { cursor:pointer; color:var(--muted); font-size:12px; }
   .pinfo details div { color:var(--muted); font-size:12px; padding:4px 0 0 4px; }
   .pinfo .open { color:#16a34a; font-weight:700; } .pinfo .closed { color:#dc2626; font-weight:700; }
@@ -337,6 +337,17 @@
   .m-tiles button:active, .m-tiles a:active { background:var(--line); }
   #bookDlg h4 { margin:18px 0 0; font-size:15px; } #bookDlg h4 small { display:block; color:var(--muted); font-size:12.5px; font-weight:500; margin-top:2px; }
   #bookDlg .m-tiles { margin-top:10px; }
+  #bookDlg .more { margin:12px 0 0; font-size:12.5px; color:var(--muted); font-weight:600; }
+  .hlist { list-style:none; margin:10px 0 0; padding:0; }
+  .hlist li { display:flex; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
+  .hlist li.msg { color:var(--muted); font-size:13px; display:block; border:0; }
+  .hlist .t { flex:1; min-width:0; }
+  .hlist .t b { display:block; font-size:14.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hlist .t small { display:block; color:var(--muted); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hlist .bs { display:flex; flex-direction:column; gap:4px; flex:none; }
+  .hlist .bs a, .hlist .bs button { font-size:12px; font-weight:700; padding:6px 10px; border-radius:8px; background:var(--bg2); color:var(--fg); text-decoration:none; text-align:center; }
+  .hlist .bs button { background:var(--accent); color:#fff; }
+  .hlist .bs button:disabled { background:var(--bg2); color:var(--muted); }
   .book-row { list-style:none; display:flex; gap:8px; padding:4px 0 12px; }
   .book-row button { flex:1; padding:12px 8px; border-radius:14px; background:var(--bg2); font-size:13.5px; font-weight:600; }
   .m-tiles i { font-style:normal; font-size:24px; line-height:1; }
@@ -2445,8 +2456,8 @@ async function loadPinfo(gid) {
     const wk = pl.regularOpeningHours?.weekdayDescriptions || [], today = wk[(new Date().getDay() + 6) % 7];
     let open = null; try { open = wk.length ? await pl.isOpen() : null; } catch {}
     h = (ph ? `<div class="ph" style="background-image:url('${esc(ph.getURI({ maxWidth: 800 }))}')"></div><small class="cr">사진: ${au ? `<a href="${esc(au.uri || '#')}" target="_blank" rel="noopener">${esc(au.displayName)}</a>` : 'Google'}</small>` : '')
-      + (pl.editorialSummary ? `<p class="sum">${esc(pl.editorialSummary)}</p>` : '')
-      + (pl.rating ? `<p>⭐ <b>${pl.rating.toFixed(1)}</b> <span class="sum">리뷰 ${(pl.userRatingCount || 0).toLocaleString()}개</span></p>` : '')
+      + (pl.editorialSummary ? `<p class="pd">${esc(pl.editorialSummary)}</p>` : '')
+      + (pl.rating ? `<p>⭐ <b>${pl.rating.toFixed(1)}</b> <span class="pd">리뷰 ${(pl.userRatingCount || 0).toLocaleString()}개</span></p>` : '')
       + (today ? `<details><summary>🕒 ${open === true ? '<span class="open">영업 중</span> · ' : open === false ? '<span class="closed">영업 종료</span> · ' : ''}${esc(today)}</summary><div>${wk.map(esc).join('<br>')}</div></details>` : '')
       + (pl.nationalPhoneNumber ? `<p>📞 <a href="tel:${esc(pl.nationalPhoneNumber.replace(/[^\d+]/g, ''))}">${esc(pl.nationalPhoneNumber)}</a></p>` : '')
       + (pl.websiteURI ? `<p>🌐 <a href="${esc(pl.websiteURI)}" target="_blank" rel="noopener">${esc(pl.websiteURI.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '').slice(0, 40))}</a></p>` : '')
@@ -2660,13 +2671,46 @@ function openBook(only = null) {
     if (only != null && list[0]) list[0] = { ...list[0], i: only, j: only }; // 그날 밤만
     for (const g of list) {
       const a = day(g.i), b = day(g.j + 1), c = encodeURIComponent(g.city);
-      h += `<h4>🏨 ${esc(g.city)} 숙소<small>${mdd(a)} ~ ${mdd(b)} · ${g.j - g.i + 1}박 · ${n}명</small></h4>`
-        + bookTiles([...(kr ? STAY_KR : []), ...STAY_SITES].map(([s, u]) => [s, u(c, a, b, n)]));
+      h += `<h4>🏨 ${esc(g.city)} 추천 숙소<small>${mdd(a)} ~ ${mdd(b)} · ${g.j - g.i + 1}박 · ${n}명 · Google 평점순</small></h4>`
+        + `<ul class="hlist" data-city="${esc(g.city)}" data-i="${g.i}" data-a="${a}" data-b="${b}" data-n="${n}"><li class="msg">숙소 목록 불러오는 중…</li></ul>`
+        + '<p class="more">다른 사이트에서 더 보기</p>' + bookTiles([...(kr ? STAY_KR : []), ...STAY_SITES].map(([s, u]) => [s, u(c, a, b, n)]));
     }
   }
   $('bookBody').innerHTML = h || '<p class="note">당일치기 여행이라 숙소가 필요 없어요.</p>';
   $('bookDlg').showModal();
+  $('bookBody').querySelectorAll('.hlist').forEach(loadHotels);
 }
+// 도시 숙소 목록: 구글 장소 검색(숙박 시설)으로 받아 평점·리뷰 수 순. 가격은 아직 없음 → 부킹닷컴에서 그 숙소로 검색
+// shortcut: 가격은 제휴 API(아고다·부킹 등) 승인 뒤에 붙일 수 있음
+const hotelCache = new Map(), hotelFound = {};
+async function loadHotels(ul) {
+  const { city, a, b, n } = ul.dataset;
+  if (!window.google?.maps?.places?.Place) { ul.innerHTML = '<li class="msg">지도 검색을 불러오지 못해서 목록을 못 보여 드려요. 아래 사이트에서 찾아 주세요.</li>'; return; }
+  try {
+    if (!hotelCache.has(city)) hotelCache.set(city, google.maps.places.Place.searchByText({
+      textQuery: city + ' 호텔', includedType: 'lodging', language: 'ko', maxResultCount: 20,
+      fields: ['id', 'displayName', 'formattedAddress', 'location', 'rating', 'userRatingCount', 'primaryTypeDisplayName']
+    }).then(r => r.places).catch(e => { hotelCache.delete(city); throw e; }));
+    const list = (await hotelCache.get(city)).filter(x => x.rating && x.userRatingCount >= 30)
+      .sort((x, y) => y.rating * Math.log10(y.userRatingCount) - x.rating * Math.log10(x.userRatingCount)).slice(0, 10);
+    hotelFound[city] = list;
+    const inTrip = new Set(trip.days.flat().map(x => x.gid).filter(Boolean));
+    ul.innerHTML = list.length ? list.map((x, k) => `<li><div class="t"><b>${esc(x.displayName)}</b>
+      <small>⭐ ${x.rating.toFixed(1)} (${x.userRatingCount.toLocaleString()}) · ${esc(x.primaryTypeDisplayName || '숙소')}</small><small>${esc(x.formattedAddress || '')}</small></div>
+      <div class="bs"><button type="button" data-hk="${k}"${inTrip.has(x.id) ? ' disabled>✓ 넣음' : '>+ 일정에'}</button>
+      <a href="${esc(`https://www.booking.com/searchresults.ko.html?ss=${encodeURIComponent(x.displayName)}&checkin=${a}&checkout=${b}&group_adults=${n}&no_rooms=1`)}" target="_blank" rel="noopener">가격 보기</a></div></li>`).join('')
+      : '<li class="msg">평점 있는 숙소를 찾지 못했어요. 아래 사이트에서 찾아 주세요.</li>';
+  } catch (e) { console.warn('hotels', e); ul.innerHTML = '<li class="msg">숙소 목록을 불러오지 못했어요. 아래 사이트에서 찾아 주세요.</li>'; }
+}
+$('bookBody').onclick = e => {
+  const bt = e.target.closest('[data-hk]'); if (!bt) return;
+  const ul = bt.closest('.hlist'), x = hotelFound[ul.dataset.city]?.[+bt.dataset.hk], d = +ul.dataset.i; if (!x) return;
+  if (loaded && !isMember()) return showInvite();
+  const p = { id: newId(), gid: x.id, name: x.displayName, addr: x.formattedAddress || '', cat: x.primaryTypeDisplayName || '', lat: x.location.lat(), lng: x.location.lng(), type: '숙소', by: me()?.id };
+  change(t => { (t.days[d] ??= []).push(p); });
+  bt.disabled = true; bt.textContent = '✓ 넣음';
+  toast(`${d + 1}일차에 숙소로 넣었어요`);
+};
 
 /* ---------- 항공편 ---------- */
 // 출발일이 여행 기간 밖이면 첫날/마지막 날에 보여 줌
