@@ -446,6 +446,7 @@
   .biz p { margin:0 0 4px; }
   .biz span { font-weight:700; color:var(--fg); margin-right:4px; } .biz .sp { margin-left:10px; }
   .biz a { color:var(--muted); }
+  .biz .legal { margin-top:10px; } .biz .legal b { color:var(--fg); }
   .home-foot { text-align:center; }
   .home-foot button { color:var(--muted); font-size:14px; padding:10px; text-decoration:underline; }
   #home { padding-bottom:calc(170px + var(--safe-b)); }
@@ -638,6 +639,7 @@
     <p><span>상호명</span> 에이블 <span class="sp">사업자등록번호</span> 896-13-01619</p>
     <p><span>사업장 주소</span> 강원특별자치도 춘천시 후석로 420번길 7, 하이테크타워 9층 911호</p>
     <p><span>문의</span> <a href="mailto:aehwa-@naver.com">aehwa-@naver.com</a></p>
+    <p class="legal"><a href="terms.html">이용약관</a> · <a href="privacy.html"><b>개인정보처리방침</b></a></p>
   </footer>
 </section>
 <button class="fab" id="newTripBtn">+ 새 여행 만들기</button>
@@ -891,6 +893,7 @@
     <p class="note" style="margin-top:0">로그인하면 어떤 폰·브라우저에서 열어도 내 여행과 프로필이 그대로 보여요. 위톡 글쓰기도 로그인이 필요해요.</p>
     <button type="button" class="sso kakao" data-login="kakao"><b>💬</b>카카오로 시작하기</button>
     <button type="button" class="sso google" data-login="google"><b>G</b>Google로 시작하기</button>
+    <p class="note" style="text-align:center">시작하면 <a href="terms.html" target="_blank">이용약관</a>과 <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의하는 것으로 봐요.</p>
     <p class="note" id="lgInapp" hidden>⚠️ 카카오톡 안에서는 구글 로그인이 막혀 있어요. 구글로 하려면 <button type="button" class="text-link" id="lgOut">다른 브라우저로 열기</button>를 눌러 주세요.</p>
     <div class="row"><button class="btn" value="cancel">닫기</button></div>
   </form>
