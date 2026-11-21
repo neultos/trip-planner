@@ -2507,7 +2507,8 @@ async function runSearch() {
   const direct = `<li class="r direct"><button class="res" data-direct="1"><span class="t"><b>'${esc(q)}' 직접 추가</b><small>지도 검색 없이 일정만 추가 (항공·이동·메모용)</small></span><span class="plus" aria-hidden="true">+</span></button></li>`;
   $('results').innerHTML = direct + '<li class="msg">검색 중…</li>';
   try {
-    const list = gmap ? await googleSearch(q) : await osmSearch(q);
+    // 구글 한도 초과·오류 때는 오픈스트리트맵으로 대신 찾음
+    const list = gmap ? await googleSearch(q).catch(err => (console.warn('google search', err), osmSearch(q))) : await osmSearch(q);
     if (my !== seq) return; // 더 최근 검색이 있음
     found = list;
     $('results').innerHTML = direct + (list.length ? list.map((p, i) => `
