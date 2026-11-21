@@ -109,6 +109,7 @@
   .num { flex:none; width:28px; height:28px; border-radius:50%; color:#fff; display:grid; place-items:center; font-size:13px; font-weight:700; margin-top:14px; }
   .num.off { background:var(--line) !important; color:var(--muted); }
   .nico { font-size:13px; line-height:1; }
+  .num.dot { width:10px; height:10px; margin:23px 9px 0; } /* 위치 없는 기타 일정: 핀 대신 작은 점 */
   .card { flex:1; min-width:0; background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:14px; transition:box-shadow .3s; }
   .flash .card { box-shadow:0 0 0 2px var(--accent); }
   .row1 { display:flex; gap:10px; align-items:flex-start; cursor:pointer; }
@@ -2040,7 +2041,7 @@ function render() {
     const vs = votesOf(p), mine = vs.includes(myId);
     const k = key(p), isSel = sel.has(k), open = !sel.size && openK === k;
     return gap + `<li class="stop${p.cand ? ' cand' : ''}${isSel ? ' sel' : ''}${open ? ' open' : ''}" data-k="${esc(k)}">
-      <span class="num${num || isSel ? '' : ' off'}" style="background:${isSel ? 'var(--accent)' : p.cand ? '#9aa1ab' : color(cur)}">${isSel ? '✓' : num || (p.cand ? '?' : `<span class="nico" aria-hidden="true">${T.e}</span>`)}</span>
+      <span class="num${num || isSel ? '' : ' off'}${!num && !isSel && !p.cand && T.e === '📍' ? ' dot' : ''}" style="background:${isSel ? 'var(--accent)' : p.cand ? '#9aa1ab' : color(cur)}">${isSel ? '✓' : num || (p.cand ? '?' : T.e === '📍' ? '' : `<span class="nico" aria-hidden="true">${T.e}</span>`)}</span>
       <div class="card">
         ${p.cand ? `<div class="voterow"><span class="vlabel">🗳 후보 · 투표 중</span>
           <button data-act="vote" class="vote${mine ? ' on' : ''}" aria-pressed="${mine}" aria-label="가고 싶어요 ${vs.length}명">👍 ${vs.length}</button>
