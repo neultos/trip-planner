@@ -105,11 +105,16 @@
   /* 일정 카드 */
   ol { list-style:none; margin:0; padding:0; }
   .stop { display:flex; gap:10px; position:relative; padding-bottom:12px; }
-  .stop:not(:last-child)::after { content:''; position:absolute; left:13px; top:44px; bottom:0; border-left:2px dashed var(--line); }
+  /* 번호 사이 점선은 끊김 없이: 각 카드 전체 높이 + 사이 거리 줄까지, 처음·끝은 번호 가운데에서 */
+  .stop.ln::after { content:''; position:absolute; left:13px; top:0; bottom:0; border-left:2px dashed var(--line); }
+  .stop.ln-s::after { top:28px; }
+  .stop.ln-e::after { bottom:auto; height:28px; }
+  .stop .num { position:relative; z-index:1; }
+  .gap { position:relative; }
+  .gap::before { content:''; position:absolute; left:-27px; top:-4px; bottom:-8px; border-left:2px dashed var(--line); }
   .num { flex:none; width:28px; height:28px; border-radius:50%; color:#fff; display:grid; place-items:center; font-size:13px; font-weight:700; margin-top:14px; }
   .num.off { background:var(--line) !important; color:var(--muted); }
-  .nico { font-size:13px; line-height:1; }
-  .num.dot { width:10px; height:10px; margin:23px 9px 0; } /* 위치 없는 기타 일정: 핀 대신 작은 점 */
+  .num.blank { visibility:hidden; } /* 위치 없는 직접 입력 일정: 번호 자리는 비우고 점선만 지나감 */
   .card { flex:1; min-width:0; background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:14px; transition:box-shadow .3s; }
   .flash .card { box-shadow:0 0 0 2px var(--accent); }
   .row1 { display:flex; gap:10px; align-items:flex-start; cursor:pointer; }
@@ -2041,7 +2046,7 @@ function render() {
     const vs = votesOf(p), mine = vs.includes(myId);
     const k = key(p), isSel = sel.has(k), open = !sel.size && openK === k;
     return gap + `<li class="stop${p.cand ? ' cand' : ''}${isSel ? ' sel' : ''}${open ? ' open' : ''}" data-k="${esc(k)}">
-      <span class="num${num || isSel ? '' : ' off'}${!num && !isSel && !p.cand && T.e === '📍' ? ' dot' : ''}" style="background:${isSel ? 'var(--accent)' : p.cand ? '#9aa1ab' : color(cur)}">${isSel ? '✓' : num || (p.cand ? '?' : T.e === '📍' ? '' : `<span class="nico" aria-hidden="true">${T.e}</span>`)}</span>
+      <span class="num${num || isSel ? '' : ' off'}${!num && !isSel && !p.cand ? ' blank' : ''}" style="background:${isSel ? 'var(--accent)' : p.cand ? '#9aa1ab' : color(cur)}">${isSel ? '✓' : num || (p.cand ? '?' : '')}</span>
       <div class="card">
         ${p.cand ? `<div class="voterow"><span class="vlabel">🗳 후보 · 투표 중</span>
           <button data-act="vote" class="vote${mine ? ' on' : ''}" aria-pressed="${mine}" aria-label="가고 싶어요 ${vs.length}명">👍 ${vs.length}</button>
@@ -2060,6 +2065,10 @@ function render() {
     </li>`;
   }).join('') + (items.length > 1 && !sel.size ? '<li class="hint">꾹 눌러 끌면 순서 바꾸기 · 날짜 탭에 놓으면 그날로 이동 · 꾹 누르면 여러 개 선택</li>' : '')
     : `<li class="empty">아직 일정이 없어요.<br>가고 싶은 곳을 추가해 보세요.</li>`;
+  // 점선은 첫 번호 가운데부터 마지막 번호 가운데까지만
+  const st = [...$('stops').querySelectorAll('.stop')], has = st.map(li => !!li.querySelector('.num:not(.blank)'));
+  const f = has.indexOf(true), l = has.lastIndexOf(true);
+  st.forEach((li, i) => { li.classList.toggle('ln', f < l && i >= f && i <= l); li.classList.toggle('ln-s', i === f); li.classList.toggle('ln-e', i === l); });
   // 이날 밤 숙소가 없거나 첫날 항공편이 없으면 찾기 버튼
   const needStay = loaded && cur < trip.days.length - 1 && !items.some(p => p.type === '숙소'), needFly = loaded && trip.abroad && cur === 0 && !trip.flights.length;
   if (!sel.size && (needStay || needFly)) $('stops').insertAdjacentHTML('beforeend', `<li class="book-row">${needFly ? '<button data-book="fly">✈️ 항공권 찾기</button>' : ''}${needStay ? '<button data-book="stay">🏨 오늘 밤 숙소 찾기</button>' : ''}</li>`);
