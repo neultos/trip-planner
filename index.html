@@ -127,6 +127,11 @@
   #pside { position:fixed; left:0; right:0; bottom:0; height:55dvh; max-width:560px; margin:0 auto; z-index:950; background:var(--bg); border-radius:20px 20px 0 0; box-shadow:0 -8px 24px rgba(0,0,0,.15); display:flex; flex-direction:column; transform:translateY(105%); visibility:hidden; transition:transform .25s cubic-bezier(.2,.8,.2,1), visibility .25s; }
   #pside.on { transform:none; visibility:visible; }
   body.at-home #pside, body.touring #pside { display:none; }
+  #psDim { position:fixed; inset:0; z-index:940; background:rgba(0,0,0,.4); opacity:0; visibility:hidden; transition:opacity .25s, visibility .25s; }
+  #pside.on + #psDim { opacity:1; visibility:visible; }
+  body.at-home #psDim, body.touring #psDim { display:none; }
+  .pinfo a.ph { display:block; }
+  .pinfo a.gm-btn { display:block; margin-top:14px; padding:13px; border-radius:12px; background:var(--accent); color:#fff; text-align:center; font-size:14.5px; font-weight:700; }
   .pin-on .pin { box-shadow:0 0 0 5px rgba(11,92,255,.35); transform-origin:50% 100%; scale:1.3; }
   .ps-head { display:flex; align-items:center; gap:8px; padding:20px 12px 12px 16px; border-bottom:1px solid var(--line); position:relative; }
   .ps-head::before { content:''; position:absolute; top:7px; left:50%; width:40px; height:5px; margin-left:-20px; border-radius:3px; background:var(--line); }
@@ -1073,7 +1078,7 @@
 </dialog>
 
 <div id="alarmPop" role="alert"><div><b id="aTitle"></b><span id="aBody"></span></div><button id="aOk">확인</button></div>
-<aside id="pside" aria-label="장소 정보"><div class="ps-head"><b id="psName"></b><button id="psX" aria-label="장소 정보 닫기">✕</button></div><div id="psBody" class="pinfo"></div></aside>
+<aside id="pside" aria-label="장소 정보"><div class="ps-head"><b id="psName"></b><button id="psX" aria-label="장소 정보 닫기">✕</button></div><div id="psBody" class="pinfo"></div></aside><div id="psDim" aria-hidden="true"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="fileDoc" accept="application/pdf,image/*" multiple hidden>
 <input type="file" id="fileCover" accept="image/*" hidden>
@@ -2556,27 +2561,27 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && $('pside').classLis
 async function loadPinfo(gid) {
   if (pinfo.has(gid)) return;
   if (!window.google?.maps?.places?.Place) { // 구글 지도를 못 불러온 경우
-    return document.querySelectorAll(`.pinfo[data-gid="${CSS.escape(gid)}"]`).forEach(e => e.innerHTML = `<a href="https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(gid)}" target="_blank" rel="noopener">Google 지도에서 장소 정보 보기 ›</a>`);
+    return document.querySelectorAll(`.pinfo[data-gid="${CSS.escape(gid)}"]`).forEach(e => e.innerHTML = `<a class="gm-btn" href="https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(gid)}" target="_blank" rel="noopener">Google 지도에서 장소 정보 보기</a>`);
   }
   pinfo.set(gid, '');
   let h;
   try {
     const pl = new google.maps.places.Place({ id: gid, requestedLanguage: 'ko' });
     await pl.fetchFields({ fields: ['rating', 'userRatingCount', 'regularOpeningHours', 'nationalPhoneNumber', 'websiteURI', 'googleMapsURI', 'photos', 'editorialSummary'] });
-    const ph = pl.photos?.[0], au = ph?.authorAttributions?.[0];
+    const ph = pl.photos?.[0], au = ph?.authorAttributions?.[0], gm = esc(pl.googleMapsURI || `https://www.google.com/maps/place/?q=place_id:${gid}`);
     const wk = pl.regularOpeningHours?.weekdayDescriptions || [], today = wk[(new Date().getDay() + 6) % 7];
     let open = null; try { open = wk.length ? await pl.isOpen() : null; } catch {}
-    h = (ph ? `<div class="ph" style="background-image:url('${esc(ph.getURI({ maxWidth: 800 }))}')"></div><small class="cr">사진: ${au ? `<a href="${esc(au.uri || '#')}" target="_blank" rel="noopener">${esc(au.displayName)}</a>` : 'Google'}</small>` : '')
+    h = (ph ? `<a class="ph" href="${gm}" target="_blank" rel="noopener" aria-label="Google 지도에서 사진 더 보기" style="background-image:url('${esc(ph.getURI({ maxWidth: 800 }))}')"></a><small class="cr">사진: ${au ? `<a href="${esc(au.uri || '#')}" target="_blank" rel="noopener">${esc(au.displayName)}</a>` : 'Google'}</small>` : '')
       + (pl.editorialSummary ? `<p class="pd">${esc(pl.editorialSummary)}</p>` : '')
       + (pl.rating ? `<p>⭐ <b>${pl.rating.toFixed(1)}</b> <span class="pd">리뷰 ${(pl.userRatingCount || 0).toLocaleString()}개</span></p>` : '')
       + (today ? `<details><summary>🕒 ${open === true ? '<span class="open">영업 중</span> · ' : open === false ? '<span class="closed">영업 종료</span> · ' : ''}${esc(today)}</summary><div>${wk.map(esc).join('<br>')}</div></details>` : '')
       + (pl.nationalPhoneNumber ? `<p>📞 <a href="tel:${esc(pl.nationalPhoneNumber.replace(/[^\d+]/g, ''))}">${esc(pl.nationalPhoneNumber)}</a></p>` : '')
       + (pl.websiteURI ? `<p>🌐 <a href="${esc(pl.websiteURI)}" target="_blank" rel="noopener">${esc(pl.websiteURI.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '').slice(0, 40))}</a></p>` : '')
-      + `<p><a href="${esc(pl.googleMapsURI || `https://www.google.com/maps/place/?q=place_id:${gid}`)}" target="_blank" rel="noopener">Google 지도에서 리뷰·사진 더 보기 ›</a></p>`;
+      + `<a class="gm-btn" href="${gm}" target="_blank" rel="noopener">Google 지도에서 리뷰·사진 더 보기</a>`;
   } catch (err) {
     console.warn('place details', err);
     pinfo.delete(gid);
-    h = `<a href="https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(gid)}" target="_blank" rel="noopener">Google 지도에서 장소 정보 보기 ›</a>`;
+    h = `<a class="gm-btn" href="https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(gid)}" target="_blank" rel="noopener">Google 지도에서 장소 정보 보기</a>`;
   }
   if (pinfo.has(gid)) pinfo.set(gid, h);
   document.querySelectorAll(`.pinfo[data-gid="${CSS.escape(gid)}"]`).forEach(e => e.innerHTML = h);
