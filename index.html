@@ -77,7 +77,7 @@
   #days { display:flex; gap:8px; overflow-x:auto; padding:4px 20px 14px; scrollbar-width:none; flex:none; }
   #days::-webkit-scrollbar { display:none; }
   .day { flex:none; border-radius:12px; padding:8px 14px; background:var(--bg2); font-size:14px; font-weight:700; white-space:nowrap; text-align:left; line-height:1.25; }
-  .day small { display:block; font-weight:500; color:var(--muted); font-size:12px; }
+  .day small { font-weight:500; color:var(--muted); font-size:12px; margin-left:5px; }
   .day.on { background:var(--accent); color:#fff; }
   .day.on small { color:inherit; opacity:.7; }
   .list-head { display:flex; align-items:center; gap:8px; padding:2px 20px 14px; flex:none; }
@@ -122,9 +122,15 @@
   .acts .go { color:var(--accent-ink); }
   .acts .pri { background:var(--accent); color:#fff; }
   .acts [data-act="more"] { margin-left:auto; padding:6px 12px; }
+  #pside { position:fixed; top:0; right:0; bottom:0; width:min(380px, 88vw); z-index:950; background:var(--bg); box-shadow:-8px 0 24px rgba(0,0,0,.15); display:flex; flex-direction:column; padding-top:var(--safe-t); transform:translateX(105%); visibility:hidden; transition:transform .25s cubic-bezier(.2,.8,.2,1), visibility .25s; }
+  #pside.on { transform:none; visibility:visible; }
+  body.at-home #pside, body.touring #pside { display:none; }
+  .ps-head { display:flex; align-items:center; gap:8px; padding:14px 12px 12px 16px; border-bottom:1px solid var(--line); }
+  .ps-head b { flex:1; min-width:0; font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ps-head button { width:36px; height:36px; border-radius:50%; background:var(--bg2); font-size:15px; flex:none; }
+  #psBody { flex:1; overflow-y:auto; margin:0; padding:12px 16px calc(20px + var(--safe-b)); }
   .pinfo { margin-top:10px; font-size:13px; line-height:1.55; }
-  .pinfo:empty { display:none; }
-  .pinfo .ph { height:150px; border-radius:12px; background:var(--bg2) center/cover; margin-bottom:4px; }
+  .pinfo .ph { height:200px; border-radius:12px; background:var(--bg2) center/cover; margin-bottom:4px; }
   .pinfo .cr { display:block; font-size:10.5px; color:var(--muted); margin-bottom:6px; }
   .pinfo p { margin:3px 0; }
   .pinfo a { color:var(--accent-ink); text-decoration:none; font-weight:600; }
@@ -1063,6 +1069,7 @@
 </dialog>
 
 <div id="alarmPop" role="alert"><div><b id="aTitle"></b><span id="aBody"></span></div><button id="aOk">확인</button></div>
+<aside id="pside" aria-label="장소 정보"><div class="ps-head"><b id="psName"></b><button id="psX" aria-label="장소 정보 닫기">✕</button></div><div id="psBody" class="pinfo"></div></aside>
 <div id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="fileDoc" accept="application/pdf,image/*" multiple hidden>
 <input type="file" id="fileCover" accept="image/*" hidden>
@@ -1989,17 +1996,16 @@ function render() {
             ${p.memo ? `<p class="memo">${esc(p.memo)}</p>` : ''}
           </div>
           ${by ? `<span class="by" title="${esc(by.name)}님이 추가">${avHtml(by, 20)}</span>` : ''}
-          <button class="grip" aria-label="${esc(p.name)} 끌어서 옮기기" tabindex="-1"><svg width="12" height="18" viewBox="0 0 12 18" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.8"/><circle cx="9" cy="3" r="1.8"/><circle cx="3" cy="9" r="1.8"/><circle cx="9" cy="9" r="1.8"/><circle cx="3" cy="15" r="1.8"/><circle cx="9" cy="15" r="1.8"/></svg></button>
         </div>
         ${open ? `<div class="acts">
           <button data-act="edit" class="pri">✏️ 편집</button>
           <a class="go" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">🧭 길찾기</a>
           <a href="https://m.search.naver.com/search.naver?where=m_blog&query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">📝 후기</a>
           <button data-act="more" aria-label="더보기">⋯</button>
-        </div>${p.gid ? `<div class="pinfo" data-gid="${esc(p.gid)}">${pinfo.get(p.gid) || '<small class="cr">장소 정보 불러오는 중…</small>'}</div>` : ''}` : ''}
+        </div>` : ''}
       </div>
     </li>`;
-  }).join('') + (items.length > 1 && !sel.size ? '<li class="hint">⋮⋮ 끌어서 순서 바꾸기 · 날짜 탭에 놓으면 그날로 이동 · 꾹 누르면 여러 개 선택</li>' : '')
+  }).join('') + (items.length > 1 && !sel.size ? '<li class="hint">꾹 눌러 끌면 순서 바꾸기 · 날짜 탭에 놓으면 그날로 이동 · 꾹 누르면 여러 개 선택</li>' : '')
     : `<li class="empty">아직 일정이 없어요.<br>가고 싶은 곳을 추가해 보세요.</li>`;
   // 이날 밤 숙소가 없거나 첫날 항공편이 없으면 찾기 버튼
   const needStay = loaded && cur < trip.days.length - 1 && !items.some(p => p.type === '숙소'), needFly = loaded && trip.abroad && cur === 0 && !trip.flights.length;
@@ -2007,7 +2013,8 @@ function render() {
   $('selBar').hidden = !sel.size;
   $('selN').textContent = `${sel.size}개 선택`;
 
-  $('stops').querySelectorAll('.pinfo[data-gid]').forEach(e => loadPinfo(e.dataset.gid));
+  const op = openK && !sel.size && items.find(p => key(p) === openK);
+  syncPside(op?.gid ? op : null);
   if (touring) renderTour();
   drawMap();
 }
@@ -2023,7 +2030,6 @@ $('stops').onclick = e => {
   const bk = e.target.closest('[data-book]'); if (bk) return openBook(bk.dataset.book === 'stay' ? cur : -1);
   const li = e.target.closest('.stop'); if (!li) return;
   const p = findItem(cur, li.dataset.k); if (!p) return;
-  if (e.target.closest('.grip')) return; // 손잡이는 끌기 전용
   const act = e.target.closest('[data-act]')?.dataset.act;
   if (sel.size && act !== 'vote' && act !== 'confirm') return toggleSel(li.dataset.k); // 선택 중에는 누르면 선택/해제
   if (act === 'edit') openItem(p, cur);
@@ -2087,13 +2093,12 @@ $('itemAct').onclick = e => {
   }
 };
 
-// 끌기: ⋮⋮ 손잡이는 바로, 카드는 꾹 누른(선택) 다음 움직이면 시작. 날짜 탭은 꾹 눌러 순서 바꾸기
+// 끌기: 카드는 꾹 누른(선택) 다음 움직이면 시작. 날짜 탭도 꾹 눌러 순서 바꾸기
 let press = null, drag = null;
 const LONG = 420;
 function pressStart(e, kind, el) {
   if (e.button > 0 || drag) return;
   press = { kind, el, x: e.clientX, y: e.clientY, armed: false };
-  if (kind === 'grip') { press.armed = true; return; }
   press.timer = setTimeout(() => {
     if (!press) return;
     press.armed = true; navigator.vibrate?.(12);
@@ -2103,7 +2108,6 @@ function pressStart(e, kind, el) {
 }
 $('stops').addEventListener('pointerdown', e => {
   const li = e.target.closest('.stop'); if (!li) return;
-  if (e.target.closest('.grip')) { e.preventDefault(); return pressStart(e, 'grip', li); }
   if (e.target.closest('a, button, .voterow')) return;
   pressStart(e, 'item', li);
 });
@@ -2115,7 +2119,7 @@ addEventListener('pointermove', e => {
   if (!press.armed) { if (moved > 8) { clearTimeout(press.timer); press = null; } return; } // 스크롤
   if (moved > 5) dragStart(e);
 });
-addEventListener('pointerup', () => { if (drag || press?.armed && press.kind !== 'grip') suppressUntil = Date.now() + 400; if (drag) dragEnd(); pressEnd(); });
+addEventListener('pointerup', () => { if (drag || press?.armed) suppressUntil = Date.now() + 400; if (drag) dragEnd(); pressEnd(); });
 addEventListener('pointercancel', () => { if (drag) dragEnd(true); pressEnd(); });
 function pressEnd() { if (!press) return; clearTimeout(press.timer); press.el.classList.remove('lift'); press = null; }
 // 꾹 누른 뒤에는 화면이 스크롤되지 않게 (touchmove를 막아야 손가락을 따라 움직임)
@@ -2201,6 +2205,7 @@ function dragEnd(cancel = false) {
   if (d.kind === 'day') { if (d.to != null) moveDay(d.from, d.to); else render(); return; }
   if (d.day != null) return moveItems(d.keys, d.day);
   if (d.anchor !== undefined && !d.keys.includes(d.anchor)) return moveItems(d.keys, cur, d.anchor);
+  if (d.keys.length === 1) sel.clear(); // 꾹 눌러 끌다가 제자리에 놓으면 선택도 풀기
   render();
 }
 // 날짜 순서 바꾸기: 일정·도시·가계부 날짜가 함께 움직이고, 날짜(달력)는 자리에 남음
@@ -2474,6 +2479,17 @@ const tapSheet = () => userSheet(snap === 'high' || snap === 'full' ? 'mid' : 'h
 /* ---------- 구글 장소 정보 (일정 카드를 펼치면) ---------- */
 // 구글 약관상 장소 정보는 저장하지 않고 열 때마다 받아 옴 (이번 실행 동안만 메모리에)
 const pinfo = new Map();
+// 일정 카드를 펼치면 오른쪽에서 장소 정보 창이 나옴
+function syncPside(p) {
+  const ps = $('pside'), b = $('psBody');
+  ps.classList.toggle('on', !!p);
+  if (!p || b.dataset.gid === p.gid) return;
+  $('psName').textContent = p.name; b.dataset.gid = p.gid; b.scrollTop = 0;
+  b.innerHTML = pinfo.get(p.gid) || '<small class="cr">장소 정보 불러오는 중…</small>';
+  loadPinfo(p.gid);
+}
+$('psX').onclick = () => { openK = null; render(); };
+addEventListener('keydown', e => { if (e.key === 'Escape' && $('pside').classList.contains('on')) $('psX').click(); });
 async function loadPinfo(gid) {
   if (pinfo.has(gid)) return;
   if (!window.google?.maps?.places?.Place) { // 구글 지도를 못 불러온 경우
