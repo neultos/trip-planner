@@ -32,7 +32,8 @@
     --sheet:40dvh; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
   }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body { margin:0; height:100%; overflow:hidden; }
+  html, body { margin:0; height:100%; overflow:hidden; overscroll-behavior-y:none; } /* 아래로 당겨 새로고침 막기 */
+  #home, #psBody, #results, dialog, .nw-page { overscroll-behavior-y:contain; }
   body { font-family:Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; background:var(--bg); color:var(--fg); letter-spacing:-.01em; }
   button { font:inherit; color:inherit; background:none; border:0; cursor:pointer; padding:0; }
   button:active { transform:scale(.97); }
