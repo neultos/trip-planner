@@ -68,6 +68,7 @@
     html.full, html.full body { height:auto; overflow:visible; }
     html.full #sheet { position:relative; height:auto; min-height:100dvh; border-radius:0; padding-top:var(--safe-t); box-shadow:none; }
     html.full #scroll, html.full #pane { flex:none; overflow:visible; }
+    html.full #days { position:sticky; top:0; z-index:5; background:var(--bg); padding-top:calc(10px + var(--safe-t)); padding-bottom:10px; border-bottom:1px solid var(--line); margin-bottom:10px; }
     html.full #addPlace { position:fixed; }
     html.full #selBar { position:sticky; bottom:0; }
     html.full #toast { bottom:calc(24px + var(--safe-b)); }
@@ -2024,7 +2025,7 @@ $('days').onclick = e => {
   cur = +b.dataset.i; needFit = true; sel.clear(); openK = null; render();
   $('stops').classList.remove('sw'); void $('stops').offsetWidth; $('stops').classList.add('sw');
   $('days').querySelector('.on')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-  $('scroll').scrollTo({ top: 0, behavior: 'smooth' });
+  (snap === 'full' ? window : $('scroll')).scrollTo({ top: 0, behavior: 'smooth' });
 };
 $('stops').onclick = e => {
   const bk = e.target.closest('[data-book]'); if (bk) return openBook(bk.dataset.book === 'stay' ? cur : -1);
