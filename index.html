@@ -2508,10 +2508,13 @@ async function runSearch() {
   $('results').innerHTML = direct + '<li class="msg">검색 중…</li>';
   try {
     // 구글 한도 초과·오류 때는 오픈스트리트맵으로 대신 찾음
-    const list = gmap ? await googleSearch(q).catch(err => (console.warn('google search', err), osmSearch(q))) : await osmSearch(q);
+    let fell = false;
+    const list = gmap ? await googleSearch(q).catch(err => (console.warn('google search', err), fell = true, osmSearch(q))) : await osmSearch(q);
     if (my !== seq) return; // 더 최근 검색이 있음
     found = list;
-    $('results').innerHTML = direct + (list.length ? list.map((p, i) => `
+    syncSub();
+    if (fell) $('searchSub').textContent = `${cur + 1}일차에 추가 · Google 검색이 잠시 안 돼서 오픈스트리트맵으로 찾았어요`;
+    $('results').innerHTML = direct + (fell ? '<li class="msg">Google 검색이 잠시 안 돼서 오픈스트리트맵 결과를 보여 드려요. 작은 가게·숙소는 안 나올 수 있어요.</li>' : '') + (list.length ? list.map((p, i) => `
       <li class="r"><button class="res" data-i="${i}" aria-label="${esc(p.name)} 일정에 추가"><span class="t">${p.cat ? `<span class="cat">${esc(p.cat)}</span>` : ''}<b>${esc(p.name)}</b><small>${esc(p.addr)}</small></span><span class="plus" aria-hidden="true">+</span></button></li>`).join('')
       : '<li class="msg">검색 결과가 없어요. 다른 이름으로 찾거나 직접 추가하세요.</li>');
   } catch {
