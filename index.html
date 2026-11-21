@@ -1635,9 +1635,7 @@ addEventListener('offline', () => toast('오프라인이에요. 본 적 있는 �
 const map = L.map('map', { zoomControl: true, attributionControl: true }).setView([37.5665, 126.978], 11);
 // shortcut: 오픈스트리트맵 공용 타일(대량 트래픽 금지), 사용자 늘면 카카오맵/유료 타일로 교체
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
-map.zoomControl.setPosition('bottomright');
-map.on('zoomend', () => { if (!useGoogle() && trip) drawMap(false); });
-const layer = L.layerGroup().addTo(map);
+map.zoomControl.setPosition('bottomright');const layer = L.layerGroup().addTo(map);
 
 let gmap = null, gshapes = [];
 const useGoogle = () => !!gmap;
@@ -1649,8 +1647,6 @@ function loadGoogle() {
   window.initGoogle = () => {
     gmap = new google.maps.Map($('gmap'), { center: { lat: 30, lng: 10 }, zoom: 2, disableDefaultUI: true,
       zoomControl: innerWidth >= 820, clickableIcons: false, gestureHandling: 'greedy' });
-    let zd = false; // 확대가 바뀌면 멈춘 뒤 핀 묶음 다시 계산
-    gmap.addListener('zoom_changed', () => { if (!zd) { zd = true; google.maps.event.addListenerOnce(gmap, 'idle', () => { zd = false; drawMap(false); }); } });
     render();
   };
   // 키가 이 주소에서 거부되면(허용 주소 밖 등) 구글 오류 화면 대신 무료 지도로
@@ -1670,29 +1666,21 @@ function mLine(pts, o) {
   } else L.polyline(pts, { color: o.color, weight: o.weight || 4, opacity: o.opacity ?? .9, dashArray: o.dash ? '2 9' : null, lineCap: 'round' }).addTo(layer);
 }
 function mPin(p, n, c, label, onClick) {
+  const z = typeof n === 'number' ? 1000 - n : 1; // 겹치면 앞 번호가 위로
   if (useGoogle()) {
-    const m = new google.maps.Marker({ map: gmap, position: G(P(p)), title: p.name, zIndex: 10,
-      label: { text: String(n), color: '#fff', fontWeight: '700', fontSize: String(n).length > 2 ? '10px' : '13px' },
+    const m = new google.maps.Marker({ map: gmap, position: G(P(p)), title: p.name, zIndex: z,
+      label: { text: String(n), color: '#fff', fontWeight: '700', fontSize: '13px' },
       icon: { path: google.maps.SymbolPath.CIRCLE, scale: 14, fillColor: c, fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 } });
-    m.addListener('click', onClick); gshapes.push(m); pins.set(key(p), m);
+    m.baseZ = z; m.addListener('click', onClick); gshapes.push(m); pins.set(key(p), m);
     if (label) gshapes.push(new google.maps.Marker({ map: gmap, position: G(P(p)), clickable: false, zIndex: 9,
       icon: { path: 'M 0,0', scale: 1, labelOrigin: new google.maps.Point(0, -30) },
       label: { text: label, fontSize: '12px', fontWeight: '700', color: '#1a1c20' } }));
     return;
   }
-  const mk = L.marker(P(p), { title: p.name, icon: L.divIcon({ className: '', html: `<div class="pin" style="background:${c}"><span${String(n).length > 2 ? ' style="font-size:10px"' : ''}>${n}</span></div>`, iconSize: [30, 30], iconAnchor: [15, 30] }) })
+  const mk = L.marker(P(p), { title: p.name, icon: L.divIcon({ className: '', html: `<div class="pin" style="background:${c}"><span>${n}</span></div>`, iconSize: [30, 30], iconAnchor: [15, 30] }), zIndexOffset: z * 1000 })
     .on('click', onClick).addTo(layer);
-  pins.set(key(p), mk);
+  mk.baseZ = z * 1000; pins.set(key(p), mk);
   if (label) mk.bindTooltip(esc(label), { permanent: true, direction: 'top', offset: [0, -30], className: 'plabel' });
-}
-// 지금 확대 수준에서 26px 안에 겹치는 핀끼리 묶음 → [[번호 인덱스...], ...]
-function groupNear(list) {
-  const pr = useGoogle() ? gmap.getProjection() : null, s = useGoogle() ? 2 ** gmap.getZoom() : 0;
-  if (useGoogle() && !pr) return list.map((_, i) => [i]);
-  const xy = list.map(p => { if (!pr) { const q = map.project(P(p)); return [q.x, q.y]; } const w = pr.fromLatLngToPoint(G(P(p))); return [w.x * s, w.y * s]; });
-  const gs = [];
-  xy.forEach((a, i) => { const g = gs.find(g => Math.hypot(xy[g[0]][0] - a[0], xy[g[0]][1] - a[1]) < 26); g ? g.push(i) : gs.push([i]); });
-  return gs;
 }
 function inView(pos) {
   if (useGoogle()) { const b = gmap.getBounds(); return !b || b.contains(G(pos)); }
@@ -1763,15 +1751,10 @@ function drawMap(fitIt = true) {
     if (touring) mLine(path, i <= tIdx ? { color: c, weight: 5 } : { color: '#9aa1ab', dash: true, weight: 4 });
     else mLine(path, { color: c, weight: 4, opacity: .7 });
   }
-  if (touring) list.forEach((p, i) => mPin(p, i + 1, i > tIdx ? '#9aa1ab' : c, `${p.time ? p.time + ' ' : ''}${p.name}`, () => pinTap(p)));
-  else groupNear(list).forEach(g => { // 화면에서 겹치는 핀은 하나로 묶고, 누르면 확대
-    const p = list[g[0]], n = g.map(i => i + 1);
-    if (g.length === 1) return mPin(p, n[0], c, '', () => pinTap(p));
-    mPin(p, n.at(-1) - n[0] === g.length - 1 ? `${n[0]}~${n.at(-1)}` : `${n[0]}+${g.length - 1}`, c, '', () => fit(g.map(i => list[i])));
-    g.forEach(i => pins.set(key(list[i]), pins.get(key(p))));
-  });
-  if (!touring) dayItems(cur).filter(p => p.cand && hasPos(p)).forEach(p => mPin(p, '?', '#9aa1ab', '', () => pinTap(p)));
+  list.forEach((p, i) => mPin(p, i + 1, touring && i > tIdx ? '#9aa1ab' : c,
+    touring ? `${p.time ? p.time + ' ' : ''}${p.name}` : '', () => pinTap(p)));
   if (fk && !touring) markPin(fk);
+  if (!touring) dayItems(cur).filter(p => p.cand && hasPos(p)).forEach(p => mPin(p, '?', '#9aa1ab', '', () => pinTap(p)));
   if (touring && list.length) { if (!anim) setChar(P(list[tIdx]), SPR.stand[0]); } else removeChar();
   if (fitIt && (!touring || needFit)) { fit(list); needFit = false; }
   fetchMissing(list);
@@ -1962,8 +1945,8 @@ const pins = new Map();
 let followK = null, followMute = 0, followRaf = 0;
 function markPin(k) {
   const old = pins.get(followK); followK = k;
-  const on = (m, y) => m instanceof L.Marker ? (m.getElement()?.classList.toggle('pin-on', y), m.setZIndexOffset(y ? 1000 : 0))
-    : (m.setIcon({ ...m.getIcon(), scale: y ? 19 : 14 }), m.setZIndex(y ? 20 : 10));
+  const on = (m, y) => m instanceof L.Marker ? (m.getElement()?.classList.toggle('pin-on', y), m.setZIndexOffset(y ? 5e6 : m.baseZ))
+    : (m.setIcon({ ...m.getIcon(), scale: y ? 19 : 14 }), m.setZIndex(y ? 5000 : m.baseZ));
   if (old) on(old, false);
   if (pins.get(k)) on(pins.get(k), true);
 }
@@ -2149,6 +2132,7 @@ const LONG = 420;
 function pressStart(e, kind, el) {
   if (e.button > 0 || drag) return;
   press = { kind, el, x: e.clientX, y: e.clientY, armed: false };
+  if (kind === 'item' && sel.has(el.dataset.k)) { press.armed = press.instant = true; return; } // 이미 선택된 카드는 바로 끌기 (톡 누르면 선택 해제)
   press.timer = setTimeout(() => {
     if (!press) return;
     press.armed = true; navigator.vibrate?.(12);
@@ -2169,7 +2153,7 @@ addEventListener('pointermove', e => {
   if (!press.armed) { if (moved > 8) { clearTimeout(press.timer); press = null; } return; } // 스크롤
   if (moved > 5) dragStart(e);
 });
-addEventListener('pointerup', () => { if (drag || press?.armed) suppressUntil = Date.now() + 400; if (drag) dragEnd(); pressEnd(); });
+addEventListener('pointerup', () => { if (drag || press?.armed && !press.instant) suppressUntil = Date.now() + 400; if (drag) dragEnd(); pressEnd(); });
 addEventListener('pointercancel', () => { if (drag) dragEnd(true); pressEnd(); });
 function pressEnd() { if (!press) return; clearTimeout(press.timer); press.el.classList.remove('lift'); press = null; }
 // 꾹 누른 뒤에는 화면이 스크롤되지 않게 (touchmove를 막아야 손가락을 따라 움직임)
