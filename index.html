@@ -63,6 +63,15 @@
   /* 바텀시트 */
   #sheet { position:fixed; left:0; right:0; bottom:0; z-index:600; height:var(--sheet); background:var(--bg); border-radius:20px 20px 0 0; box-shadow:var(--shadow); display:flex; flex-direction:column; transition:height .25s cubic-bezier(.2,.8,.2,1); }
   #sheet.dragging { transition:none; }
+  /* 전체화면: 페이지 자체가 스크롤돼야 휴대폰 스크롤 캡처가 됨 */
+  @media (max-width:819px) {
+    html.full, html.full body { height:auto; overflow:visible; }
+    html.full #sheet { position:relative; height:auto; min-height:100dvh; border-radius:0; padding-top:var(--safe-t); box-shadow:none; }
+    html.full #scroll, html.full #pane { flex:none; overflow:visible; }
+    html.full #addPlace { position:fixed; }
+    html.full #selBar { position:sticky; bottom:0; }
+    html.full #toast { bottom:calc(24px + var(--safe-b)); }
+  }
   #grip { padding:10px 0 6px; touch-action:none; cursor:grab; }
   #grip::before { content:''; display:block; width:40px; height:5px; border-radius:3px; background:var(--line); margin:0 auto; }
   #days { display:flex; gap:8px; overflow-x:auto; padding:4px 20px 14px; scrollbar-width:none; flex:none; }
@@ -2170,7 +2179,8 @@ function findTarget() {
 }
 function autoScroll() {
   if (!drag) return;
-  const s = $('scroll'), r = s.getBoundingClientRect(), dr = $('days').getBoundingClientRect();
+  const full = snap === 'full', s = full ? document.scrollingElement : $('scroll');
+  const r = full ? { top: 0, bottom: innerHeight, left: 0, right: innerWidth } : s.getBoundingClientRect(), dr = $('days').getBoundingClientRect();
   let moved = false;
   if (drag.kind === 'item' && drag.x > r.left && drag.x < r.right) {
     if (drag.y < r.top + 50 && drag.y > r.top - 10 && s.scrollTop > 0) { s.scrollTop -= 8; moved = true; }
@@ -2400,31 +2410,40 @@ function wxText(d) {
 }
 
 /* ---------- 바텀시트 (모바일) ---------- */
-const SNAP = { low: 30, mid: 52, high: 74 }; // dvh
+const SNAP = { low: 30, mid: 52, high: 74, full: 100 }; // dvh
 let snap = 'mid';
-function setSheet(s) { snap = s; document.documentElement.style.setProperty('--sheet', SNAP[s] + 'dvh'); }
+function setSheet(s) {
+  snap = s; document.documentElement.style.setProperty('--sheet', SNAP[s] + 'dvh');
+  document.documentElement.classList.toggle('full', s === 'full');
+}
 setSheet(SNAP[readLocal('sheet')] ? readLocal('sheet') : 'mid');
+// 끌기 시작: 전체화면이면 고정 시트로 되돌린 뒤 높이를 잼
+function sheetH() {
+  if (snap === 'full') { scrollTo(0, 0); document.documentElement.classList.remove('full'); }
+  return Math.min($('sheet').offsetHeight, innerHeight);
+}
 // 끌어서 놓은 높이에 가장 가까운 단계로. 같은 단계인데 40px 넘게 밀었으면 한 단계 이동 (dy > 0 = 위로)
 function endSheet(dy) {
-  const sh = $('sheet'), vh = sh.offsetHeight / innerHeight * 100, O = ['low', 'mid', 'high'];
+  const sh = $('sheet'), vh = sh.offsetHeight / innerHeight * 100, O = ['low', 'mid', 'high', 'full'];
   sh.classList.remove('dragging'); sh.style.height = '';
   let k = O.reduce((a, x) => Math.abs(SNAP[x] - vh) < Math.abs(SNAP[a] - vh) ? x : a, 'mid');
-  if (k === snap && Math.abs(dy) > 40) k = O[Math.max(0, Math.min(2, O.indexOf(snap) + (dy > 0 ? 1 : -1)))];
+  if (k === snap && Math.abs(dy) > 40) k = O[Math.max(0, Math.min(3, O.indexOf(snap) + (dy > 0 ? 1 : -1)))];
   userSheet(k);
 }
 function userSheet(k) { setSheet(k); writeLocal('sheet', k); setTimeout(() => fit(routeItems(cur)), 260); }
+const tapSheet = () => userSheet(snap === 'high' || snap === 'full' ? 'mid' : 'high');
 (() => {
   const g = $('grip'), sh = $('sheet');
   let y0, h0;
-  g.addEventListener('pointerdown', e => { y0 = e.clientY; h0 = sh.offsetHeight; sh.classList.add('dragging'); g.setPointerCapture(e.pointerId); });
-  g.addEventListener('pointermove', e => { if (y0 == null) return; sh.style.height = Math.min(innerHeight * .8, Math.max(120, h0 + y0 - e.clientY)) + 'px'; });
+  g.addEventListener('pointerdown', e => { y0 = e.clientY; h0 = sheetH(); sh.classList.add('dragging'); g.setPointerCapture(e.pointerId); });
+  g.addEventListener('pointermove', e => { if (y0 == null) return; sh.style.height = Math.min(innerHeight, Math.max(120, h0 + y0 - e.clientY)) + 'px'; });
   g.addEventListener('pointerup', e => {
     if (y0 == null) return;
     const dy = y0 - e.clientY; y0 = null;
-    if (Math.abs(dy) < 6) { sh.classList.remove('dragging'); sh.style.height = ''; return userSheet(snap === 'high' ? 'mid' : 'high'); } // 탭 = 펼치기/접기
+    if (Math.abs(dy) < 6) { sh.classList.remove('dragging'); sh.style.height = ''; return tapSheet(); } // 탭 = 펼치기/접기
     endSheet(dy);
   });
-  g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); userSheet(snap === 'high' ? 'mid' : 'high'); } };
+  g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tapSheet(); } };
 
   // 시트 어디서든 위아래로 밀면 높이 조절. 목록이 맨 위일 때 아래로 밀면 내려가고, 다 펼친 뒤에는 목록이 스크롤됨
   const wide = matchMedia('(min-width:820px)');
@@ -2440,13 +2459,13 @@ function userSheet(k) { setSheet(k); writeLocal('sheet', k); setTimeout(() => fi
     const dy = t.y - t.y0, dx = e.touches[0].clientX - t.x0;
     if (!t.mode) {
       if (Math.abs(dy) < 6 || Math.abs(dy) < Math.abs(dx)) return;
-      const atTop = !t.s || t.s.scrollTop <= 0;
-      t.mode = (dy < 0 ? snap !== 'high' : atTop && snap !== 'low') ? 'sheet' : 'scroll';
-      if (t.mode === 'sheet') sh.classList.add('dragging');
+      const atTop = snap === 'full' ? scrollY <= 0 : !t.s || t.s.scrollTop <= 0;
+      t.mode = (dy < 0 ? snap !== 'full' : atTop && snap !== 'low') ? 'sheet' : 'scroll';
+      if (t.mode === 'sheet') { t.h = sheetH(); sh.classList.add('dragging'); }
     }
     if (t.mode !== 'sheet') return;
     if (e.cancelable) e.preventDefault();
-    sh.style.height = Math.min(innerHeight * .8, Math.max(120, t.h - dy)) + 'px';
+    sh.style.height = Math.min(innerHeight, Math.max(120, t.h - dy)) + 'px';
   }, { passive: false });
   const end = () => { if (t?.mode === 'sheet') endSheet(t.y0 - t.y); t = null; };
   sh.addEventListener('touchend', end); sh.addEventListener('touchcancel', end);
