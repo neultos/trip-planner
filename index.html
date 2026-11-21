@@ -70,7 +70,7 @@
     html.full #scroll, html.full #pane { flex:none; overflow:visible; }
     html.full #days { position:sticky; top:0; z-index:5; background:var(--bg); padding-top:calc(10px + var(--safe-t)); padding-bottom:10px; border-bottom:1px solid var(--line); margin-bottom:10px; }
     html.full #addPlace { position:fixed; }
-    html.full #selBar { position:sticky; bottom:0; }
+    html.full #selBar { position:fixed; left:0; right:0; bottom:0; z-index:10; }
     html.full #toast { bottom:calc(24px + var(--safe-b)); }
   }
   #grip { padding:10px 0 6px; touch-action:none; cursor:grab; }
@@ -2132,6 +2132,8 @@ const LONG = 420;
 function pressStart(e, kind, el) {
   if (e.button > 0 || drag) return;
   press = { kind, el, x: e.clientX, y: e.clientY, armed: false };
+  // 꾹 누르면 목록이 다시 그려져 손가락 아래 요소가 바뀌어도 touchmove는 원래 요소로 옴 → 거기서 스크롤을 막아야 끌기가 이어짐
+  if (e.pointerType === 'touch') e.target.addEventListener('touchmove', ev => { if (drag || press?.armed) ev.preventDefault(); }, { passive: false });
   if (kind === 'item' && sel.has(el.dataset.k)) { press.armed = press.instant = true; return; } // 이미 선택된 카드는 바로 끌기 (톡 누르면 선택 해제)
   press.timer = setTimeout(() => {
     if (!press) return;
@@ -2163,7 +2165,9 @@ document.addEventListener('contextmenu', e => { if (e.target.closest('#stops, #d
 document.addEventListener('click', e => { if (Date.now() < suppressUntil) { suppressUntil = 0; e.stopPropagation(); e.preventDefault(); } }, true);
 
 function dragStart(e) {
-  const { kind, el } = press;
+  const { kind } = press;
+  // 꾹 누르기로 다시 그려졌으면 지금 화면에 있는 같은 카드로
+  const el = press.el.isConnected ? press.el : $(kind === 'day' ? 'days' : 'stops').querySelector(kind === 'day' ? `.day[data-i="${press.el.dataset.i}"]` : `.stop[data-k="${CSS.escape(press.el.dataset.k)}"]`) || press.el;
   let keys = null, src = el;
   if (kind === 'day') {
     drag = { kind, from: +el.dataset.i, to: null };
