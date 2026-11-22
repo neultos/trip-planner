@@ -2046,11 +2046,12 @@ $('scroll').addEventListener('scroll', () => { followRaf ||= requestAnimationFra
   const clear = () => { gs.forEach(g => g.remove()); gs = []; };
   // 옆 일차를 실제와 같은 모양으로 그려 복제한 뒤 원래대로 되돌림 (지도는 그대로)
   const ghost = (n, sign) => {
-    const c = cur, sl = sel, ok = openK;
+    const c = cur, sl = sel, ok = openK, keep = ['flights', 'stops'].map(id => [...$(id).childNodes]);
     ghostOnly = true; cur = n; sel = new Set(); openK = null; render();
     const h = lh().cloneNode(true), box = document.createElement('div');
     box.append($('flights').cloneNode(true), $('stops').cloneNode(true));
     cur = c; sel = sl; openK = ok; render(); ghostOnly = false;
+    ['flights', 'stops'].forEach((id, i) => $(id).replaceChildren(...keep[i])); // 손가락 아래 원래 칸을 되살려야 터치가 끊기지 않음
     const w = $('dayWrap').offsetWidth + 40, vis = snap === 'full' ? $('days').getBoundingClientRect().bottom : $('scroll').getBoundingClientRect().top;
     h.style.cssText = `position:absolute;top:0;left:${sign * w}px;width:${lh().offsetWidth}px`;
     box.style.cssText = `position:absolute;top:${Math.max(0, vis - $('dayWrap').getBoundingClientRect().top)}px;left:${sign * w}px;width:${$('dayWrap').offsetWidth}px`;
