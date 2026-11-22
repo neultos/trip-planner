@@ -1276,11 +1276,16 @@ function guessType(c = '') {
   if (/관광|명소|공원|박물관|미술관|전망|해변|attraction|museum|park|landmark|tourist|temple|사찰|궁/i.test(c)) return '명소';
   return '기타';
 }
-function dirUrl(p) {
-  if (safeUrl(p.mapUrl)) return p.mapUrl;
-  if (p.kid && hasPos(p)) return `https://map.kakao.com/link/to/${encodeURIComponent(p.name)},${p.lat},${p.lng}`;
+// from(이전 일정)이 있으면 거기서 출발, 없으면 지도 앱이 내 위치에서 출발
+const TRAVEL = { 도보: 'walking', 지하철: 'transit', 버스: 'transit', 트램: 'transit', 기차: 'transit', 택시: 'driving', 자전거: 'bicycling' };
+function dirUrl(p, from) {
+  const fromOk = from && hasPos(from) && hasPos(p);
+  if (safeUrl(p.mapUrl) && !fromOk) return p.mapUrl;
+  if (p.kid && hasPos(p)) return `https://map.kakao.com/link/${fromOk ? `from/${encodeURIComponent(from.name)},${from.lat},${from.lng}/` : ''}to/${encodeURIComponent(p.name)},${p.lat},${p.lng}`;
   const dest = hasPos(p) ? `${p.lat},${p.lng}` : encodeURIComponent(p.place || p.name);
-  return `https://www.google.com/maps/dir/?api=1&destination=${dest}${p.gid ? '&destination_place_id=' + encodeURIComponent(p.gid) : ''}`;
+  return `https://www.google.com/maps/dir/?api=1&destination=${dest}${p.gid ? '&destination_place_id=' + encodeURIComponent(p.gid) : ''}`
+    + (fromOk ? `&origin=${from.lat},${from.lng}${from.gid ? '&origin_place_id=' + encodeURIComponent(from.gid) : ''}` : '')
+    + (TRAVEL[p.move] ? `&travelmode=${TRAVEL[p.move]}` : '');
 }
 function viewUrl(p) {
   if (safeUrl(p.mapUrl)) return p.mapUrl;
@@ -2054,7 +2059,7 @@ function render() {
     // 앞 일정에서 이곳까지 직선 거리 (2km 안이면 걷는 시간도)
     let gap = '';
     if (num) { if (prev) { const m = hav(P(prev), P(p));
-      gap = `<li class="gap"><span>↓ 직선 ${distText(m)}${m < 2000 ? ` · 걸어서 약 ${Math.max(1, Math.round(m * 1.3 / 75))}분` : ''}</span><a class="gapgo" href="${esc(dirUrl(p))}" target="_blank" rel="noopener" aria-label="${esc(p.name)}까지 길찾기">🧭 길찾기</a></li>`; } prev = p; }
+      gap = `<li class="gap"><span>↓ 직선 ${distText(m)}${m < 2000 ? ` · 걸어서 약 ${Math.max(1, Math.round(m * 1.3 / 75))}분` : ''}</span><a class="gapgo" href="${esc(dirUrl(p, prev))}" target="_blank" rel="noopener" aria-label="${esc(prev.name)}에서 ${esc(p.name)}까지 길찾기">🧭 길찾기</a></li>`; } prev = p; }
     const vs = votesOf(p), mine = vs.includes(myId);
     const k = key(p), isSel = sel.has(k), open = !sel.size && openK === k;
     return gap + `<li class="stop${p.cand ? ' cand' : ''}${isSel ? ' sel' : ''}${open ? ' open' : ''}" data-k="${esc(k)}">
