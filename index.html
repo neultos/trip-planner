@@ -2039,7 +2039,7 @@ $('scroll').addEventListener('scroll', () => { followRaf ||= requestAnimationFra
 // 일정 목록을 좌우로 밀면 손가락을 따라 밀리며 이전·다음 일차로
 (() => {
   let s = null;
-  const put = (x, ms) => [$('flights'), $('stops')].forEach(el => { el.style.transition = ms ? `transform ${ms}ms cubic-bezier(.2,.8,.2,1)` : 'none'; el.style.transform = x ? `translateX(${x}px)` : ''; });
+  const put = (x, ms) => [$('sheet').querySelector('.list-head'), $('flights'), $('stops')].forEach(el => { el.style.transition = ms ? `transform ${ms}ms cubic-bezier(.2,.8,.2,1)` : 'none'; el.style.transform = x ? `translateX(${x}px)` : ''; });
   const tab = n => $('days').querySelector(`.day[data-i="${n}"]`);
   const back = () => { if (s?.h) put(0, 220); s = null; };
   $('scroll').addEventListener('touchstart', e => { s = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0 } : null; }, { passive: true });
