@@ -1998,6 +1998,18 @@ function followTop() {
   markPin(li.dataset.k); panVisible(P(findItem(cur, li.dataset.k)));
 }
 $('scroll').addEventListener('scroll', () => { followRaf ||= requestAnimationFrame(followTop); }, { passive: true });
+// 일정 목록을 좌우로 밀면 이전·다음 일차로
+(() => {
+  let s = null;
+  $('scroll').addEventListener('touchstart', e => { s = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null; }, { passive: true });
+  $('scroll').addEventListener('touchend', e => {
+    if (!s || drag || press?.armed || Date.now() < suppressUntil) return (s = null); // 끌기 직후는 제외
+    const t = e.changedTouches[0], dx = t.clientX - s.x, dy = t.clientY - s.y; s = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const n = cur + (dx < 0 ? 1 : -1);
+    $('days').querySelector(`.day[data-i="${n}"]`)?.click();
+  }, { passive: true });
+})();
 
 function focusCard(p) {
   followMute = Date.now() + 900; markPin(key(p));
