@@ -80,7 +80,7 @@ async function customToken(sa, uid) {
   return head + '.' + body + '.' + b64u(sig);
 }
 
-// 항공권 참고 최저가 (Aviasales 데이터: 최근 이틀쯤 검색된 가격이라 실시간 아님)
+// 항공권 참고 최저가 (Aviasales 데이터 API: 최근 검색된 가격을 모아 둔 것이라 실시간 아님)
 // /flights?from=ICN&to=KIX&a=2026-12-01&b=2026-12-04  (b 없으면 편도)
 const ALLOW = ['https://neultos.github.io', 'http://localhost:5178'];
 async function flights(url, req, env) {
