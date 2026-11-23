@@ -948,6 +948,19 @@
   .bookpane .more, .bres .more { margin:14px 0 0; font-size:13px; color:var(--wt-sub); font-weight:600; }
   .btodo.ok { display:flex; align-items:center; gap:12px; background:var(--wt-blue-soft); padding:14px 16px; }
   .btodo .ck { width:32px; height:32px; border-radius:50%; background:var(--wt-brand); color:#fff; display:grid; place-items:center; font-weight:800; flex:none; }
+
+  .fdays { margin-bottom:14px; }
+  .fd-h { display:flex; align-items:baseline; gap:6px; margin:0 0 8px; font-size:14px; font-weight:700; color:var(--wt-ink); }
+  .fd-h small { font-size:12px; font-weight:500; color:var(--wt-sub); }
+  .fd-row { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; margin:0 -20px; padding:0 20px; }
+  .fd-row::-webkit-scrollbar { display:none; }
+  .fd { flex:none; min-width:64px; min-height:52px; padding:6px 8px; border-radius:12px; border:1px solid var(--wt-line); background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+  .fd small { font-size:11.5px; color:var(--wt-sub); } .fd b { font-size:14px; color:var(--wt-ink); }
+  .fd.on { border:1.5px solid var(--wt-brand); background:var(--wt-blue-soft); } .fd.on b { color:var(--wt-brand); }
+  .fd.none b { color:#c3c8d2; font-weight:500; }
+  .fair { list-style:none; margin:0; padding:0; }
+  .fair a { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 2px; border-bottom:1px solid var(--wt-line); color:inherit; text-decoration:none; background:none; border-radius:0; }
+  .fair .fp-p b { font-size:15px; }
   .btodo.ok b { margin:0; font-size:15px; } .btodo.ok small { display:block; color:var(--wt-sub); font-size:12.5px; }
 
 
@@ -3282,6 +3295,15 @@ async function loadPrice(el) {
       <span class="fp-a"><b>${esc(airlineOf(f.airline) || f.airline)}</b><small>${stop(f.transfers)}${dur(f.duration)}</small></span>
       <span class="fp-t">${t(f.depart)} 출발${f.ret ? `<br>${t(f.ret)} 귀국${f.back ? ` · 경유 ${f.back}회` : ''}` : ''}</span>
       <span class="fp-p"><b>${Math.round(f.price).toLocaleString('ko-KR')}원</b><small>1인 참고가</small></span></a></li>`).join('')}</ul>`;
+    // 날짜별 최저가 (예약 탭에서는 눌러서 그 날짜로 다시 검색)
+    const q = new URLSearchParams(el.dataset.q), a0 = q.get('a'), live = !!el.closest('#bkRes');
+    const man = v => `${(v / 10000).toFixed(v < 100000 ? 1 : 0)}만`;
+    if (x.days?.some(d => d.price)) el.insertAdjacentHTML('afterbegin', `<div class="fdays"><p class="fd-h">날짜별 최저가 · 1인<small>${q.get('b') ? '같은 일정 길이 우선' : '편도'}</small></p><div class="fd-row">${x.days.map(d => {
+      const dt = new Date(d.d + 'T00:00'), on = d.d === a0, tag = live && d.price && !on ? 'button' : 'span';
+      return `<${tag} class="fd${on ? ' on' : ''}${d.price ? '' : ' none'}"${tag === 'button' ? ` data-day="${d.d}" aria-label="${md(dt)} 출발로 다시 찾기"` : ''}><small>${md(dt)} (${WD[dt.getDay()]})</small><b>${d.price ? man(d.price) : '–'}</b></${tag}>`; }).join('')}</div></div>`);
+    // 항공사별 최저가
+    if (x.airlines?.length > 1) el.insertAdjacentHTML('beforeend', `<p class="fd-h" style="margin-top:16px">항공사별 최저가<small>${x.exact ? '여행 날짜 기준' : '같은 달 기준'}</small></p><ul class="fair">${x.airlines.map(f => `<li><a href="${esc(f.link)}" target="_blank" rel="noopener">
+      <span class="fp-a"><b>${esc(airlineOf(f.airline) || f.airline)}</b><small>${t(f.depart).split(' ').slice(0, 2).join(' ')} 출발 · ${stop(f.transfers)}</small></span><span class="fp-p"><b>${Math.round(f.price).toLocaleString('ko-KR')}원</b></span></a></li>`).join('')}</ul>`);
   } catch { el.remove(); }
 }
 // 투어·입장권: 도시 이름으로 검색 연결
@@ -4564,6 +4586,7 @@ $('hBook').addEventListener('change', e => {
 $('hBook').addEventListener('click', e => {
   const t = e.target;
   if (t.closest('[data-edit]')) { bk.edit = true; return renderHomeBook(); }
+  const dy = t.closest('[data-day]'); if (dy) { const k = bk.b ? span(bk.a, bk.b) : 0; bk.a = dy.dataset.day; if (bk.b) bk.b = addDays(bk.a, k); bk.auto = true; return renderHomeBook(); }
   const bs = t.closest('[data-bs]'); if (bs) { bk.seg = bs.dataset.bs; renderHomeBook(); return bs.classList.contains('stayb') && $('hBook').querySelector('.bseg').scrollIntoView({ block: 'start' }); }
   const rt = t.closest('[data-rt]'); if (rt) { readBk(); bk.rt = rt.dataset.rt === '1'; return renderHomeBook(); }
   const dm = t.closest('[data-dom]'); if (dm) { readBk(); bk.dom = dm.dataset.dom === '1'; return renderHomeBook(); }

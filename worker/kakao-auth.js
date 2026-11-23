@@ -89,17 +89,33 @@ async function flights(url, req, env) {
   const q = url.searchParams, from = q.get('from') || '', to = q.get('to') || '', a = q.get('a') || '', b = q.get('b') || '';
   const iata = /^[A-Z]{3}$/, day = /^\d{4}-\d{2}-\d{2}$/;
   if (!iata.test(from) || !iata.test(to) || !day.test(a) || (b && !day.test(b))) return new Response('{"error":"bad"}', { status: 400, headers: h });
-  const ask = async (d1, d2) => {
-    const p = new URLSearchParams({ origin: from, destination: to, departure_at: d1, currency: 'krw', sorting: 'price', limit: '5', one_way: String(!d2) });
+  const ask = async (d1, d2, limit) => {
+    const p = new URLSearchParams({ origin: from, destination: to, departure_at: d1, currency: 'krw', sorting: 'price', limit: String(limit), one_way: String(!d2) });
     if (d2) p.set('return_at', d2);
     const r = await fetch('https://api.travelpayouts.com/aviasales/v3/prices_for_dates?' + p, { headers: { 'X-Access-Token': env.TP_TOKEN }, cf: { cacheTtl: 3600, cacheEverything: true } });
     return (await r.json()).data || [];
   };
-  let list = await ask(a, b);
-  const exact = !!list.length;
-  if (!exact) list = await ask(a.slice(0, 7), b.slice(0, 7)); // 그 날짜 가격이 없으면 같은 달 최저
-  const items = list.map(x => ({ price: x.price, airline: x.airline, no: x.flight_number || '', transfers: x.transfers, back: x.return_transfers ?? null, duration: x.duration_to || x.duration || 0,
-    depart: x.departure_at, ret: x.return_at || '', link: 'https://www.aviasales.com' + x.link + (x.link.includes('?') ? '&' : '?') + 'marker=605632' }));
-  const out = { exact, list: items, ...(items[0] || { price: null }) }; // price 등은 옛 화면용
+  const shift = (d, k) => { const t = new Date(d + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + k); return t.toISOString().slice(0, 10); };
+  const nights = b ? Math.round((Date.parse(b) - Date.parse(a)) / 864e5) : 0;
+  // 출발 앞뒤 3일이 걸친 달(최대 2개)을 한 번씩 받아서 날짜별·항공사별로 묶음
+  const months = [...new Set([shift(a, -3), a, shift(a, 3)].map(d => d.slice(0, 7)))];
+  const [exactList, ...monthLists] = await Promise.all([ask(a, b, 5), ...months.map(m => ask(m, b ? shift(m + '-15', nights).slice(0, 7) : '', 1000))]);
+  const all = monthLists.flat();
+  const item = x => ({ price: x.price, airline: x.airline, no: x.flight_number || '', transfers: x.transfers, back: x.return_transfers ?? null, duration: x.duration_to || x.duration || 0,
+    depart: x.departure_at, ret: x.return_at || '', link: 'https://www.aviasales.com' + x.link + (x.link.includes('?') ? '&' : '?') + 'marker=605632' });
+  const exact = !!exactList.length;
+  const list = (exact ? exactList : all.slice().sort((x, y) => x.price - y.price).slice(0, 5)).map(item);
+  // 날짜별: 출발일마다 최저가 (왕복이면 같은 박수 우선, 없으면 귀국일 상관없이)
+  const days = [-3, -2, -1, 0, 1, 2, 3].map(k => {
+    const d = shift(a, k), on = all.filter(x => x.departure_at.slice(0, 10) === d);
+    const same = b ? on.filter(x => x.return_at && x.return_at.slice(0, 10) === shift(d, nights)) : on;
+    const best = (same.length ? same : on).sort((x, y) => x.price - y.price)[0];
+    return { d, price: best ? best.price : null, same: !!same.length };
+  });
+  // 항공사별: 여행 날짜에 맞는 편이 있으면 그것, 없으면 그 달에서 항공사마다 최저가
+  const pool = exact ? exactList.concat(all.filter(x => x.departure_at.slice(0, 10) === a)) : all, seen = new Map();
+  for (const x of pool.slice().sort((x, y) => x.price - y.price)) if (!seen.has(x.airline)) seen.set(x.airline, x);
+  const airlines = [...seen.values()].slice(0, 6).map(item);
+  const out = { exact, list, days, airlines, ...(list[0] || { price: null }) }; // price 등은 옛 화면용
   return new Response(JSON.stringify(out), { headers: h });
 }
