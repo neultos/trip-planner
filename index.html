@@ -400,6 +400,13 @@
   .m-tiles button:active, .m-tiles a:active { background:var(--line); }
   .btodo { background:#fff4ef; border-radius:14px; padding:12px 14px; margin:4px 0 6px; font-size:13.5px; } .btodo b { display:block; margin-bottom:4px; } .btodo p { margin:2px 0; } .btodo.ok { background:var(--bg2); }
   .bookpane .note { margin-top:18px; }
+  .fprice { margin-top:10px; font-size:12.5px; color:var(--muted); }
+  .fprice a { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-radius:14px; background:#eef4ff; color:inherit; text-decoration:none; }
+  .fprice a span { display:flex; flex-direction:column; gap:2px; } .fprice b { font-size:18px; color:var(--fg); } .fprice em { font-style:normal; font-weight:700; color:var(--accent); white-space:nowrap; }
+  .hbk { list-style:none; margin:0 0 22px; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .hbk button { width:100%; display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:14px 16px; border-radius:16px; background:var(--bg2); text-align:left; }
+  .hbk b { font-size:15.5px; } .hbk small { color:var(--muted); font-size:12.5px; } .hbk em { font-style:normal; font-weight:700; color:var(--accent); font-size:13px; margin-top:4px; }
+  #hBook h4 { margin:16px 0 0; font-size:15px; } #hBook .m-tiles { margin-top:10px; }
   .bookpane h4, #bookDlg h4 { margin:18px 0 0; font-size:15px; } .bookpane h4 small, #bookDlg h4 small { display:block; color:var(--muted); font-size:12.5px; font-weight:500; margin-top:2px; }
   #bookDlg .m-tiles, .bookpane .m-tiles { margin-top:10px; }
   .bookpane .more, #bookDlg .more { margin:12px 0 0; font-size:12.5px; color:var(--muted); font-weight:600; }
@@ -707,6 +714,7 @@
     <div id="tip"></div>
     <div id="tripCards"></div>
   </div>
+  <div id="hBook" hidden></div>
   <div id="hCafe" hidden></div>
   <div id="hBlog" hidden></div>
   <footer class="biz">
@@ -720,6 +728,7 @@
 <button class="fab" id="newTripBtn">+ 새 여행 만들기</button>
 <nav id="hNav" aria-label="홈 메뉴">
   <button data-h="trips" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5v2M3 12.5h18"/></svg>내 여행</button>
+  <button data-h="book" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16a1 1 0 0 1 1 1v3a2 2 0 0 0 0 4v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2 2 0 0 0 0-4V7a1 1 0 0 1 1-1z"/><path d="M14.5 6.5v11" stroke-dasharray="1.5 2.6"/></svg>예약</button>
   <button data-h="cafe" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01" stroke-width="2.8"/></svg>위톡</button>
   <button data-h="blog" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H3z"/><path d="M21 5.5A1.5 1.5 0 0 0 19.5 4H15a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H21z"/></svg>여행 글</button>
 </nav>
@@ -2453,7 +2462,7 @@ function renderPane() {
   if (view === 'money') $('pane').innerHTML = moneyHtml();
   if (view === 'book') { // 같은 내용이면 다시 안 그림 (숙소 목록 깜빡임 방지)
     const sig = JSON.stringify([tripId, trip.start, trip.days.length, trip.cities, trip.flights, trip.members.length, trip.days.map((_, i) => dayItems(i).some(p => p.type === '숙소'))]);
-    if (sig !== bookSig || !$('pane').querySelector('.bookpane')) { bookSig = sig; $('pane').innerHTML = bookPaneHtml(); $('pane').querySelectorAll('.hlist').forEach(loadHotels); }
+    if (sig !== bookSig || !$('pane').querySelector('.bookpane')) { bookSig = sig; $('pane').innerHTML = bookPaneHtml(); $('pane').querySelectorAll('.hlist').forEach(loadHotels); $('pane').querySelectorAll('.fprice').forEach(loadPrice); }
   } else bookSig = '';
   if (view === 'pack') { // 친구 수정으로 다시 그려도 입력 중인 글자는 유지
     const typed = $('packIn')?.value || '', focused = document.activeElement?.id === 'packIn';
@@ -2955,6 +2964,7 @@ function bookHtml(only = null) {
     const to = f0?.to || (kr ? trip.cities.map(c => c && findAirports(c)[0]?.code).find(c => c && c !== 'GMP' && c !== 'ICN') : mainAirport(trip.country)?.code);
     const a = f0?.dep?.slice(0, 10) || trip.start, b = trip.days.length > 1 ? (fs.length > 1 && fs.at(-1).dep?.slice(0, 10)) || trip.end : '';
     h += to ? `<h4>✈️ 항공권 · ${esc(from)} → ${esc(to)}<small>${mdd(a)}${b ? ' ~ ' + mdd(b) + ' 왕복' : ' 편도'} · ${n}명</small></h4>`
+      + `<div class="fprice" data-q="${esc(new URLSearchParams({ from, to, a, ...(b ? { b } : {}) }))}"><small>참고 최저가 찾는 중…</small></div>`
       + bookTiles(FLY_SITES.map(([s, u]) => [s, u(from, to, a, b, n, kr)]))
       : '<h4>✈️ 항공권<small>도착 공항을 모르겠어요. 일차 도시를 넣거나 항공편을 추가해 주세요.</small></h4>';
   }
@@ -2974,6 +2984,21 @@ function openBook(only = null) {
   $('bookBody').innerHTML = bookHtml(only);
   $('bookDlg').showModal();
   $('bookBody').querySelectorAll('.hlist').forEach(loadHotels);
+  $('bookBody').querySelectorAll('.fprice').forEach(loadPrice);
+}
+// 항공권 참고 최저가: Worker가 Travelpayouts에 물어봄 (토큰은 Worker에만)
+const priceCache = new Map();
+async function loadPrice(el) {
+  const q = el.dataset.q;
+  try {
+    if (!priceCache.has(q)) priceCache.set(q, fetch(`${KAKAO_AUTH}/flights?${q}`, { signal: AbortSignal.timeout(8000) })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status)).catch(e => { priceCache.delete(q); throw e; }));
+    const x = await priceCache.get(q);
+    if (!x.price) return el.remove();
+    const d = s => s ? md(new Date(s.slice(0, 10) + 'T00:00')) : '';
+    el.innerHTML = `<a href="${esc(x.link)}" target="_blank" rel="noopener"><span><small>참고 최저가 · 1인${x.exact ? '' : ' · 같은 달 기준'}</small>
+      <b>${Math.round(x.price).toLocaleString('ko-KR')}원~</b><small>${d(x.depart)}${x.ret ? ' ~ ' + d(x.ret) : ''} · ${x.transfers ? `경유 ${x.transfers}회` : '직항'}</small></span><em>보기 ›</em></a>`;
+  } catch { el.remove(); }
 }
 // 투어·입장권: 도시 이름으로 검색 연결
 // shortcut: 제휴 ID 없이 검색 링크만, 제휴 승인되면 링크에 ID를 붙임
@@ -3689,7 +3714,7 @@ function openForm(mode, pre = {}) {
   $('settings').showModal();
   if (mode === 'new' && !pre.title) $('fTitle').focus();
 }
-$('newTripBtn').onclick = () => hTab === 'trips' ? openNew() : openWrite(hTab === 'blog' ? 'blog' : '');
+$('newTripBtn').onclick = () => hTab === 'trips' || hTab === 'book' ? openNew() : openWrite(hTab === 'blog' ? 'blog' : '');
 $('settings').onclose = async () => {
   if ($('settings').returnValue !== 'ok') return;
   const country = (countryOf($('fCountry').value.trim()) || findCountries($('fCountry').value.trim())[0])?.name || $('fCountry').value.trim().slice(0, 20);
@@ -4046,12 +4071,31 @@ $('pAuth').onclick = async e => {
 
 /* ---------- 홈 탭: 내 여행 / 위톡 / 여행 글 ---------- */
 let hTab = 'trips';
+// 홈 예약 탭: 다가오는 여행별 예약 보기 + 사이트 바로가기
+const HOME_BOOK = [
+  ['✈️ 항공권', [['스카이스캐너', 'https://www.skyscanner.co.kr/'], ['네이버 항공권', 'https://flight.naver.com/'], ['트립닷컴', 'https://kr.trip.com/flights/']]],
+  ['🏨 숙소', [['부킹닷컴', 'https://www.booking.com/index.ko.html'], ['아고다', 'https://www.agoda.com/ko-kr/'], ['여기어때', 'https://www.yeogi.com/']]],
+  ['🎟️ 투어·입장권', [['마이리얼트립', 'https://www.myrealtrip.com/'], ['클룩', 'https://www.klook.com/ko/'], ['KKday', 'https://www.kkday.com/ko/']]],
+];
+function renderHomeBook() {
+  const up = recents().filter(x => !(x.end && span(today(), x.end) < 0)).sort((x, y) => (x.start || '').localeCompare(y.start || ''));
+  $('hBook').innerHTML = `<div class="sec">내 여행 예약</div>` + (up.length
+    ? `<ul class="hbk">${up.map(x => `<li><button data-bk="${esc(x.id)}"><b>${esc(x.title)}</b><small>${x.start ? md(new Date(x.start + 'T00:00')) + ' 출발' : ''}</small><em>날짜·도시에 맞춘 항공·숙소·투어 보기 ›</em></button></li>`).join('')}</ul>`
+    : '<p class="note">여행을 만들면 날짜와 도시에 맞춰 항공권·숙소를 찾아 드려요.</p>')
+    + '<div class="sec">바로 찾아보기</div>' + HOME_BOOK.map(([h, l]) => `<h4>${h}</h4>` + bookTiles(l)).join('');
+}
+$('hBook').onclick = e => {
+  const b = e.target.closest('[data-bk]'); if (!b) return;
+  view = 'book'; $('tabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === 'book')));
+  location.hash = 't=' + b.dataset.bk;
+};
 function homeTab(t) {
   hTab = t;
   $('hNav').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.h === t)));
-  $('hTrips').hidden = t !== 'trips'; $('hCafe').hidden = t !== 'cafe'; $('hBlog').hidden = t !== 'blog';
-  $('newTripBtn').textContent = t === 'trips' ? '+ 새 여행 만들기' : t === 'cafe' ? '✏️ 글쓰기' : '🔗 블로그 글 공유하기';
-  if (t !== 'trips' && !posts && db) loadPosts();
+  $('hTrips').hidden = t !== 'trips'; $('hBook').hidden = t !== 'book'; $('hCafe').hidden = t !== 'cafe'; $('hBlog').hidden = t !== 'blog';
+  $('newTripBtn').textContent = t === 'trips' || t === 'book' ? '+ 새 여행 만들기' : t === 'cafe' ? '✏️ 글쓰기' : '🔗 블로그 글 공유하기';
+  if ((t === 'cafe' || t === 'blog') && !posts && db) loadPosts();
+  if (t === 'book') renderHomeBook();
   if (t === 'cafe') renderCafe();
   if (t === 'blog') renderBlog();
 }

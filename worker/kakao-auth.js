@@ -5,6 +5,7 @@
 //   KAKAO_REST_KEY       카카오 REST API 키
 //   KAKAO_CLIENT_SECRET  카카오 Client Secret (사용 안 하면 비워 둠)
 //   FIREBASE_SA          파이어베이스 서비스 계정 키 JSON 파일 내용 전체
+//   TP_TOKEN             Travelpayouts API 토큰 (항공권 참고 가격)
 
 const BACK = ['https://neultos.github.io/trip-planner/', 'http://localhost:5178/']; // 로그인 뒤 돌아갈 수 있는 주소만
 
@@ -14,6 +15,7 @@ export default {
     try {
       if (url.pathname === '/kakao/start') return start(url, env);
       if (url.pathname === '/kakao/callback') return await callback(url, env);
+      if (url.pathname === '/flights') return await flights(url, req, env);
       return new Response('wetrip auth', { status: 200 });
     } catch (e) {
       console.log('auth error', e && e.stack || e);
@@ -76,4 +78,27 @@ async function customToken(sa, uid) {
   const key = await crypto.subtle.importKey('pkcs8', der, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
   const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(head + '.' + body));
   return head + '.' + body + '.' + b64u(sig);
+}
+
+// 항공권 참고 최저가 (Aviasales 데이터: 최근 이틀쯤 검색된 가격이라 실시간 아님)
+// /flights?from=ICN&to=KIX&a=2026-12-01&b=2026-12-04  (b 없으면 편도)
+const ALLOW = ['https://neultos.github.io', 'http://localhost:5178'];
+async function flights(url, req, env) {
+  const o = req.headers.get('Origin') || '';
+  const h = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': ALLOW.includes(o) ? o : ALLOW[0], 'Cache-Control': 'public, max-age=3600', Vary: 'Origin' };
+  const q = url.searchParams, from = q.get('from') || '', to = q.get('to') || '', a = q.get('a') || '', b = q.get('b') || '';
+  const iata = /^[A-Z]{3}$/, day = /^\d{4}-\d{2}-\d{2}$/;
+  if (!iata.test(from) || !iata.test(to) || !day.test(a) || (b && !day.test(b))) return new Response('{"error":"bad"}', { status: 400, headers: h });
+  const ask = async (d1, d2) => {
+    const p = new URLSearchParams({ origin: from, destination: to, departure_at: d1, currency: 'krw', sorting: 'price', limit: '1', one_way: String(!d2) });
+    if (d2) p.set('return_at', d2);
+    const r = await fetch('https://api.travelpayouts.com/aviasales/v3/prices_for_dates?' + p, { headers: { 'X-Access-Token': env.TP_TOKEN }, cf: { cacheTtl: 3600, cacheEverything: true } });
+    return (await r.json()).data?.[0];
+  };
+  let x = await ask(a, b);
+  const exact = !!x;
+  if (!x) x = await ask(a.slice(0, 7), b.slice(0, 7)); // 그 날짜 가격이 없으면 같은 달 최저
+  const out = x ? { price: x.price, airline: x.airline, transfers: x.transfers, depart: x.departure_at, ret: x.return_at || '', exact,
+    link: 'https://www.aviasales.com' + x.link + (x.link.includes('?') ? '&' : '?') + 'marker=605632' } : { price: null };
+  return new Response(JSON.stringify(out), { headers: h });
 }
