@@ -104,7 +104,8 @@ async function flights(url, req, env) {
   const item = x => ({ price: x.price, airline: x.airline, no: x.flight_number || '', transfers: x.transfers, back: x.return_transfers ?? null, duration: x.duration_to || x.duration || 0,
     depart: x.departure_at, ret: x.return_at || '', link: 'https://www.aviasales.com' + x.link + (x.link.includes('?') ? '&' : '?') + 'marker=605632' });
   const exact = !!exactList.length;
-  const list = (exact ? exactList : all.slice().sort((x, y) => x.price - y.price).slice(0, 5)).map(item);
+  const gap = x => Math.abs(Date.parse(x.departure_at.slice(0, 10)) - Date.parse(a)); // 고른 출발일에 가까운 편부터
+  const list = (exact ? exactList : all.slice().sort((x, y) => gap(x) - gap(y) || x.price - y.price).slice(0, 5)).map(item);
   // 날짜별: 출발일마다 최저가 (왕복이면 같은 박수 우선, 없으면 귀국일 상관없이)
   const days = [-3, -2, -1, 0, 1, 2, 3].map(k => {
     const d = shift(a, k), on = all.filter(x => x.departure_at.slice(0, 10) === d);
