@@ -1739,7 +1739,7 @@ function mLine(pts, o) {
 function mPin(p, n, c, label, onClick) {
   const z = typeof n === 'number' ? 1000 - n : 1; // 겹치면 앞 번호가 위로
   if (useGoogle()) {
-    const m = new google.maps.Marker({ map: gmap, position: G(P(p)), title: p.name, zIndex: z,
+    const m = new google.maps.Marker({ map: gmap, position: G(P(p)), title: p.name, zIndex: z, optimized: false, // 크기 바꿀 때 깜빡임 방지
       label: { text: String(n), color: '#fff', fontWeight: '700', fontSize: '13px' },
       icon: { path: google.maps.SymbolPath.CIRCLE, scale: 14, fillColor: c, fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 } });
     m.baseZ = z; m.addListener('click', onClick); gshapes.push(m); pins.set(key(p), m);
@@ -1775,7 +1775,8 @@ function fit(list) {
 
 /* ---------- 실제 도로 경로 (OSRM 무료 서버, 실패하면 직선) ---------- */
 const routeCache = new Map();
-const rk = (a, b) => `${a.lat},${a.lng};${b.lat},${b.lng};${b.move === '항공'}`;
+const walkLeg = (a, b) => b.move === '도보' || !b.move && hav(P(a), P(b)) < 2000; // 목록의 '걸어서 약 N분'과 같은 기준
+const rk = (a, b) => `${a.lat},${a.lng};${b.lat},${b.lng};${b.move === '항공'};${walkLeg(a, b)}`;
 const straight = (a, b) => [P(a), P(b)];
 function hav(a, b) {
   const r = Math.PI / 180, dLa = (b[0] - a[0]) * r, dLo = (b[1] - a[1]) * r;
@@ -1789,7 +1790,8 @@ async function getRoute(a, b) {
   // shortcut: OSRM 공개 데모 서버(자동차 경로, 과도한 사용 금지), 사용자 늘면 유료 경로 API로 교체
   if (b.move !== '항공' && hav(P(a), P(b)) < 300e3) {
     try {
-      const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson`, { signal: AbortSignal.timeout(6000) });
+      const ll = `${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson`;
+      const r = await fetch(walkLeg(a, b) ? `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${ll}` : `https://router.project-osrm.org/route/v1/driving/${ll}`, { signal: AbortSignal.timeout(6000) });
       const j = await r.json();
       if (j.code === 'Ok' && j.routes[0]) path = j.routes[0].geometry.coordinates.map(([x, y]) => [y, x]);
     } catch {}
@@ -3344,6 +3346,7 @@ function openFlight(f, pre) {
   $('flDel').hidden = !f;
   $('flightForm').returnValue = '';
   $('flightForm').showModal();
+  if (f) document.activeElement?.blur(); // 기존 항공편은 보기만 해도 키패드가 안 뜨게
 }
 $('flights').onclick = e => { const b = e.target.closest('[data-f]'); if (b) openFlight(trip.flights.find(f => f.id === b.dataset.f)); };
 $('flightForm').onclose = () => {
