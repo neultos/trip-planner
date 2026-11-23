@@ -900,16 +900,6 @@
   .share-cta svg { width:20px; height:20px; }
   .mini-foot { display:flex; justify-content:center; gap:16px; margin:32px 0 0; padding-top:20px; border-top:1px solid var(--wt-line); font-size:12px; }
   .mini-foot a { color:var(--wt-sub); text-decoration:none; }
-  /* 여행 일정 상단 (추가 시안): 흰 바 + 메뉴명, 여행 칩은 지도 위 */
-  .top-t { display:none; }
-  @media (max-width:819px) {
-    .top { top:0; left:0; right:0; padding:calc(var(--safe-t) + 6px) 12px 6px; background:#fff; align-items:center; gap:4px; }
-    .top .round:not(#shareBtn) { box-shadow:none; background:transparent; }
-    .top-t { display:block; flex:1; margin:0 0 0 2px; font-size:20px; line-height:28px; font-weight:700; letter-spacing:-.02em; color:var(--wt-ink); }
-    #titleBtn { position:absolute; left:12px; top:calc(100% + 10px); flex:none; max-width:calc(100% - 24px); height:40px; padding:0 14px; }
-    #titleBtn .badge { background:var(--wt-blue-soft); color:var(--wt-brand); }
-    #shareBtn { background:var(--wt-brand); }
-  }
 
   /* 예약 (추가 시안) */
   .tpick { position:relative; display:flex; align-items:center; gap:8px; height:48px; padding:0 14px; margin-bottom:12px; border:1px solid var(--wt-line); border-radius:12px; background:#fff; }
@@ -1015,7 +1005,6 @@
   <button class="chip-btn round" id="backBtn" aria-label="내 여행 목록으로">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
   </button>
-  <h1 class="top-t">여행 일정</h1>
   <button class="chip-btn" id="titleBtn" aria-label="여행 메뉴"><span class="badge" id="titleDday"></span><span id="titleText"></span><span class="stack" id="titleMembers"></span></button>
   <button class="chip-btn round" id="menuBtn" aria-label="여행 메뉴">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
@@ -2068,7 +2057,7 @@ function inView(pos) {
 function panTo(pos) { useGoogle() ? gmap.panTo(G(pos)) : map.panTo(pos, { animate: true, duration: .4 }); }
 
 function sheetPx() { return touring ? $('tour').offsetHeight + 12 : innerWidth >= 820 ? 0 : $('sheet').offsetHeight; }
-function pad() { return { top: innerWidth >= 820 ? 80 : 130, left: innerWidth >= 820 ? 420 : 30, right: 30, bottom: sheetPx() + 30 }; }
+function pad() { return { top: 80, left: innerWidth >= 820 ? 420 : 30, right: 30, bottom: sheetPx() + 30 }; }
 function fit(list) {
   const p = pad();
   if (useGoogle()) {
