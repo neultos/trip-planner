@@ -1,0 +1,7 @@
+# GitHub Actions가 이 설정으로 Worker를 배포함 (.github/workflows/worker.yml)
+# 비밀값(KAKAO_REST_KEY, KAKAO_CLIENT_SECRET, FIREBASE_SA, TP_TOKEN)은 Cloudflare에 있고 배포해도 그대로 남음
+name = "wetrip-aut"
+main = "kakao-auth.js"
+compatibility_date = "2025-01-01"
+workers_dev = true
+keep_vars = true
