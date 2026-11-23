@@ -732,8 +732,8 @@
   /* 바로가기 */
   .scut { display:grid; grid-template-columns:repeat(4, 1fr); padding:16px 0; margin:4px 0 8px; }
   .scut button { display:flex; flex-direction:column; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--wt-ink); min-height:44px; }
-  .scut .ic { width:48px; height:48px; border-radius:14px; display:grid; place-items:center; }
-  .scut .ic svg { width:26px; height:26px; }
+  .scut img, .tchk-h img, .cband img, .pband img, .share-empty img { object-fit:contain; display:block; flex:none; }
+  .scut img { width:52px; height:52px; }
   /* 다가오는 여행 */
   .upc { display:flex; align-items:center; gap:14px; width:100%; min-height:104px; padding:14px; border:1px solid var(--wt-line); border-radius:14px; text-align:left; background:#fff; }
   .upc .ph { width:76px; height:76px; border-radius:12px; flex:none; background:var(--wt-soft) center/cover; }
@@ -764,8 +764,19 @@
   .bband { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:72px; margin-top:32px; padding:0 20px; border-radius:14px; background:var(--wt-brand); color:#fff; text-align:left; }
   .bband b { display:block; font-size:16px; line-height:23px; font-weight:700; } .bband small { display:block; font-size:12px; line-height:18px; opacity:.9; }
   .bband .ar { font-size:20px; }
-  .pband { display:flex; flex-direction:column; align-items:flex-start; width:100%; margin-top:32px; padding:20px; border-radius:14px; background:var(--wt-blue-soft); color:var(--wt-ink); text-align:left; }
+  .pband { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; margin-top:32px; padding:20px; border-radius:14px; background:var(--wt-blue-soft); color:var(--wt-ink); text-align:left; }
   .pband b { font-size:20px; line-height:28px; font-weight:700; letter-spacing:-.02em; }
+  .pband .tx { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
+  .pband img { width:112px; height:auto; max-height:96px; }
+  .tchk-h { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .tchk-h img { width:52px; height:52px; }
+  .cband { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; margin:0 0 14px; border-radius:14px; background:var(--wt-blue-soft); }
+  .cband b { display:block; font-size:16px; line-height:23px; font-weight:700; color:var(--wt-ink); }
+  .cband small { display:block; font-size:12px; line-height:18px; color:var(--wt-sub); margin-top:2px; }
+  .cband img { width:104px; height:auto; max-height:88px; }
+  #hCafe, #hBlog { padding-top:calc(var(--safe-t) + 16px); } /* 홈 외 화면은 상단에 메뉴명 */
+  #hCafe > .sec:first-child, #hBlog > .sec:first-child { font-size:24px; line-height:32px; font-weight:700; }
+  .share-empty img { width:96px; height:96px; margin:0 auto 16px; }
   .pband em { margin-top:8px; font-style:normal; font-size:14px; font-weight:600; color:var(--wt-brand); }
   .stayb { position:relative; display:block; width:100%; aspect-ratio:350/180; border-radius:16px; overflow:hidden; padding:0; text-align:left; color:#fff; }
   .stayb img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
@@ -1770,7 +1781,7 @@ function showHome() {
     <div class="hero-art">${ART[now ? 'fly' : next ? 'pack' : 'globe']}</div>`;
 
   const act = x => `<div class="tact"><button data-id="${esc(x.id)}">${SVG(IC.list)}일정 보기</button><button data-inv="${esc(x.id)}">${SVG(IC.users)}동행 초대</button><button data-tv="pack" data-tid="${esc(x.id)}">${SVG(IC.case)}여행 준비</button></div>
-    <div class="tchk"><b>출발 전, 체크해 보세요</b><button data-tv="book" data-tid="${esc(x.id)}"><span>✈️ 항공권 예약 확인</span><span>항공권 찾기 →</span></button><button data-tv="book" data-tid="${esc(x.id)}"><span>🏨 숙소 예약 확인</span><span>숙소 찾기 →</span></button></div>`;
+    <div class="tchk"><div class="tchk-h"><b>출발 전, 체크해 보세요</b><img src="assets/wetrip/web/suitcase-156.png" width="52" height="52" alt=""></div><button data-tv="book" data-tid="${esc(x.id)}"><span>✈️ 항공권 예약 확인</span><span>항공권 찾기 →</span></button><button data-tv="book" data-tid="${esc(x.id)}"><span>🏨 숙소 예약 확인</span><span>숙소 찾기 →</span></button></div>`;
   $('tripCards').innerHTML = '<div class="sec-up">' + (up.length ? `<ul>${up.map((x, i) => `<li class="tcard rv" data-rv="${esc(x.id)}">
       <button class="open" data-id="${esc(x.id)}">
         <div class="cv${!own(x) && !destPhoto(x) && noPhoto(placeOf(x)) ? ' noph' : ''}"${ph(x)} style="${bg(x)}"><span class="cv-e">${mark}</span>
@@ -4298,10 +4309,10 @@ function renderHomeMain() {
       ${heroes.length > 1 ? `<div class="pg"><button id="heroPrev" aria-label="이전 여행지">‹</button><span id="heroNo">1 / ${heroes.length}</span><button id="heroNext" aria-label="다음 여행지">›</button></div>` : ''}
     </div>
     <div class="scut">
-      <button data-sc="fly"><span class="ic" style="background:#eaf1ff;color:#1557ff">${SVG(IC.plane)}</span>항공권</button>
-      <button data-sc="stayA"><span class="ic" style="background:#f1ecff;color:#7c4dff">${SVG(IC.bag)}</span>해외숙소</button>
-      <button data-sc="stayD"><span class="ic" style="background:#fff1e8;color:#f2711c">${SVG(IC.house)}</span>국내숙소</button>
-      <button data-sc="new"><span class="ic" style="background:#eaf1ff;color:#1557ff">${SVG(IC.cal)}</span>일정 만들기</button>
+      <button type="button" data-sc="fly" aria-label="항공권 예약"><img src="assets/wetrip/web/airplane-156.png" width="52" height="52" alt=""><span>항공권</span></button>
+      <button type="button" data-sc="stayA" aria-label="해외숙소 찾기"><img src="assets/wetrip/web/suitcase-156.png" width="52" height="52" alt=""><span>해외숙소</span></button>
+      <button type="button" data-sc="stayD" aria-label="국내숙소 찾기"><img src="assets/wetrip/web/accommodation-156.png" width="52" height="52" alt=""><span>국내숙소</span></button>
+      <button type="button" data-sc="new" aria-label="일정 만들기"><img src="assets/wetrip/web/calendar-156.png" width="52" height="52" alt=""><span>일정 만들기</span></button>
     </div>
     ${n ? `<button class="upc" data-open="${esc(n.id)}"><span class="ph"${own(n) || destPhoto(n) ? '' : ` data-ph="${esc(placeOf(n).trim().slice(0, 64))}"`} style="${(u => u ? `background-image:url('${u}')` : '')(own(n) ? n.cover : destPhoto(n) || photoOf(placeOf(n)))}"></span>
         <span class="tx">${n.start ? `<span class="dd">${dday(n)}</span>` : ''}<b>${esc(n.title || '나의 여행')}</b>
@@ -4316,7 +4327,7 @@ function renderHomeMain() {
     <section class="hsec"><h2>머무는 순간까지 특별하게</h2><p class="sub">여행에 어울리는 숙소를 찾아보세요</p>
       <div class="bd"><button class="stayb" data-sc="stayA">${img('stay-resort', '해변 리조트 수영장 풍경', '60% 55%', 1)}<span class="cp"><b>일상에서 멀리,<br>바다 가까이</b><em>숙소 찾아보기 →</em></span></button>
       <p class="pnote">ⓘ 예약은 제휴 파트너에서 진행돼요</p></div></section>
-    <button class="pband" data-sc="new"><b>가고 싶은 곳을<br>하나의 일정으로</b><em>새 여행 만들기 →</em></button>`;
+    <button class="pband" data-sc="new"><span class="tx"><b>가고 싶은 곳을<br>하나의 일정으로</b><em>새 여행 만들기 →</em></span><img src="assets/wetrip/web/planning-360.png" width="112" height="112" alt="" loading="lazy"></button>`;
   renderStories(); startHero();
 }
 // 여행의 영감: 실제로 공유된 여행 글 중 사진 있는 글만 (없으면 섹션을 숨김)
@@ -4536,6 +4547,7 @@ function renderCafe() {
   const list = posts.filter(visible), cities = [...new Set(list.map(p => p.city).filter(Boolean))].slice(0, 12);
   const shown = list.filter(p => (cafeBoard === 'all' || (cafeBoard === 'mine' ? p.uid === user?.uid : p.board === cafeBoard)) && (!cafeCity || p.city === cafeCity));
   $('hCafe').innerHTML = `<div class="sec">위톡<small>위트립 여행자들의 수다방</small></div>
+    <div class="cband"><span><b>여행 이야기를 함께 나눠요</b><small>가는 곳이 같다면 먼저 다녀온 여행자에게 물어보세요</small></span><img src="assets/wetrip/web/chat-360.png" width="104" height="104" alt=""></div>
     <div class="ctop" id="cBoards">${[['all', '전체'], ...Object.entries(BOARDS), ['mine', '내 글']].map(([k, v]) => `<button data-b="${k}" aria-pressed="${k === cafeBoard}">${v}</button>`).join('')}</div>
     ${cities.length ? `<div class="ctop city" id="cCities"><button data-c="" aria-pressed="${!cafeCity}">모든 도시</button>${cities.map(c => `<button data-c="${esc(c)}" aria-pressed="${c === cafeCity}">${esc(c)}</button>`).join('')}</div>` : ''}
     ${shown.map(postCard).join('') || `<div class="home-empty"><b>${list.length ? '이 조건의 글이 없어요' : '아직 글이 없어요'}</b><br>첫 글을 남겨 보세요. 궁금한 점, 다녀온 일정, 사진 모두 좋아요.</div>`}
@@ -4701,7 +4713,7 @@ function renderBlog() {
     ${blogQ ? `<div class="bsrch">${searchLinks(blogQ).map(([n, s, i, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${i}<span>${n}<small>${s}</small></span></a>`).join('')}</div>`
       : '<p class="muted">도시나 장소를 넣으면 네이버 블로그·구글·유튜브 후기를 한 번에 찾아 줘요. 일정 카드의 <b>후기</b> 버튼으로 장소별 후기도 볼 수 있어요.</p>'}
     <div class="sec" style="margin-top:18px">여행자들이 추천한 글<small>${shared.length}개</small></div>
-    ${posts == null ? '<p class="muted">불러오는 중…</p>' : shared.map(postCard).join('') || '<div class="home-empty">아직 공유된 글이 없어요.<br>좋았던 블로그 글을 아래 버튼으로 공유해 주세요.</div>'}`;
+    ${posts == null ? '<p class="muted">불러오는 중…</p>' : shared.map(postCard).join('') || '<div class="home-empty share-empty"><img src="assets/wetrip/web/share-288.png" width="96" height="96" alt=""><b>아직 공유된 글이 없어요</b><br>좋았던 블로그 글을 아래 버튼으로 공유해 주세요.</div>'}`;
 }
 $('hBlog').onclick = e => {
   const b = e.target.closest('[data-bq]'); if (b) { blogQ = blogQ === b.dataset.bq ? '' : b.dataset.bq; return renderBlog(); }
