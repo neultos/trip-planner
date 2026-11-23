@@ -716,16 +716,16 @@
   .hsearch svg { width:20px; height:20px; color:var(--wt-ink); flex:none; }
   .htabs { margin:4px 0 16px; }
   /* 히어로 */
-  .hero2 { position:relative; border-radius:16px; overflow:hidden; aspect-ratio:350/190; background:#1f2937; }
+  .hero2 { position:relative; margin-top:12px; border-radius:16px; overflow:hidden; aspect-ratio:350/165; background:#1f2937; }
   .hero2 .track { display:flex; height:100%; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }
   .hero2 .track::-webkit-scrollbar { display:none; }
   .hero2 .sl { position:relative; flex:0 0 100%; height:100%; scroll-snap-align:start; display:block; color:#fff; text-align:left; padding:0; border-radius:0; }
   .hero2 img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .hero2 .sl::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,.48), rgba(0,0,0,.04)), linear-gradient(0deg, rgba(0,0,0,.2), transparent 40%); }
-  .hero2 .cp { position:absolute; left:20px; top:20px; right:28%; z-index:1; }
-  .hero2 .cp b { display:block; font-size:28px; line-height:34px; font-weight:700; letter-spacing:-.02em; text-shadow:0 1px 8px rgba(0,0,0,.3); }
+  .hero2 .cp { position:absolute; left:20px; top:18px; right:24%; z-index:1; }
+  .hero2 .cp b { display:block; font-size:24px; line-height:31px; font-weight:700; letter-spacing:-.02em; text-shadow:0 1px 8px rgba(0,0,0,.3); }
   .hero2 .cp small { display:block; margin-top:6px; font-size:14px; line-height:21px; font-weight:500; text-shadow:0 1px 6px rgba(0,0,0,.35); }
-  .hero2 .cp em { display:inline-block; margin-top:12px; font-style:normal; font-size:14px; font-weight:600; }
+  .hero2 .cp em { display:inline-block; margin-top:10px; font-style:normal; font-size:14px; font-weight:600; }
   .hero2 .pg { position:absolute; right:10px; bottom:10px; z-index:2; display:flex; align-items:center; background:rgba(17,24,39,.55); color:#fff; border-radius:999px; font-size:12px; font-weight:600; }
   .hero2 .pg button { width:40px; height:32px; color:#fff; font-size:15px; }
   .hero2 .pg span { min-width:30px; text-align:center; }
@@ -4382,8 +4382,8 @@ const DEST = {
   도쿄: { country: '일본', air: 'NRT', abroad: 1, ph: 'tokyo-skyline', pos: '45% 50%', line: '걸을수록 새로운 골목과 전망' },
   부산: { country: '대한민국', air: 'PUS', abroad: 0, ph: 'busan-gwangan', pos: '55% 50%', line: '바다 위 야경과 시장 골목' },
 };
-const HERO = ['홍콩', '다낭', '제주'];
-const PICKS = { rec: ['오사카', '타이베이'], abroad: ['오사카', '타이베이', '도쿄', '다낭'], dom: ['제주', '부산'] };
+// 히어로 문구는 장마다 다르게 [큰 글씨, 작은 글씨]
+const HERO = { 홍콩: ['야경이 빛나는 밤,<br>홍콩', '낮부터 밤까지 새로운 발견'], 다낭: ['바다 앞에서 쉼표,<br>다낭', '해변과 리조트가 가까운 도시'], 제주: ['오름 따라 걷는 섬,<br>제주', '바다와 오름을 함께 걷는 하루'] };
 const THEMES = [
   ['도시 산책', 'theme-city-walk', '50% 55%', ['도쿄', '오사카', '타이베이', '홍콩']],
   ['휴양과 쉼', 'theme-beach', '50% 50%', ['다낭', '제주']],
@@ -4393,21 +4393,20 @@ const THEMES = [
 const img = (name, alt, pos, big, eager) => `<img src="photos/${name}-800.webp" srcset="photos/${name}-${big ? '800' : '480'}.webp ${big ? 800 : 480}w, photos/${name}-${big ? '1400' : '800'}.webp ${big ? 1400 : 800}w"
   sizes="(min-width:768px) 560px, 100vw" alt="${esc(alt)}" style="object-position:${pos}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="this.style.visibility='hidden'">`;
 const cardImg = (c, cls = '') => { const d = DEST[c]; return `<span class="im ${cls}">${img(d.ph, `${c} 여행 사진`, d.pos, d.big)}</span>`; };
-let homeCat = 'rec', heroTimer = 0;
+let heroTimer = 0;
 const ro = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00, j = c % 28; return w + (c >= 0 && c < 11172 && j && j !== 8 ? '으로' : '로'); }; // 받침 있으면 '으로'
 const destPhoto = x => { const d = DEST[(placeOf(x) || '').trim()]; return d ? `photos/${d.ph}-800.webp` : ''; };
 
 function renderHomeMain() {
-  const heroes = HERO.filter(c => homeCat === 'rec' || (homeCat === 'abroad') === !!DEST[c].abroad);
+  const heroes = Object.keys(HERO);
   const all = recents(), up = all.filter(x => !(x.end && span(today(), x.end) < 0)).sort((x, y) => (x.start || '').localeCompare(y.start || ''));
   const n = up[0], own = x => COVER_RE.test(x.cover || '');
   const nights = x => { const k = span(x.start, x.end); return k ? `${k}박 ${k + 1}일` : '당일'; };
   $('hHome').innerHTML = `
     <button class="hsearch" id="hSearch">${SVG(IC.search)}어디로 떠나고 싶으세요?</button>
-    <div class="seg-u htabs" role="tablist">${[['rec', '추천'], ['abroad', '해외여행'], ['dom', '국내여행']].map(([k, t]) => `<button role="tab" data-hc="${k}" aria-selected="${homeCat === k}">${t}</button>`).join('')}</div>
     <div class="hero2" aria-roledescription="carousel" aria-label="추천 여행지">
       <div class="track" id="heroTrack">${heroes.map((c, i) => `<button class="sl" data-city="${c}" aria-label="${c} 여행 가이드 보기 (${i + 1}/${heroes.length})">
-        ${img(DEST[c].ph, `${c} 풍경`, DEST[c].pos, 1, i === 0)}<span class="cp"><b>이번 여행은,<br>${c}</b><small>${DEST[c].line}</small><em>여행 가이드 보기 →</em></span></button>`).join('')}</div>
+        ${img(DEST[c].ph, `${c} 풍경`, DEST[c].pos, 1, 1)}<span class="cp"><b>${HERO[c][0]}</b><small>${HERO[c][1]}</small><em>여행 가이드 보기 →</em></span></button>`).join('')}</div>
       ${heroes.length > 1 ? `<div class="pg"><button id="heroPrev" aria-label="이전 여행지">‹</button><span id="heroNo">1 / ${heroes.length}</span><button id="heroNext" aria-label="다음 여행지">›</button></div>` : ''}
     </div>
     <div class="scut">
@@ -4421,7 +4420,7 @@ function renderHomeMain() {
         <small>${n.start ? `${md(new Date(n.start + 'T00:00'))} – ${md(new Date(n.end + 'T00:00'))} · ${nights(n)}` : ''}</small>
         <span class="stack">${(n.members || []).slice(0, 4).map(m => avHtml(m, 22)).join('')}</span></span><span class="go">일정 이어보기 →</span></button>`
       : `<div class="upc empty"><span class="tx"><b>첫 여행을 만들어 보세요</b><small>날짜와 도시만 정하면 일정이 시작돼요</small></span><button class="cta" data-sc="new">새 여행 만들기</button></div>`}
-    <section class="hsec"><h2>지금 떠나기 좋은 곳</h2><div class="bd g2">${PICKS[homeCat].map(c => `<button class="dcard" data-city="${c}">${cardImg(c)}<b>${c}</b><small>${DEST[c].line}</small></button>`).join('')}</div></section>
+    <section class="hsec"><h2>지금 떠나기 좋은 곳</h2><div class="bd g2">${['오사카', '타이베이', '도쿄', '부산'].map(c => `<button class="dcard" data-city="${c}">${cardImg(c)}<b>${c}</b><small>${DEST[c].line}</small></button>`).join('')}</div></section>
     <button class="bband" data-sc="new"><span><b>함께 짜면 더 즐거운 여행</b><small>친구와 같은 일정을 같이 고쳐요</small></span><span class="ar" aria-hidden="true">→</span></button>
     <section class="hsec"><h2>취향대로 떠나는 여행</h2><p class="sub">이번 여행은 어떤 분위기인가요?</p>
       <div class="bd g2">${THEMES.map(([t, ph, pos], i) => `<button class="dcard" data-theme="${i}"><span class="im t">${img(ph, `${t} 테마 사진`, pos)}</span><b>${t}</b></button>`).join('')}</div></section>
@@ -4457,7 +4456,6 @@ function startHero() {
 }
 $('hHome').onclick = e => {
   const t = e.target;
-  const hc = t.closest('[data-hc]'); if (hc) { homeCat = hc.dataset.hc; return renderHomeMain(); }
   const c = t.closest('[data-city]'); if (c) return openCity(c.dataset.city);
   const th = t.closest('[data-theme]'); if (th) return openTheme(+th.dataset.theme);
   const o = t.closest('[data-open]'); if (o) return (location.hash = 't=' + o.dataset.open);
