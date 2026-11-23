@@ -398,9 +398,11 @@
   .m-tiles button { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:84px; padding:12px 6px; border-radius:14px; background:var(--bg2); font-size:13px; font-weight:600; line-height:1.25; text-align:center; word-break:keep-all; }
   .m-tiles a { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:64px; padding:10px 6px; border-radius:14px; background:var(--bg2); font-size:13px; font-weight:600; text-align:center; word-break:keep-all; color:inherit; text-decoration:none; }
   .m-tiles button:active, .m-tiles a:active { background:var(--line); }
-  #bookDlg h4 { margin:18px 0 0; font-size:15px; } #bookDlg h4 small { display:block; color:var(--muted); font-size:12.5px; font-weight:500; margin-top:2px; }
-  #bookDlg .m-tiles { margin-top:10px; }
-  #bookDlg .more { margin:12px 0 0; font-size:12.5px; color:var(--muted); font-weight:600; }
+  .btodo { background:#fff4ef; border-radius:14px; padding:12px 14px; margin:4px 0 6px; font-size:13.5px; } .btodo b { display:block; margin-bottom:4px; } .btodo p { margin:2px 0; } .btodo.ok { background:var(--bg2); }
+  .bookpane .note { margin-top:18px; }
+  .bookpane h4, #bookDlg h4 { margin:18px 0 0; font-size:15px; } .bookpane h4 small, #bookDlg h4 small { display:block; color:var(--muted); font-size:12.5px; font-weight:500; margin-top:2px; }
+  #bookDlg .m-tiles, .bookpane .m-tiles { margin-top:10px; }
+  .bookpane .more, #bookDlg .more { margin:12px 0 0; font-size:12.5px; color:var(--muted); font-weight:600; }
   .hlist { list-style:none; margin:10px 0 0; padding:0; }
   .hlist li { display:flex; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
   .hlist li.msg { color:var(--muted); font-size:13px; display:block; border:0; }
@@ -728,7 +730,7 @@
 <section id="sheet" aria-label="일정">
   <div id="grip" role="button" aria-label="일정 목록 펼치기/접기" tabindex="0"></div>
   <nav id="tabs" aria-label="보기 선택">
-    <button data-v="plan" aria-pressed="true">일정</button><button data-v="money" aria-pressed="false">가계부</button><button data-v="pack" aria-pressed="false">준비물</button>
+    <button data-v="plan" aria-pressed="true">일정</button><button data-v="book" aria-pressed="false">예약</button><button data-v="money" aria-pressed="false">가계부</button><button data-v="pack" aria-pressed="false">준비물</button>
   </nav>
   <div id="pane" hidden></div>
   <nav id="days" aria-label="일차 선택"></nav>
@@ -2023,9 +2025,10 @@ function markPin(k) {
   if (old) on(old, false);
   if (pins.get(k)) on(pins.get(k), true);
 }
-function panVisible(pos) { // 시트에 가리지 않는 지도 가운데로
+function panVisible(pos, minZ = 15) { // 시트에 가리지 않는 지도 가운데로, 너무 멀리 보고 있으면 동네 크기까지 확대
   const off = sheetPx() / 2;
-  if (!useGoogle()) return map.panTo(map.unproject(map.project(pos).add([0, off])), { animate: true, duration: .4 });
+  if (!useGoogle()) { const z = Math.max(map.getZoom(), minZ); return map.setView(map.unproject(map.project(pos, z).add([0, off]), z), z, { animate: true, duration: .4 }); }
+  if (gmap.getZoom() < minZ) gmap.setZoom(minZ);
   const pr = gmap.getProjection(); if (!pr) return panTo(pos);
   const pt = pr.fromLatLngToPoint(G(pos)); pt.y += off / 2 ** gmap.getZoom();
   gmap.panTo(pr.fromPointToLatLng(pt));
@@ -2438,6 +2441,10 @@ function renderPane() {
   $('sheet').classList.toggle('alt', view !== 'plan');
   $('pane').hidden = view === 'plan';
   if (view === 'money') $('pane').innerHTML = moneyHtml();
+  if (view === 'book') { // 같은 내용이면 다시 안 그림 (숙소 목록 깜빡임 방지)
+    const sig = JSON.stringify([tripId, trip.start, trip.days.length, trip.cities, trip.flights, trip.members.length, trip.days.map((_, i) => dayItems(i).some(p => p.type === '숙소'))]);
+    if (sig !== bookSig || !$('pane').querySelector('.bookpane')) { bookSig = sig; $('pane').innerHTML = bookPaneHtml(); $('pane').querySelectorAll('.hlist').forEach(loadHotels); }
+  } else bookSig = '';
   if (view === 'pack') { // 친구 수정으로 다시 그려도 입력 중인 글자는 유지
     const typed = $('packIn')?.value || '', focused = document.activeElement?.id === 'packIn';
     $('pane').innerHTML = packHtml(); $('packIn').value = typed; if (focused) $('packIn').focus();
@@ -2928,7 +2935,7 @@ function stays() {
   return out;
 }
 // only: 그날 밤 숙소만(일차 번호), -1이면 항공권만, 없으면 전체
-function openBook(only = null) {
+function bookHtml(only = null) {
   const n = trip.members.length > 1 ? trip.members.length : 2, kr = !trip.abroad || countryOf(trip.country)?.code === 'KR';
   const day = i => addDays(trip.start, i), mdd = s => md(new Date(s + 'T00:00'));
   let h = '';
@@ -2951,9 +2958,34 @@ function openBook(only = null) {
         + '<p class="more">다른 사이트에서 더 보기</p>' + bookTiles([...(kr ? STAY_KR : []), ...STAY_SITES].map(([s, u]) => [s, u(c, a, b, n)]));
     }
   }
-  $('bookBody').innerHTML = h || '<p class="note">당일치기 여행이라 숙소가 필요 없어요.</p>';
+  return h || '<p class="note">당일치기 여행이라 숙소가 필요 없어요.</p>';
+}
+function openBook(only = null) {
+  $('bookBody').innerHTML = bookHtml(only);
   $('bookDlg').showModal();
   $('bookBody').querySelectorAll('.hlist').forEach(loadHotels);
+}
+// 투어·입장권: 도시 이름으로 검색 연결
+// shortcut: 제휴 ID 없이 검색 링크만, 제휴 승인되면 링크에 ID를 붙임
+const TOUR_SITES = [
+  ['마이리얼트립', c => `https://www.myrealtrip.com/search?q=${c}`],
+  ['클룩', c => `https://www.klook.com/ko/search/?query=${c}`],
+  ['KKday', c => `https://www.kkday.com/ko/product/productlist?keyword=${c}`],
+];
+// 예약 탭: 비어 있는 것 먼저 알려 주고, 항공·숙소·투어 찾기
+let bookSig = '';
+function bookPaneHtml() {
+  const nights = trip.days.slice(0, -1).map((_, i) => i).filter(i => !dayItems(i).some(p => p.type === '숙소'));
+  const todo = [
+    trip.abroad && !trip.flights.length ? '✈️ 아직 항공편이 없어요' : '',
+    nights.length ? `🏨 숙소가 비어 있는 밤: ${nights.map(i => i + 1).join('·')}일차` : '',
+  ].filter(Boolean);
+  const cities = [...new Set(trip.cities.filter(Boolean).map(c => c.trim()))];
+  if (!cities.length) cities.push(countryOf(trip.country)?.city || trip.title);
+  return `<div class="bookpane">${todo.length ? `<div class="btodo"><b>지금 챙길 것</b>${todo.map(t => `<p>${esc(t)}</p>`).join('')}</div>` : '<div class="btodo ok"><b>항공편·숙소가 다 채워져 있어요 👍</b></div>'}`
+    + bookHtml()
+    + cities.map(c => `<h4>🎟️ ${esc(c)} 투어·입장권<small>가이드 투어, 입장권, 교통패스</small></h4>` + bookTiles(TOUR_SITES.map(([n, u]) => [n, u(encodeURIComponent(c))]))).join('')
+    + '<p class="note">예약은 각 사이트에서 해요. 예약하고 나면 확인 메일을 <b>예약 서류함</b>에 올려 두면 같이 가는 사람도 볼 수 있어요.</p></div>';
 }
 // 도시 숙소 목록: 구글 장소 검색(숙박 시설)으로 받아 평점·리뷰 수 순. 가격은 아직 없음 → 부킹닷컴에서 그 숙소로 검색
 // shortcut: 가격은 제휴 API(아고다·부킹 등) 승인 뒤에 붙일 수 있음
