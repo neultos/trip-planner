@@ -3296,9 +3296,9 @@ async function loadPrice(el) {
       <span class="fp-t">${t(f.depart)} 출발${f.ret ? `<br>${t(f.ret)} 귀국${f.back ? ` · 경유 ${f.back}회` : ''}` : ''}</span>
       <span class="fp-p"><b>${Math.round(f.price).toLocaleString('ko-KR')}원</b><small>1인 참고가</small></span></a></li>`).join('')}</ul>`;
     // 날짜별 최저가 (예약 탭에서는 눌러서 그 날짜로 다시 검색)
-    const q = new URLSearchParams(el.dataset.q), a0 = q.get('a'), live = !!el.closest('#bkRes');
+    const qs = new URLSearchParams(el.dataset.q), a0 = qs.get('a'), live = !!el.closest('#bkRes');
     const man = v => `${(v / 10000).toFixed(v < 100000 ? 1 : 0)}만`;
-    if (x.days?.some(d => d.price)) el.insertAdjacentHTML('afterbegin', `<div class="fdays"><p class="fd-h">날짜별 최저가 · 1인<small>${q.get('b') ? '같은 일정 길이 우선' : '편도'}</small></p><div class="fd-row">${x.days.map(d => {
+    if (x.days?.some(d => d.price)) el.insertAdjacentHTML('afterbegin', `<div class="fdays"><p class="fd-h">날짜별 최저가 · 1인<small>${qs.get('b') ? '같은 일정 길이 우선' : '편도'}</small></p><div class="fd-row">${x.days.map(d => {
       const dt = new Date(d.d + 'T00:00'), on = d.d === a0, tag = live && d.price && !on ? 'button' : 'span';
       return `<${tag} class="fd${on ? ' on' : ''}${d.price ? '' : ' none'}"${tag === 'button' ? ` data-day="${d.d}" aria-label="${md(dt)} 출발로 다시 찾기"` : ''}><small>${md(dt)} (${WD[dt.getDay()]})</small><b>${d.price ? man(d.price) : '–'}</b></${tag}>`; }).join('')}</div></div>`);
     // 항공사별 최저가
