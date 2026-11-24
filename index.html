@@ -160,8 +160,8 @@
   .ps-head::before { content:''; position:absolute; top:7px; left:50%; width:40px; height:5px; margin-left:-20px; border-radius:3px; background:var(--line); }
   .ps-head b { flex:1; min-width:0; font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .ps-head button { width:36px; height:36px; border-radius:50%; background:var(--bg2); font-size:15px; flex:none; }
-  .ps-tt { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
-  .ps-tt small { font-size:12px; font-weight:600; color:var(--muted); }
+  .ps-tt { flex:1; min-width:0; display:flex; align-items:center; gap:8px; }
+  .ps-tt small { flex:none; padding:3px 9px; border-radius:12px; background:var(--bg2); font-size:12px; font-weight:700; color:var(--fg); white-space:nowrap; }
   .ps-tt b { font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #pside .ps-edit { color:#111827; }
   .ps-acts { display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:8px; margin-top:14px; }
@@ -2403,7 +2403,7 @@ $('scroll').addEventListener('scroll', () => { followRaf ||= requestAnimationFra
 (() => {
   let s = null, gs = [], busy = false;
   const lh = () => $('sheet').querySelector('.list-head');
-  const put = (x, ms) => [lh(), $('dayWrap')].forEach(el => { el.style.transition = ms ? `transform ${ms}ms cubic-bezier(.2,.8,.2,1)` : 'none'; el.style.transform = x ? `translateX(${x}px)` : ''; });
+  const put = (x, ms) => [lh(), $('dayWrap')].forEach(el => { el.style.transition = ms ? `transform ${ms}ms cubic-bezier(.25,.8,.3,1)` : 'none'; el.style.transform = x ? `translateX(${x}px)` : ''; });
   const tab = n => $('days').querySelector(`.day[data-i="${n}"]`);
   const clear = () => { gs.forEach(g => g.remove()); gs = []; };
   // 옆 일차를 실제와 같은 모양으로 그려 복제한 뒤 원래대로 되돌림 (지도는 그대로)
@@ -2421,7 +2421,7 @@ $('scroll').addEventListener('scroll', () => { followRaf ||= requestAnimationFra
     lh().append(h); $('dayWrap').append(box); gs = [h, box];
     return w;
   };
-  const back = () => { if (s?.h) { put(0, 220); setTimeout(clear, 230); } s = null; };
+  const back = () => { if (s?.h) { put(0, 300); setTimeout(clear, 310); } s = null; };
   $('scroll').addEventListener('touchstart', e => { s = !busy && e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0 } : null; }, { passive: true });
   $('scroll').addEventListener('touchmove', e => {
     if (!s) return;
@@ -2441,15 +2441,16 @@ $('scroll').addEventListener('scroll', () => { followRaf ||= requestAnimationFra
   $('scroll').addEventListener('touchend', () => {
     if (!s?.h) return (s = null);
     const { dx, sign, w } = s, n = cur + sign; s = null;
-    if (Math.abs(dx) < 60 || !w) { put(0, 220); return setTimeout(clear, 230); }
-    busy = true; put(-sign * w, 200);
+    if (Math.abs(dx) < 60 || !w) { put(0, 300); return setTimeout(clear, 310); }
+    const ms = Math.round(Math.min(440, Math.max(300, (w - Math.abs(dx)) * 1.1))); // 남은 거리가 길수록 천천히
+    busy = true; put(-sign * w, ms);
     setTimeout(() => {
       const y = gs[1].getBoundingClientRect().top;
       tab(n)?.click(); $('stops').classList.remove('sw');
       clear(); put(0, 0);
       (snap === 'full' ? window : $('scroll')).scrollBy({ top: $('dayWrap').getBoundingClientRect().top - y, behavior: 'instant' }); // 보던 위치 그대로
       busy = false;
-    }, 200);
+    }, ms);
   });
 })();
 
@@ -3050,11 +3051,13 @@ const pinfo = new Map();
 // 일정 카드를 누르면 아래에서 상세 창: 시간·메모·첨부 파일 + 구글 장소 정보
 const docUrl = new Map(); // 첨부 사진 미리보기 주소 (이번 실행 동안만)
 const blobUrl = d => docUrl.get(d.id) || (docUrl.set(d.id, URL.createObjectURL(d.blob)), docUrl.get(d.id));
-let psP = null;
+let psP = null, psLayer = false, psPopped = false;
 function syncPside(p) {
   const ps = $('pside'), b = $('psBody'), pl = $('psPlace');
   ps.classList.toggle('on', !!p); psP = p;
-  if (!p) return;
+  // 폰 뒤로가기로 닫히게: 열 때 기록 하나, 버튼으로 닫으면 정리 (아래 '폰 뒤로가기' 참고)
+  if (!p) { if (psLayer) { psLayer = false; if (psPopped) psPopped = false; else dropLayer(); } return; }
+  if (!psLayer) { psLayer = true; pushLayer(); }
   if (b.dataset.k !== key(p)) { b.dataset.k = key(p); b.scrollTop = 0; }
   $('psName').textContent = p.name;
   const T = typeOf(p), fl = filesOf(p);
@@ -5067,6 +5070,7 @@ addEventListener('popstate', () => {
   }
   const top = [...document.querySelectorAll('dialog[open]')].pop();
   if (top) { top.dataset.popped = '1'; top.close(); return; }
+  if (psLayer) { psPopped = true; openK = null; return render(); } // 일정 상세 창
   if ($('searchView').classList.contains('on')) { $('searchView').dataset.popped = '1'; closeSearch(); }
   else if (nw) { nw.popped = true; closeNew(); }
 });
