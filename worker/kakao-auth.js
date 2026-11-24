@@ -20,6 +20,7 @@ export default {
       return new Response('wetrip auth', { status: 200 });
     } catch (e) {
       console.log('auth error', e && e.stack || e);
+      if (url.pathname === '/files') return new Response('error', { status: 500, headers: { 'Access-Control-Allow-Origin': ALLOW.includes(req.headers.get('Origin')) ? req.headers.get('Origin') : ALLOW[0] } });
       const back = backOf(url.searchParams.get('state')) || BACK[0];
       return Response.redirect(back + '#kakaoerr=' + encodeURIComponent('server'), 302);
     }

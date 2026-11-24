@@ -3091,7 +3091,7 @@ $('psItem').onclick = e => {
   if (!psP) return;
   const a = e.target.closest('[data-ps]')?.dataset.ps, dc = e.target.closest('[data-doc]');
   if (a === 'edit') openItem(psP, cur);
-  if (a === 'attach') { docsFor = { p: psP, day: cur }; $('fileDoc').click(); }
+  if (a === 'attach') { if (loaded && !isMember()) return showInvite(); docsFor = { p: psP, day: cur }; $('fileDoc').click(); }
   if (dc) { const d = docs.find(v => v.id === dc.dataset.doc); if (d) openDoc(d); }
 };
 $('psX').onclick = () => { openK = null; render(); };
@@ -3930,7 +3930,7 @@ $('dList').onclick = async e => {
     renderDocs(); render();
   }
 };
-$('dAdd').onclick = () => $('fileDoc').click();
+$('dAdd').onclick = () => loaded && !isMember() ? showInvite() : $('fileDoc').click(); // 참여한 사람만 올림
 $('fileDoc').onchange = e => { const f = [...e.target.files]; e.target.value = ''; if (f.length && docsFor) addDocs(f); };
 
 /* ---------- 캘린더(.ics) 내보내기 ---------- */
