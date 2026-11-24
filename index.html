@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="favicon.png?v=2">
-<link rel="apple-touch-icon" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" href="icon-192.png?v=3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="위트립">
@@ -691,6 +691,11 @@
   .nw-search input { flex:1; min-width:0; border:0; background:none; font-size:16px; outline:none; color:var(--fg); }
   .nw-h { font-size:15px; font-weight:800; margin:0 0 12px; }
   .nw-tiles { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  /* 많이 가는 여행지: 남은 높이에 맞춰 타일 높이를 나눠서 스크롤 없이 (아주 작은 화면만 스크롤) */
+  .nw-page:first-child { display:flex; flex-direction:column; }
+  #nwList { flex:1; min-height:0; display:flex; flex-direction:column; }
+  #nwList .nw-tiles { flex:1; min-height:0; grid-auto-rows:minmax(68px, 1fr); }
+  #nwList .nw-tiles .nw-tile { aspect-ratio:auto; }
   .nw-tile { position:relative; aspect-ratio:4/3; border-radius:16px; overflow:hidden; background:#eef1f5 center/cover; text-align:left; }
   .nw-tile::after { content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0) 60%); }
   .nw-tile span { position:absolute; left:12px; bottom:10px; z-index:1; color:#fff; font-weight:800; font-size:17px; }
@@ -963,6 +968,47 @@
   .mini-foot a { color:var(--wt-sub); text-decoration:none; }
 
   /* 예약 (추가 시안) */
+
+  /* 하단 메뉴 페이지 넘김 · 고정 헤더 */
+  #home .home-head, #home .hpage-h { position:sticky; top:0; z-index:6; background:var(--bg); }
+  #home .hpage-h { margin-left:-20px; margin-right:-20px; padding-left:20px; padding-right:20px; padding-bottom:8px; margin-bottom:4px; }
+  #hHomeWrap > .home-head { margin-left:-20px; margin-right:-20px; padding-left:20px; padding-right:20px; }
+  #home .pane-out { position:absolute; left:20px; right:20px; z-index:1; pointer-events:none; }
+  #hHomeWrap .home-head { animation:none; }
+  /* 예약 폼: 누르면 검색 페이지·달력 */
+  .bform .fbtn { display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:2px; width:100%; min-height:56px; padding:8px 14px; border:1px solid var(--wt-line); border-radius:12px; background:#fff; text-align:left; min-width:0; }
+  .bform .fbtn small { font-size:12px; color:var(--wt-sub); font-weight:500; }
+  .bform .fbtn b { font-size:15px; font-weight:600; color:var(--wt-ink); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bform .fbtn b.ph { color:#9aa3b2; font-weight:500; }
+  .bform .r2s { align-items:stretch; }
+  .bform .swap { height:auto; }
+  .pstep { display:flex; align-items:center; justify-content:space-between; min-height:56px; padding:0 8px 0 14px; border:1px solid var(--wt-line); border-radius:12px; background:#fff; }
+  .pstep small { font-size:12px; color:var(--wt-sub); font-weight:500; }
+  .pstep div { display:flex; align-items:center; gap:4px; }
+  .pstep b { min-width:76px; text-align:center; font-size:15px; font-weight:600; color:var(--wt-ink); }
+  .pstep button { width:40px; height:40px; border-radius:50%; background:var(--wt-soft); color:var(--wt-ink); font-size:20px; line-height:1; }
+  .pstep button:disabled { opacity:.35; }
+  button.tpick { width:100%; text-align:left; padding:0 12px 0 14px; }
+  #bkRes { scroll-margin-top:84px; }
+  dialog.pick-dlg { width:100%; max-width:600px; height:100dvh; max-height:100dvh; margin:0 auto; border-radius:0; padding:0; display:flex; flex-direction:column; overflow:hidden; }
+  dialog.pick-dlg:not([open]) { display:none; }
+  .pk-h { display:flex; align-items:center; gap:4px; padding:calc(var(--safe-t) + 8px) 12px 4px 4px; }
+  .pk-h button { width:44px; height:44px; display:grid; place-items:center; border-radius:50%; color:var(--wt-ink); }
+  .pk-h b { font-size:18px; font-weight:700; color:var(--wt-ink); }
+  .pk-q { display:flex; align-items:center; gap:8px; margin:8px 16px 4px; padding:0 14px; height:48px; border-radius:12px; background:var(--wt-soft); color:var(--wt-sub); }
+  .pk-q input { flex:1; min-width:0; height:100%; border:0; background:none; font-size:16px; color:var(--wt-ink); outline:none; }
+  .pk-list { list-style:none; margin:0; padding:4px 16px calc(24px + var(--safe-b)); overflow-y:auto; flex:1; }
+  .pk-list .pk-sec { padding:14px 4px 6px; font-size:13px; font-weight:700; color:var(--wt-sub); }
+  .pk-list .pk-none { padding:24px 4px; color:var(--wt-sub); font-size:14px; line-height:1.6; }
+  .pk-list button { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; min-height:56px; padding:8px 4px; border-bottom:1px solid var(--wt-line); text-align:left; }
+  .pk-list button span { display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .pk-list button b { font-size:15.5px; font-weight:600; color:var(--wt-ink); }
+  .pk-list button small { font-size:12.5px; color:var(--wt-sub); }
+  .pk-list button em { flex:none; font-style:normal; font-size:13px; font-weight:700; color:var(--wt-brand); background:var(--wt-blue-soft); padding:3px 8px; border-radius:8px; }
+  .pk-list button.on b { color:var(--wt-brand); }
+  /* 어디로 떠나고 싶으세요: 한 화면에 다 보이게 */
+  .city-dlg .cd-list button { padding:6px 0; }
+  .city-dlg .cd-list img { width:64px; height:42px; }
   .tpick { position:relative; display:flex; align-items:center; gap:8px; height:48px; padding:0 14px; margin-bottom:12px; border:1px solid var(--wt-line); border-radius:12px; background:#fff; }
   .tpick .dd { background:var(--wt-blue-soft); color:var(--wt-brand); font-size:13px; font-weight:700; padding:2px 8px; border-radius:8px; }
   .tpick b { font-size:15px; font-weight:700; color:var(--wt-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -1080,7 +1126,7 @@
   // 홈이 준비돼 있으면 0.22초 사라짐. 사진이 3초 안에 안 오면 기다리지 않고 닫음
   (() => {
     const sp = document.getElementById('splash'), bg = sp.querySelector('.bg');
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches, HOLD = still ? 900 : 1100;
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches, HOLD = still ? 1200 : 1600;
     let t0 = 0, ready = false; const start = performance.now();
     const close = () => { if (sp.classList.contains('out')) return; sp.classList.add('out'); setTimeout(() => sp.remove(), 240); };
     const tryClose = () => { if (!ready) return; if (t0) setTimeout(close, Math.max(0, t0 + HOLD - performance.now())); else if (performance.now() - start > 3000) close(); };
@@ -1095,11 +1141,13 @@
 <div id="gmap" role="application" aria-label="일정 지도" hidden></div>
 
 <section id="home" aria-label="내 여행">
+  <div id="hHomeWrap">
   <div class="home-head">
     <button class="brand" id="brandBtn" aria-label="위트립 홈"><img class="wordmark" src="symbol.png?v=1" width="40" height="32" alt=""></button>
     <button id="meBtn" aria-label="내 프로필"></button>
   </div>
   <div id="hHome"></div>
+  </div>
   <div id="hTrips" hidden data-seg="up">
     <div class="hpage-h"><h1>내 여행</h1><button class="hp-add" id="tripsNew" aria-label="새 여행 만들기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
     <div class="seg-u" role="tablist" id="tripSeg"><button role="tab" data-ts="up" aria-selected="true">다가오는 여행</button><button role="tab" data-ts="past" aria-selected="false">지난 여행</button></div>
@@ -1345,6 +1393,12 @@
   </form>
 </dialog>
 
+<!-- 예약: 공항·도시·여행 고르기 (전체 화면) -->
+<dialog id="pickDlg" class="pick-dlg" aria-labelledby="pkTitle">
+  <div class="pk-h"><button type="button" id="pkBack" aria-label="닫기"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><b id="pkTitle"></b></div>
+  <div class="pk-q" id="pkSearch"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="pkQ" type="search" autocomplete="off" enterkeyhint="search" aria-label="검색"></div>
+  <ul id="pkList" class="pk-list"></ul>
+</dialog>
 <!-- 커스텀 캘린더 -->
 <dialog id="calDlg">
   <form method="dialog">
@@ -4676,13 +4730,23 @@ function renderStories() {
 function startHero() {
   clearInterval(heroTimer);
   const tr = $('heroTrack'); if (!tr) return;
-  const k = tr.children.length, at = () => Math.round(tr.scrollLeft / tr.clientWidth);
-  const go = i => tr.scrollTo({ left: ((i + k) % k) * tr.clientWidth, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-  tr.onscroll = () => { if ($('heroNo')) $('heroNo').textContent = `${at() + 1} / ${k}`; };
-  const stop = () => clearInterval(heroTimer);
-  ['pointerdown', 'touchstart', 'focusin'].forEach(ev => tr.addEventListener(ev, stop, { passive: true }));
-  if ($('heroPrev')) { $('heroPrev').onclick = () => { stop(); go(at() - 1); }; $('heroNext').onclick = () => { stop(); go(at() + 1); }; }
-  if (k > 1 && !matchMedia('(prefers-reduced-motion: reduce)').matches) heroTimer = setInterval(() => { if (hTab === 'home' && document.body.classList.contains('at-home')) go(at() + 1); }, 6000);
+  const k = tr.children.length; if (k < 2) return;
+  const loop = tr.children[0].cloneNode(true); loop.inert = true; loop.setAttribute('aria-hidden', 'true'); loop.dataset.loop = '1';
+  loop.querySelectorAll('img').forEach(i => { i.removeAttribute('fetchpriority'); i.loading = 'lazy'; }); tr.append(loop);
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const at = () => Math.round(tr.scrollLeft / tr.clientWidth);
+  const home0 = () => { if (at() >= k) tr.scrollTo({ left: 0, behavior: 'instant' }); };
+  const go = i => { tr.scrollTo({ left: i * tr.clientWidth, behavior: still ? 'auto' : 'smooth' }); if (i >= k) setTimeout(home0, 700); }; // 복사본까지 간 뒤 첫 장으로
+  let settle = 0;
+  tr.onscroll = () => {
+    if ($('heroNo')) $('heroNo').textContent = `${at() % k + 1} / ${k}`;
+    clearTimeout(settle); settle = setTimeout(home0, 120); // 손으로 넘겨 복사본에 멈춰도 첫 장으로
+  };
+  const auto = () => { clearInterval(heroTimer); if (!still) heroTimer = setInterval(() => { if (hTab === 'home' && document.body.classList.contains('at-home')) go(at() + 1); }, 6000); };
+  ['pointerdown', 'touchstart'].forEach(ev => tr.addEventListener(ev, () => clearInterval(heroTimer), { passive: true }));
+  ['pointerup', 'touchend', 'touchcancel'].forEach(ev => tr.addEventListener(ev, auto, { passive: true })); // 손을 떼면 다시 자동으로
+  if ($('heroPrev')) { $('heroPrev').onclick = () => { auto(); go(at() === 0 ? k - 1 : at() - 1); }; $('heroNext').onclick = () => { auto(); go(at() + 1); }; }
+  auto();
 }
 $('hHome').onclick = e => {
   const t = e.target;
@@ -4767,9 +4831,11 @@ function renderHomeBook() {
   if (!bk.a) { bk.a = addDays(t0, 14); bk.b = addDays(t0, 17); }
   const tr = up.find(x => x.id === bk.trip), sum = tr && !bk.edit, b = bk.seg === 'fly' && !bk.rt ? '' : bk.b;
   const d = s => s ? md(new Date(s + 'T00:00')) : '', nights = Math.max(0, span(bk.a, bk.b || bk.a));
-  const pick = up.length ? `<label class="tpick">${tr ? `<span class="dd">${dday(tr)}</span><b>${esc(tr.title)}</b><span class="stack">${(tr.members || []).slice(0, 3).map(m => avHtml(m, 22)).join('')}</span>` : '<b>여행 없이 직접 찾기</b>'}
-      <span class="chev" aria-hidden="true">${SVG('<path d="m6 9 6 6 6-6"/>')}</span>
-      <select id="bkTrip" aria-label="예약할 여행 고르기">${up.map(x => `<option value="${esc(x.id)}"${x.id === bk.trip ? ' selected' : ''}>${esc(dday(x) + ' ' + x.title)}</option>`).join('')}<option value=""${bk.trip ? '' : ' selected'}>여행 없이 직접 찾기</option></select></label>` : '';
+  const chev = `<span class="chev" aria-hidden="true">${SVG('<path d="m6 9 6 6 6-6"/>')}</span>`;
+  const pick = up.length ? `<button type="button" class="tpick" data-pick="trip" aria-label="예약할 여행 고르기">${tr ? `<span class="dd">${dday(tr)}</span><b>${esc(tr.title)}</b><span class="stack">${(tr.members || []).slice(0, 3).map(m => avHtml(m, 22)).join('')}</span>` : '<b>여행 없이 직접 찾기</b>'}${chev}</button>` : '';
+  const fb = (k, lab, val, ph) => `<button type="button" class="fbtn" data-pick="${k}"><small>${lab}</small><b class="${val ? '' : 'ph'}">${esc(val || ph)}</b></button>`;
+  const dtxt = bk.seg === 'fly' && !bk.rt ? fmtDate(bk.a) : `${d(bk.a)} (${WD[new Date(bk.a + 'T00:00').getDay()]}) – ${d(bk.b)} (${WD[new Date(bk.b + 'T00:00').getDay()]}) · ${nights ? nights + '박' : '당일'}`;
+  const people = `<div class="pstep"><small>인원</small><div><button type="button" data-step="-1" aria-label="인원 줄이기"${bk.n <= 1 ? ' disabled' : ''}>−</button><b>성인 ${bk.n}명</b><button type="button" data-step="1" aria-label="인원 늘리기"${bk.n >= 9 ? ' disabled' : ''}>+</button></div></div>`;
   const fsum = `<div class="fsum"><div><b>${esc(bk.from)} <small>${esc(airportOf(bk.from) ? airportLabel(airportOf(bk.from)) : '')}</small> → ${esc(bk.to)} <small>${esc(airportOf(bk.to) ? airportLabel(airportOf(bk.to)) : '')}</small></b>
       <small>${d(bk.a)}${b ? ' – ' + d(b) + ' · 왕복' : ' · 편도'} · ${bk.n}명</small></div><button type="button" class="fs-go" data-edit="1">조건 수정</button></div>`;
   const ssum = `<div class="fsum"><span class="fs-ic">${SVG(IC.bed)}</span><div><b>${esc(bk.city)} · ${d(bk.a)} – ${d(bk.b)}</b><small>${nights}박 · ${bk.n}명</small></div><button type="button" class="fs-ed" data-edit="1" aria-label="조건 수정">${SVG('<path d="M4 20h4L19 9l-4-4L4 16z"/>')}</button></div>`;
@@ -4777,16 +4843,15 @@ function renderHomeBook() {
     <div class="bseg" role="tablist"><button role="tab" data-bs="fly" aria-selected="${bk.seg === 'fly'}">항공권</button><button role="tab" data-bs="stay" aria-selected="${bk.seg === 'stay'}">숙소</button></div>
     ${sum ? (bk.seg === 'fly' ? fsum : ssum) : bk.seg === 'fly' ? `<form class="bform" id="bkFly" novalidate>
       <div class="chips2"><button type="button" data-rt="1" aria-pressed="${bk.rt}">왕복</button><button type="button" data-rt="0" aria-pressed="${!bk.rt}">편도</button></div>
-      <div class="r2s"><label>출발<input id="bkFrom" list="apList" value="${esc(apText(bk.from))}" autocomplete="off"></label><button type="button" class="swap" id="bkSwap" aria-label="출발·도착 바꾸기">⇄</button>
-        <label>도착<input id="bkTo" list="apList" value="${esc(apText(bk.to))}" placeholder="어디로 떠나세요?" autocomplete="off"></label></div>
-      <div class="r2"><label>가는 날<input type="date" id="bkA" value="${bk.a}" min="${t0}"></label>${bk.rt ? `<label>오는 날<input type="date" id="bkB" value="${bk.b}" min="${t0}"></label>` : '<span></span>'}</div>
-      <label>인원<select id="bkN">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => `<option value="${k}"${k === bk.n ? ' selected' : ''}>성인 ${k}명</option>`).join('')}</select></label>
+      <div class="r2s">${fb('from', '출발', apText(bk.from), '출발지 선택')}<button type="button" class="swap" id="bkSwap" aria-label="출발·도착 바꾸기">⇄</button>${fb('to', '도착', apText(bk.to), '도착지 선택')}</div>
+      ${fb('dates', bk.rt ? '가는 날 – 오는 날' : '가는 날', dtxt, '날짜 선택')}
+      ${people}
       <button class="go">항공권 검색</button></form>`
     : `<form class="bform" id="bkStay" novalidate>
       <div class="chips2"><button type="button" data-dom="0" aria-pressed="${!bk.dom}">해외</button><button type="button" data-dom="1" aria-pressed="${bk.dom}">국내</button></div>
-      <label>도시<input id="bkCity" value="${esc(bk.city)}" placeholder="예: 오사카, 제주" autocomplete="off"></label>
-      <div class="r2"><label>체크인<input type="date" id="bkA" value="${bk.a}" min="${t0}"></label><label>체크아웃<input type="date" id="bkB" value="${bk.b}" min="${t0}"></label></div>
-      <label>인원<select id="bkN">${[1, 2, 3, 4, 5, 6, 7, 8].map(k => `<option value="${k}"${k === bk.n ? ' selected' : ''}>성인 ${k}명</option>`).join('')}</select></label>
+      ${fb('city', '도시', bk.city, '어디에서 머무세요?')}
+      ${fb('dates', '체크인 – 체크아웃', dtxt, '날짜 선택')}
+      ${people}
       <button class="go">숙소 검색</button></form>`}
     <div class="bres" id="bkRes"></div>
     ${bk.trip ? '' : `<section class="hsec"><button class="stayb" data-bs="stay">${img('stay-v4', '', '50% 50%', 1)}<span class="cp"><b>여행에 꼭 맞는 숙소</b><em>숙소 둘러보기 →</em></span></button></section>
@@ -4807,7 +4872,9 @@ $('hBook').addEventListener('click', e => {
   const bs = t.closest('[data-bs]'); if (bs) { bk.seg = bs.dataset.bs; renderHomeBook(); return bs.classList.contains('stayb') && $('hBook').querySelector('.bseg').scrollIntoView({ block: 'start' }); }
   const rt = t.closest('[data-rt]'); if (rt) { readBk(); bk.rt = rt.dataset.rt === '1'; return renderHomeBook(); }
   const dm = t.closest('[data-dom]'); if (dm) { readBk(); bk.dom = dm.dataset.dom === '1'; return renderHomeBook(); }
-  if (t.closest('#bkSwap')) { const f = $('bkFrom').value; $('bkFrom').value = $('bkTo').value; $('bkTo').value = f; return; }
+  if (t.closest('#bkSwap')) { [bk.from, bk.to] = [bk.to, bk.from]; return renderHomeBook(); }
+  const pk = t.closest('[data-pick]'); if (pk) return bkPick(pk.dataset.pick);
+  const stp = t.closest('[data-step]'); if (stp) { bk.n = Math.max(1, Math.min(9, bk.n + +stp.dataset.step)); return renderHomeBook(); }
   const c = t.closest('[data-city]'); if (c) return openCity(c.dataset.city);
 });
 function readBk() {
@@ -4816,7 +4883,47 @@ function readBk() {
   if ($('bkA')) bk.a = $('bkA').value; if ($('bkB')) bk.b = $('bkB').value;
   if ($('bkN')) bk.n = +$('bkN').value;
 }
-$('hBook').addEventListener('submit', e => { e.preventDefault(); readBk(); bk.edit = false; runBk(); });
+$('hBook').addEventListener('submit', e => { e.preventDefault(); readBk(); bk.edit = false; runBk(); bkToRes(); });
+// 검색하면 결과 목록으로 스크롤
+const bkToRes = () => setTimeout(() => $('bkRes')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }), 60);
+// 공항·도시·여행 고르기: 전체 화면 검색 페이지
+const POP_AP = ['ICN', 'GMP', 'PUS', 'CJU', 'NRT', 'HND', 'KIX', 'FUK', 'CTS', 'OKA', 'TPE', 'HKG', 'BKK', 'DAD', 'SGN', 'HAN', 'CEB', 'MNL', 'SIN', 'GUM'];
+const STAY_POP_KR = ['제주', '부산', '강릉', '경주', '여수', '속초', '서울', '전주'], STAY_POP = ['도쿄', '오사카', '후쿠오카', '타이베이', '다낭', '방콕', '홍콩', '세부', '싱가포르', '괌', '파리', '하와이'];
+const CITY_ALL = (() => { const seen = new Set(), out = [];
+  for (const c of COUNTRIES) for (const n of [c.city, ...c.alias.split(' ')]) if (n && !NATION_ALIAS.test(n) && !/^[A-Z]+$/.test(n) && !seen.has(n)) { seen.add(n); out.push({ n, c: c.name, kr: c.code === 'KR' }); }
+  return out; })();
+function bkPick(k) {
+  const apItem = a => ({ v: a.code, t: airportLabel(a), s: [countryByCode(a.cc)?.name, a.alias && /공항/.test(a.alias) ? a.alias : ''].filter(Boolean).join(' · '), r: a.code });
+  if (k === 'from' || k === 'to') return openPick({ title: k === 'from' ? '어디에서 출발하세요?' : '어디로 떠나세요?', ph: '도시·공항 이름이나 코드 (예: 오사카, KIX)', search: 1, head: '많이 찾는 공항',
+    items: q => (q ? findAirports(q) : POP_AP.map(airportOf).filter(Boolean)).map(apItem), done: v => { bk[k] = v; renderHomeBook(); } });
+  if (k === 'city') return openPick({ title: '어디에서 머무세요?', ph: '도시 이름 (예: 오사카, 제주)', search: 1, head: bk.dom ? '국내 인기 도시' : '해외 인기 도시',
+    items: q => { const n = norm(q);
+      if (!n) return (bk.dom ? STAY_POP_KR : STAY_POP).map(x => CITY_ALL.find(c => c.n === x) || { n: x, c: '' }).map(c => ({ v: c.n, t: c.n, s: c.c }));
+      const m = CITY_ALL.filter(c => norm(c.n).includes(n) || norm(c.c).startsWith(n)).slice(0, 30).map(c => ({ v: c.n, t: c.n, s: c.c }));
+      return m.some(x => norm(x.v) === n) ? m : [{ v: q.trim().slice(0, 30), t: `'${q.trim().slice(0, 30)}' 그대로 찾기`, s: '목록에 없는 도시도 찾을 수 있어요' }, ...m]; },
+    done: v => { bk.city = v; const c = CITY_ALL.find(x => x.n === v); if (c) bk.dom = c.kr; renderHomeBook(); } });
+  if (k === 'trip') return openPick({ title: '어떤 여행을 예약할까요?', items: () => [...upTrips().map(x => ({ v: x.id, t: x.title || '나의 여행', s: `${dday(x)} · ${rangeText(x.start, x.end)}`, on: x.id === bk.trip })), { v: '', t: '여행 없이 직접 찾기', s: '날짜와 장소를 직접 넣어요', on: !bk.trip }],
+    done: v => { const x = upTrips().find(t => t.id === v); if (x) bkFromTrip(x); else { bk.trip = ''; bk.edit = false; } renderHomeBook(); } });
+  if (k === 'dates') {
+    const single = bk.seg === 'fly' && !bk.rt;
+    return openCal(single ? 'single' : 'range', bk.a, single ? '' : bk.b, (a, b) => { const len = bk.b ? span(bk.a, bk.b) : 3; bk.a = a; bk.b = single ? (bk.b && bk.b > a ? bk.b : addDays(a, Math.max(1, len))) : b; renderHomeBook(); });
+  }
+}
+let pk = null;
+function openPick(o) {
+  pk = o; $('pkTitle').textContent = o.title; $('pkQ').value = ''; $('pkQ').placeholder = o.ph || ''; $('pkSearch').hidden = !o.search;
+  drawPick(); $('pickDlg').showModal(); $('pkList').scrollTop = 0;
+  if (o.search) setTimeout(() => $('pkQ').focus(), 60); else document.activeElement?.blur();
+}
+function drawPick() {
+  const q = $('pkQ').value.trim(), it = pk.items(q); pk.cur = it;
+  $('pkList').innerHTML = (pk.head && !q ? `<li class="pk-sec">${pk.head}</li>` : '') + (it.length ? it.map((x, i) => `<li><button type="button" data-pk="${i}"${x.on ? ' class="on"' : ''}><span><b>${esc(x.t)}</b>${x.s ? `<small>${esc(x.s)}</small>` : ''}</span>${x.r ? `<em>${esc(x.r)}</em>` : ''}</button></li>`).join('')
+    : '<li class="pk-none">찾는 곳이 없어요. 도시 이름이나 공항 코드로 넣어 보세요.</li>');
+}
+$('pkQ').oninput = drawPick;
+$('pkQ').onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('pkList').querySelector('[data-pk]')?.click(); } };
+$('pkList').onclick = e => { const b = e.target.closest('[data-pk]'); if (!b) return; const x = pk.cur[+b.dataset.pk]; $('pickDlg').close(); pk.done(x.v); };
+$('pkBack').onclick = () => $('pickDlg').close();
 function runBk() {
   const err = m => { $('bkRes').innerHTML = `<p class="err">${esc(m)}</p>`; };
   const b = bk.seg === 'fly' && !bk.rt ? '' : bk.b;
@@ -4858,7 +4965,7 @@ $('hBook').addEventListener('click', e => {
 function homeTab(t) {
   hTab = t;
   $('hNav').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.h === t)));
-  $('hHome').hidden = t !== 'home'; $('hTrips').hidden = t !== 'trips'; $('hBook').hidden = t !== 'book'; $('hCafe').hidden = t !== 'cafe'; $('hBlog').hidden = t !== 'blog';
+  $('hHomeWrap').hidden = t !== 'home'; $('hTrips').hidden = t !== 'trips'; $('hBook').hidden = t !== 'book'; $('hCafe').hidden = t !== 'cafe'; $('hBlog').hidden = t !== 'blog';
   document.body.classList.toggle('h-home', t === 'home');
   document.body.classList.toggle('fab-off', t !== 'cafe'); // 떠 있는 글쓰기 버튼은 위톡에서만 (여행 글은 화면 안 버튼)
   $('newTripBtn').innerHTML = SVG('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>') + '글쓰기';
@@ -4871,7 +4978,25 @@ function homeTab(t) {
 $('brandBtn').onclick = () => { homeTab('home'); $('home').scrollTo({ top: 0, behavior: 'smooth' }); };
 $('tripsNew').onclick = () => openNew();
 $('tripSeg').onclick = e => { const b = e.target.closest('[data-ts]'); if (!b) return; $('hTrips').dataset.seg = b.dataset.ts; $('tripSeg').querySelectorAll('button').forEach(x => x.setAttribute('aria-selected', String(x === b))); };
-$('hNav').onclick = e => { const b = e.target.closest('[data-h]'); if (!b) return; homeTab(b.dataset.h); $('home').scrollTo(0, 0); };
+// 하단 메뉴: 메뉴 순서대로 페이지가 옆으로 밀려 넘어감 (헤더 포함, 메뉴는 고정)
+const TAB_ORDER = ['home', 'trips', 'book', 'cafe', 'blog'];
+const paneOf = t => $({ home: 'hHomeWrap', trips: 'hTrips', book: 'hBook', cafe: 'hCafe', blog: 'hBlog' }[t]);
+function slideTo(t) {
+  const from = hTab, home = $('home'), old = paneOf(from);
+  if (t === from) return home.scrollTo({ top: 0, behavior: 'smooth' });
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const top = old.offsetTop - home.scrollTop, dir = TAB_ORDER.indexOf(t) > TAB_ORDER.indexOf(from) ? 1 : -1;
+  homeTab(t); home.scrollTo(0, 0);
+  if (still) return;
+  // 나가는 페이지는 보던 자리 그대로 잠깐 남겨 두고 같이 밀어냄
+  old.hidden = false; old.classList.add('pane-out'); old.style.top = top + 'px';
+  const nw2 = paneOf(t), o = { duration: 320, easing: 'cubic-bezier(.25,.8,.3,1)' };
+  nw2.animate([{ transform: `translateX(${dir * 100}%)` }, { transform: 'none' }], o);
+  const done = () => { [old, nw2].forEach(e => e.getAnimations().forEach(x => x.finish())); old.classList.remove('pane-out'); old.style.top = ''; if (hTab !== from) old.hidden = true; };
+  old.animate([{ transform: 'none' }, { transform: `translateX(${-dir * 100}%)` }], o).onfinish = done;
+  setTimeout(done, o.duration + 80); // 화면이 멈춰 onfinish가 안 와도 정리
+}
+$('hNav').onclick = e => { const b = e.target.closest('[data-h]'); if (b) slideTo(b.dataset.h); };
 
 /* ---------- 위톡 = 커뮤니티 (posts 컬렉션, 글마다 comments 하위 컬렉션) ---------- */
 const BOARDS = { qna: '묻고답해요', free: '자유수다', log: '여행록', photo: '여행사진', blog: '블로그 글' };
