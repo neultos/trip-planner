@@ -1077,13 +1077,19 @@
   <div class="foot" aria-hidden="true">WETRIP</div>
 </div>
 <script>
-  // 스플래시: 배경 사진과 폰트가 준비되면 등장(t0), 홈이 준비되면 0.22초 사라짐. 최소 대기 없음
+  // 스플래시: 배경 사진과 폰트가 준비되면 등장(t0). 웹에서도 보이도록 등장 연출(제목·서브, 약 1.1초)이 끝난 뒤
+  // 홈이 준비돼 있으면 0.22초 사라짐. 사진이 3초 안에 안 오면 기다리지 않고 닫음
   (() => {
     const sp = document.getElementById('splash'), bg = sp.querySelector('.bg');
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches, HOLD = still ? 900 : 1100;
+    let t0 = 0, ready = false; const start = performance.now();
+    const close = () => { if (sp.classList.contains('out')) return; sp.classList.add('out'); setTimeout(() => sp.remove(), 240); };
+    const tryClose = () => { if (!ready) return; if (t0) setTimeout(close, Math.max(0, t0 + HOLD - performance.now())); else if (performance.now() - start > 3000) close(); };
     const img = new Promise(r => bg.complete ? r() : (bg.onload = bg.onerror = r));
     const font = document.fonts ? Promise.race([document.fonts.load('700 28px Pretendard', '함께한'), new Promise(r => setTimeout(r, 1200))]) : Promise.resolve();
-    Promise.all([img, font]).then(() => sp.classList.add('go'));
-    window.splashDone = () => { if (sp.classList.contains('out')) return; sp.classList.add('out'); setTimeout(() => sp.remove(), 240); };
+    Promise.all([img, font]).then(() => { if (sp.classList.contains('out')) return; sp.classList.add('go'); t0 = performance.now(); tryClose(); });
+    setTimeout(tryClose, 3000);
+    window.splashDone = () => { ready = true; tryClose(); };
   })();
 </script>
 <div id="map" role="application" aria-label="일정 지도"></div>
