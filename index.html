@@ -160,6 +160,22 @@
   .ps-head::before { content:''; position:absolute; top:7px; left:50%; width:40px; height:5px; margin-left:-20px; border-radius:3px; background:var(--line); }
   .ps-head b { flex:1; min-width:0; font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .ps-head button { width:36px; height:36px; border-radius:50%; background:var(--bg2); font-size:15px; flex:none; }
+  .ps-edit { width:auto !important; padding:0 14px; border-radius:18px !important; font-size:14px !important; font-weight:700; color:var(--accent-ink); }
+  .ps-chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .ps-chip { padding:5px 10px; border-radius:14px; background:var(--bg2); font-size:13px; }
+  .ps-addr { margin:10px 0 0; font-size:13px; color:var(--muted); line-height:1.5; }
+  .ps-sec { margin-top:16px; }
+  .ps-sec h4, .ps-h { display:flex; align-items:baseline; gap:6px; margin:0 0 8px; font-size:14px; font-weight:700; color:var(--fg); }
+  .ps-sec h4 small { font-size:11.5px; font-weight:500; color:var(--muted); }
+  .ps-h { margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+  .ps-memo { margin:0; padding:12px 14px; border-radius:12px; background:var(--bg2); font-size:14px; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+  .ps-empty { display:block; width:100%; padding:12px; border:1px dashed var(--line); border-radius:12px; color:var(--accent-ink); font-size:13.5px; font-weight:600; text-align:center; }
+  .ps-docs { list-style:none; margin:0 0 8px; padding:0; display:grid; grid-template-columns:repeat(auto-fill, minmax(84px, 1fr)); gap:8px; max-width:420px; }
+  .ps-docs button { display:flex; flex-direction:column; gap:4px; width:100%; min-width:0; text-align:left; }
+  .ps-docs img, .ps-docs .pdf { width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; background:var(--bg2); border:1px solid var(--line); }
+  .ps-docs .pdf { display:grid; place-items:center; font-weight:800; color:#dc2626; font-size:15px; }
+  .ps-docs small { max-width:100%; font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #pside .ps-dir { display:block; margin-top:16px; padding:13px; border-radius:12px; background:var(--accent); color:#fff; text-align:center; font-size:14.5px; font-weight:700; text-decoration:none; }
   #psBody { flex:1; overflow-y:auto; margin:0; padding:12px 16px calc(20px + var(--safe-b)); }
   .pinfo { margin-top:10px; font-size:13px; line-height:1.55; }
   .pinfo .ph { height:200px; border-radius:12px; background:var(--bg2) center/cover; margin-bottom:4px; }
@@ -1425,7 +1441,7 @@
 </dialog>
 
 <div id="alarmPop" role="alert"><div><b id="aTitle"></b><span id="aBody"></span></div><button id="aOk">확인</button></div>
-<aside id="pside" aria-label="장소 정보"><div class="ps-head"><b id="psName"></b><button id="psX" aria-label="장소 정보 닫기">✕</button></div><div id="psBody" class="pinfo"></div></aside><div id="psDim" aria-hidden="true"></div>
+<aside id="pside" aria-label="일정 상세"><div class="ps-head"><b id="psName"></b><button id="psEdit" class="ps-edit">편집</button><button id="psX" aria-label="일정 상세 닫기">✕</button></div><div id="psBody"><div id="psItem"></div><div id="psPlace" class="pinfo"></div></div></aside><div id="psDim" aria-hidden="true"></div>
 <div id="guide" hidden role="dialog" aria-modal="true" aria-label="손가락 사용법 안내">
   <div class="gd-ph" aria-hidden="true">
     <div class="gd-map">🗺️</div>
@@ -2486,7 +2502,7 @@ function render() {
 
   if (ghostOnly) return; // 옆 일차 미리 그리기용
   const op = openK && !sel.size && items.find(p => key(p) === openK);
-  syncPside(op?.gid ? op : null);
+  syncPside(op || null);
   if (loaded && !touring) maybeGuide();
   if (touring) renderTour();
   drawMap();
@@ -3001,18 +3017,49 @@ function maybeGuide() {
 
 const pinfo = new Map();
 // 일정 카드를 펼치면 오른쪽에서 장소 정보 창이 나옴
+// 일정 카드를 누르면 아래에서 상세 창: 시간·메모·첨부 파일 + 구글 장소 정보
+const docUrl = new Map(); // 첨부 사진 미리보기 주소 (이번 실행 동안만)
+const blobUrl = d => docUrl.get(d.id) || (docUrl.set(d.id, URL.createObjectURL(d.blob)), docUrl.get(d.id));
+let psP = null;
 function syncPside(p) {
-  const ps = $('pside'), b = $('psBody');
-  ps.classList.toggle('on', !!p);
-  if (!p || b.dataset.gid === p.gid) return;
-  $('psName').textContent = p.name; b.dataset.gid = p.gid; b.scrollTop = 0;
-  b.innerHTML = pinfo.get(p.gid) || '<small class="cr">장소 정보 불러오는 중…</small>';
+  const ps = $('pside'), b = $('psBody'), pl = $('psPlace');
+  ps.classList.toggle('on', !!p); psP = p;
+  if (!p) return;
+  if (b.dataset.k !== key(p)) { b.dataset.k = key(p); b.scrollTop = 0; }
+  $('psName').textContent = p.name;
+  const T = typeOf(p), fl = docs.filter(d => d.item === key(p)).sort((a, c) => a.added - c.added);
+  const chip = (e, t) => t ? `<span class="ps-chip">${e} ${esc(t)}</span>` : '';
+  $('psItem').innerHTML = `<div class="ps-chips">${chip('🕒', p.time)}${chip(T.e, p.type || '기타')}${chip('🚶', p.move && p.move + '로 이동')}${chip('⏰', p.alarm)}</div>
+    ${p.place || p.addr ? `<p class="ps-addr">📍 ${esc(p.place || p.addr)}</p>` : ''}
+    <section class="ps-sec"><h4>메모</h4>${p.memo ? `<p class="ps-memo">${esc(p.memo)}</p>` : '<button type="button" class="ps-empty" data-ps="edit">+ 메모 적기</button>'}</section>
+    <section class="ps-sec"><h4>첨부 파일<small>이 폰에만 저장</small></h4>
+      ${fl.length ? `<ul class="ps-docs">${fl.map(d => `<li><button type="button" data-doc="${d.id}">${/^image\//.test(d.type) ? `<img src="${blobUrl(d)}" alt="">` : '<span class="pdf">PDF</span>'}<small>${esc(d.name)}</small></button></li>`).join('')}</ul>` : ''}
+      <button type="button" class="ps-empty" data-ps="attach">+ 파일 첨부 (예약 확인서·티켓)</button></section>
+    ${!p.gid && hasPos(p) ? `<a class="gm-btn ps-dir" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">🧭 길찾기</a>` : ''}`;
+  if (!p.gid) { pl.hidden = true; pl.dataset.gid = ''; return; }
+  pl.hidden = false;
+  if (pl.dataset.gid === p.gid) return;
+  pl.dataset.gid = p.gid;
+  pl.innerHTML = '<h4 class="ps-h">장소 정보</h4>' + (pinfo.get(p.gid) || '<small class="cr">장소 정보 불러오는 중…</small>');
   loadPinfo(p.gid);
 }
+const openDoc = d => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(d.blob); a.target = '_blank'; a.rel = 'noopener';
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+};
+$('psEdit').onclick = () => psP && openItem(psP, cur);
+$('psItem').onclick = e => {
+  if (!psP) return;
+  const a = e.target.closest('[data-ps]')?.dataset.ps, dc = e.target.closest('[data-doc]');
+  if (a === 'edit') openItem(psP, cur);
+  if (a === 'attach') { docsFor = { p: psP, day: cur }; $('fileDoc').click(); }
+  if (dc) { const d = docs.find(v => v.id === dc.dataset.doc); if (d) openDoc(d); }
+};
 $('psX').onclick = () => { openK = null; render(); };
 // 창 바깥을 누르면 닫힘 (다른 일정 카드를 누르면 그 장소로 바뀜)
 document.addEventListener('click', e => {
-  if (!$('pside').classList.contains('on') || e.target.closest('#pside, .stop')) return;
+  if (!$('pside').classList.contains('on') || e.target.closest('#pside, .stop, dialog')) return;
   e.stopPropagation(); e.preventDefault(); $('psX').click();
 }, true);
 // 아래로 밀어서 닫기 (내용이 맨 위로 스크롤돼 있을 때)
@@ -3060,7 +3107,7 @@ async function loadPinfo(gid) {
     h = `<a class="gm-btn" href="https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(gid)}" target="_blank" rel="noopener">Google 지도에서 장소 정보 보기</a>`;
   }
   if (pinfo.has(gid)) pinfo.set(gid, h);
-  document.querySelectorAll(`.pinfo[data-gid="${CSS.escape(gid)}"]`).forEach(e => e.innerHTML = h);
+  document.querySelectorAll(`.pinfo[data-gid="${CSS.escape(gid)}"]`).forEach(e => e.innerHTML = (e.id === 'psPlace' ? '<h4 class="ps-h">장소 정보</h4>' : '') + h);
 }
 
 /* ---------- 장소 검색 ---------- */
@@ -3798,12 +3845,7 @@ function renderDocs() {
 }
 $('dList').onclick = async e => {
   const o = e.target.closest('[data-open]'), x = e.target.closest('[data-del]');
-  if (o) {
-    const d = docs.find(v => v.id === o.dataset.open); if (!d) return;
-    const a = document.createElement('a'); a.href = URL.createObjectURL(d.blob); a.target = '_blank'; a.rel = 'noopener';
-    document.body.append(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
-  }
+  if (o) { const d = docs.find(v => v.id === o.dataset.open); if (d) openDoc(d); }
   if (x && confirm('이 파일을 삭제할까요?')) {
     try { await req((await docStore('readwrite')).delete(x.dataset.del)); } catch {}
     docs = docs.filter(v => v.id !== x.dataset.del); renderDocs(); render();
