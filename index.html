@@ -771,6 +771,17 @@
   .hero2 .cp b { display:block; font-size:24px; line-height:31px; font-weight:700; letter-spacing:-.02em; text-shadow:0 1px 8px rgba(0,0,0,.3); }
   .hero2 .cp small { display:block; margin-top:6px; font-size:14px; line-height:21px; font-weight:500; text-shadow:0 1px 6px rgba(0,0,0,.35); }
   .hero2 .cp em { display:inline-block; margin-top:10px; font-style:normal; font-size:14px; font-weight:600; }
+  /* 메인 배너: 확정 사진(banner-day/night), 글자는 DOM. 막·그림자·흐림 없음. 글자 크기는 배너 폭 기준(cqw) */
+  .hero2.wb { aspect-ratio:1536/830; background:#0b2a5c; container-type:inline-size; }
+  .hero2.wb .sl::after { content:none; }
+  .hero2.wb img { object-position:center; }
+  .wb .cp { position:absolute; left:7%; top:18%; right:auto; z-index:1; display:flex; flex-direction:column; align-items:flex-start; }
+  .wb .cp b { max-width:58cqw; font-size:clamp(20px, 5.64cqw, 24px); line-height:1.3; font-weight:700; letter-spacing:-.02em; text-shadow:none; white-space:nowrap; }
+  .wb .cp b span { display:block; }
+  .wb .cp small { margin-top:10px; max-width:72cqw; font-size:clamp(10.5px, 2.95cqw, 12.5px); line-height:1.5; font-weight:400; text-shadow:none; }
+  .wb .cp em { display:inline-flex; align-items:center; min-height:44px; margin-top:0; font-size:clamp(11px, 3.08cqw, 13px); line-height:1.4; font-weight:600; font-style:normal; }
+  .wb .day { color:#081C39; } .wb .day small { color:#152740; } .wb .day em { color:#1557FF; }
+  .wb .night { color:#fff; } .wb .night small { color:rgba(255,255,255,.92); } .wb .night em { color:#fff; }
   .hero2 .pg { position:absolute; right:10px; bottom:10px; z-index:2; display:flex; align-items:center; background:rgba(17,24,39,.55); color:#fff; border-radius:999px; font-size:12px; font-weight:600; }
   .hero2 .pg button { width:40px; height:32px; color:#fff; font-size:15px; }
   .hero2 .pg span { min-width:30px; text-align:center; }
@@ -1020,8 +1031,55 @@
     document.head.appendChild(script);
   })();
 </script>
+<link rel="preload" as="image" href="assets/wetrip/backgrounds/splash-night-900.webp" imagesrcset="assets/wetrip/backgrounds/splash-night-600.webp 600w, assets/wetrip/backgrounds/splash-night-900.webp 900w" imagesizes="100vw" fetchpriority="high">
+<style>
+  /* 스플래시: 확정 사진(splash-night) + 글자는 DOM. 사진 위 막·그림자 없음 */
+  #splash { position:fixed; inset:0; z-index:5000; background:#06162F; overflow:hidden; color:#fff; font-family:Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif; transition:opacity .22s ease; }
+  #splash.out { opacity:0; pointer-events:none; }
+  #splash .bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; transform-origin:center bottom; opacity:0; }
+  #splash .mark { position:absolute; left:50%; top:calc(13% + env(safe-area-inset-top)); transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:6px; opacity:0; }
+  #splash .mark .sym { width:46px; height:auto; display:block; }
+  #splash .mark .wm { height:13px; width:auto; display:block; }
+  #splash .copy { position:absolute; left:24px; right:24px; top:27.5%; text-align:center; }
+  #splash h1 { margin:0; font-size:28px; line-height:1.35; font-weight:700; letter-spacing:-.025em; color:#fff; opacity:0; }
+  #splash h1 span { display:block; white-space:nowrap; }
+  #splash .sub { margin:20px 0 0; font-size:15px; line-height:1.6; font-weight:400; color:rgba(255,255,255,.92); opacity:0; }
+  #splash .foot { position:absolute; left:0; right:0; bottom:max(28px, calc(env(safe-area-inset-bottom) + 16px)); text-align:center; font-size:12px; font-weight:600; letter-spacing:.3em; opacity:0; }
+  @media (max-width:360px) { #splash h1 { font-size:25px; } #splash .sub { font-size:13px; } }
+  @media (min-width:430px) { #splash h1 { font-size:min(30px, calc(28px + (100vw - 430px) * .05)); } #splash .sub { font-size:min(16px, calc(15px + (100vw - 430px) * .025)); } }
+  /* 등장: 배경·폰트 준비 = t0 (.go) */
+  #splash.go .bg { opacity:1; animation:spBg 2.2s ease-out both; }
+  #splash.go .mark { animation:spFade .42s ease 80ms both; }
+  #splash.go h1 { animation:spUp8 .65s cubic-bezier(.22,1,.36,1) .22s both; }
+  #splash.go .sub { animation:spUp6 .6s cubic-bezier(.22,1,.36,1) .42s both; }
+  #splash.go .foot { animation:spFade .4s ease .5s both; }
+  @keyframes spBg { from { transform:scale(1.025); } to { transform:none; } }
+  @keyframes spFade { from { opacity:0; } to { opacity:1; } }
+  @keyframes spUp8 { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  @keyframes spUp6 { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+  @media (prefers-reduced-motion:reduce) {
+    #splash .bg, #splash .mark, #splash h1, #splash .sub, #splash .foot { opacity:1; animation:none !important; }
+    #splash { transition:none; }
+  }
+</style>
 </head>
 <body>
+<div id="splash" role="img" aria-label="위트립 · 함께한 오늘이 오래 남도록">
+  <img class="bg" src="assets/wetrip/backgrounds/splash-night-900.webp" srcset="assets/wetrip/backgrounds/splash-night-600.webp 600w, assets/wetrip/backgrounds/splash-night-900.webp 900w" sizes="100vw" width="898" height="1751" alt="" fetchpriority="high" decoding="async">
+  <div class="mark" aria-hidden="true"><img class="sym" src="assets/wetrip/symbol-white.png" width="151" height="96" alt=""><img class="wm" src="assets/wetrip/wordmark-white.png" width="319" height="96" alt=""></div>
+  <div class="copy" aria-hidden="true"><h1><span>함께한 오늘이</span><span>오래 남도록</span></h1><p class="sub">계획도 추억도, 위트립에서</p></div>
+  <div class="foot" aria-hidden="true">WETRIP</div>
+</div>
+<script>
+  // 스플래시: 배경 사진과 폰트가 준비되면 등장(t0), 홈이 준비되면 0.22초 사라짐. 최소 대기 없음
+  (() => {
+    const sp = document.getElementById('splash'), bg = sp.querySelector('.bg');
+    const img = new Promise(r => bg.complete ? r() : (bg.onload = bg.onerror = r));
+    const font = document.fonts ? Promise.race([document.fonts.load('700 28px Pretendard', '함께한'), new Promise(r => setTimeout(r, 1200))]) : Promise.resolve();
+    Promise.all([img, font]).then(() => sp.classList.add('go'));
+    window.splashDone = () => { if (sp.classList.contains('out')) return; sp.classList.add('out'); setTimeout(() => sp.remove(), 240); };
+  })();
+</script>
 <div id="map" role="application" aria-label="일정 지도"></div>
 <div id="gmap" role="application" aria-label="일정 지도" hidden></div>
 
@@ -2029,6 +2087,10 @@ async function init() {
   const h = location.hash.slice(1);
   if (!h.startsWith('t=')) showHome(); // 서버 연결 전에도 목록은 바로 보여 줌
   render();
+  if (!h.startsWith('t=')) {
+    const b = $('heroTrack')?.querySelector('img');
+    Promise.race([b ? b.decode().catch(() => {}) : 0, new Promise(r => setTimeout(r, 2500))]).then(() => window.splashDone?.());
+  }
   try {
     const [{ initializeApp }, f, a] = await Promise.all([
       import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
@@ -2053,8 +2115,8 @@ async function init() {
       history.replaceState(null, '', '#t=' + await createTrip(seed));
       try { localStorage.removeItem('trip'); } catch {}
     }
-    route();
-  } catch { toast(navigator.onLine ? '서버에 연결하지 못했어요. 새로고침해 주세요' : '인터넷에 연결되지 않았어요'); }
+    route(); window.splashDone?.();
+  } catch { window.splashDone?.(); toast(navigator.onLine ? '서버에 연결하지 못했어요. 새로고침해 주세요' : '인터넷에 연결되지 않았어요'); }
 }
 // 앱 파일을 기기에 저장해서 인터넷이 없어도 열리게 (https에서만)
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -4532,7 +4594,11 @@ const DEST = {
   부산: { country: '대한민국', air: 'PUS', abroad: 0, ph: 'busan-gwangan', pos: '55% 50%', line: '바다 위 야경과 시장 골목' },
 };
 // 히어로 문구는 장마다 다르게 [큰 글씨, 작은 글씨]
-const HERO = { 홍콩: ['야경이 빛나는 밤,<br>홍콩', '낮부터 밤까지 새로운 발견'], 다낭: ['바다 앞에서 쉼표,<br>다낭', '해변과 리조트가 가까운 도시'], 제주: ['오름 따라 걷는 섬,<br>제주', '바다와 오름을 함께 걷는 하루'] };
+// 메인 배너 (CLAUDE_PROMPT v2): [사진, 글자색, 제목 두 줄, 보조, 링크, 누르면]
+const BANNERS = [
+  ['banner-day', 'day', ['일상 밖으로,', '우리 함께'], '계획하는 설렘부터 함께하는 순간까지', '위트립으로 여행 시작 →', 'new'],
+  ['banner-night', 'night', ['같이 떠나서,', '더 특별한 여행'], '친구를 초대하고, 하나의 일정으로', '함께 여행 만들기 →', 'invite'],
+];
 const THEMES = [
   ['도시 산책', 'theme-city-walk', '50% 55%', ['도쿄', '오사카', '타이베이', '홍콩']],
   ['휴양과 쉼', 'theme-beach', '50% 50%', ['다낭', '제주']],
@@ -4547,16 +4613,16 @@ const ro = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00, j = c % 28; ret
 const destPhoto = x => { const d = DEST[(placeOf(x) || '').split('|').find(n => DEST[n])]; return d ? `photos/${d.ph}-800.webp` : ''; };
 
 function renderHomeMain() {
-  const heroes = Object.keys(HERO);
   const all = recents(), up = all.filter(x => !(x.end && span(today(), x.end) < 0)).sort((x, y) => (x.start || '').localeCompare(y.start || ''));
   const n = up[0], own = x => COVER_RE.test(x.cover || '');
   const nights = x => { const k = span(x.start, x.end); return k ? `${k}박 ${k + 1}일` : '당일'; };
   $('hHome').innerHTML = `
     <button class="hsearch" id="hSearch">${SVG(IC.search)}어디로 떠나고 싶으세요?</button>
-    <div class="hero2" aria-roledescription="carousel" aria-label="추천 여행지">
-      <div class="track" id="heroTrack">${heroes.map((c, i) => `<button class="sl" data-city="${c}" aria-label="${c} 여행 가이드 보기 (${i + 1}/${heroes.length})">
-        ${img(DEST[c].ph, `${c} 풍경`, DEST[c].pos, 1, 1)}<span class="cp"><b>${HERO[c][0]}</b><small>${HERO[c][1]}</small><em>여행 가이드 보기 →</em></span></button>`).join('')}</div>
-      ${heroes.length > 1 ? `<div class="pg"><button id="heroPrev" aria-label="이전 여행지">‹</button><span id="heroNo">1 / ${heroes.length}</span><button id="heroNext" aria-label="다음 여행지">›</button></div>` : ''}
+    <div class="hero2 wb" aria-roledescription="carousel" aria-label="위트립 소개">
+      <div class="track" id="heroTrack">${BANNERS.map(([ph, tone, [t1, t2], sub, cta, act], i) => `<button type="button" class="sl" data-ban="${act}">
+        <img src="assets/wetrip/backgrounds/${ph}-800.webp" srcset="assets/wetrip/backgrounds/${ph}-800.webp 800w, assets/wetrip/backgrounds/${ph}-1200.webp 1200w" sizes="(min-width:768px) 560px, 100vw" width="1706" height="922" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async">
+        <span class="cp ${tone}"><b><span>${t1}</span><span>${t2}</span></b><small>${sub}</small><em>${cta}</em></span></button>`).join('')}</div>
+      <div class="pg"><button id="heroPrev" aria-label="이전 배너">‹</button><span id="heroNo">1 / ${BANNERS.length}</span><button id="heroNext" aria-label="다음 배너">›</button></div>
     </div>
     <div class="scut">
       <button type="button" data-sc="fly" aria-label="항공권 예약"><img src="assets/wetrip/web/airplane-156.png" width="52" height="52" alt=""><span>항공권</span></button>
@@ -4605,6 +4671,15 @@ function startHero() {
 }
 $('hHome').onclick = e => {
   const t = e.target;
+  const bn = t.closest('[data-ban]');
+  if (bn) {
+    if (bn.dataset.ban === 'new') return openNew();
+    const up = recents().filter(x => !(x.end && span(today(), x.end) < 0));
+    if (!up.length) return openNew();
+    if (up.length > 1) return homeTab('trips'); // 여러 개면 내 여행에서 골라 '동행 초대'
+    taId = up[0].id; $('taTitle').textContent = up[0].title || '여행';
+    return $('tripAct').querySelector('[data-ta="link"]').click();
+  }
   const c = t.closest('[data-city]'); if (c) return openCity(c.dataset.city);
   const th = t.closest('[data-theme]'); if (th) return openTheme(+th.dataset.theme);
   const o = t.closest('[data-open]'); if (o) return (location.hash = 't=' + o.dataset.open);
