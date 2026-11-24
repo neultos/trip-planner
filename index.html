@@ -1979,7 +1979,6 @@ function reveal(root) {
 function showHome() {
   unsub?.(); unsub = null; tripId = null; loaded = false; stopTour();
   document.body.classList.add('at-home'); $('invite').classList.remove('on'); renderMe();
-  if (!history.state) history.pushState({ homeGuard: 1 }, ''); // 뒤로가기 한 번은 여기서 받음
   renderTip();
   homeTab(hTab);
   const ended = x => x.end && span(today(), x.end) < 0;
@@ -4541,7 +4540,9 @@ async function onUser(u) {
       userDoc = { alias, blocked: Array.isArray(d.blocked) ? d.blocked : [] };
       blocked = new Set([...blocked, ...userDoc.blocked]);
       await fs.setDoc(ref, { profile: { name: me().name, av: me().av }, alias, trips: tripsForCloud(trips), updated: fs.serverTimestamp() }, { merge: true });
-      toast(`${me().name}님, ${snap.exists() ? '다시 오셨네요!' : '반가워요!'}`);
+      // 인사는 앱을 켰을 때 한 번만 (같은 탭에서 일정을 열고 닫아도 다시 안 뜸)
+      let said = false; try { said = !!sessionStorage.getItem('hello'); sessionStorage.setItem('hello', '1'); } catch {}
+      if (!said) toast(`${me().name}님, ${snap.exists() ? '다시 오셨네요!' : '반가워요!'}`);
     } catch (e) { console.warn('user', e); toast('로그인 정보를 불러오지 못했어요'); }
   } else userDoc = null;
   renderMe();
@@ -5138,6 +5139,9 @@ document.addEventListener('click', e => {
 // 버튼으로 닫을 땐 쌓은 기록을 history.back()으로 정리하는데, 그게 끝나기 전에 다음 팝업이 열리면
 // (예: 메뉴 → 항공편) 새 기록이 같이 지워지지 않도록 back이 끝난 뒤에 쌓음.
 let pendingBack = 0, queuedPush = 0, exitAsk = 0;
+// 홈 뒤로가기 한 번을 받을 기록. 크롬은 손대기 전에 쌓은 기록은 뒤로가기에서 건너뛰므로, 홈에서 처음 누를 때 쌓음
+const armGuard = () => { if (document.body.classList.contains('at-home') && !history.state && !location.hash.slice(1) && !pendingBack) history.pushState({ homeGuard: 1 }, ''); };
+['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, armGuard, true));
 function pushLayer() { if (pendingBack) queuedPush++; else history.pushState({ layer: 1 }, ''); }
 function dropLayer() {
   if (queuedPush) { queuedPush--; return; }
@@ -5159,7 +5163,7 @@ addEventListener('popstate', () => {
   }
   const top = [...document.querySelectorAll('dialog[open]')].pop();
   if (top) { top.dataset.popped = '1'; top.close(); return; }
-  if (document.body.classList.contains('at-home') && !history.state && !$('searchView').classList.contains('on') && !nw) { // 홈에서 뒤로가기
+  if (document.body.classList.contains('at-home') && !history.state && !location.hash.slice(1) && !$('searchView').classList.contains('on') && !nw) { // 홈에서 뒤로가기 (일정 열 때 주소 바뀌는 것 제외)
     if (Date.now() - exitAsk < 2000) return history.back();
     exitAsk = Date.now(); toast('한 번 더 누르면 나가요'); return history.pushState({ homeGuard: 1 }, '');
   }
