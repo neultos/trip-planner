@@ -973,7 +973,6 @@
   #home .home-head, #home .hpage-h { position:sticky; top:0; z-index:6; background:var(--bg); }
   #home .hpage-h { margin-left:-20px; margin-right:-20px; padding-left:20px; padding-right:20px; padding-bottom:8px; margin-bottom:4px; }
   #hHomeWrap > .home-head { margin-left:-20px; margin-right:-20px; padding-left:20px; padding-right:20px; }
-  #home .pane-out { position:absolute; left:20px; right:20px; z-index:1; pointer-events:none; }
   #hHomeWrap .home-head { animation:none; }
   /* 예약 폼: 누르면 검색 페이지·달력 */
   .bform .fbtn { display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:2px; width:100%; min-height:56px; padding:8px 14px; border:1px solid var(--wt-line); border-radius:12px; background:#fff; text-align:left; min-width:0; }
@@ -2654,8 +2653,9 @@ $('scroll').addEventListener('scroll', () => { followRaf ||= requestAnimationFra
     lh().append(h); $('dayWrap').append(box); gs = [h, box];
     return w;
   };
-  const back = () => { if (s?.h) { put(0, 300); setTimeout(clear, 310); } s = null; };
-  $('scroll').addEventListener('touchstart', e => { s = !busy && e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0 } : null; }, { passive: true });
+  let clr = 0; const later = () => { clearTimeout(clr); clr = setTimeout(clear, 310); }; // 되돌아간 뒤 정리 (다음 손가락이 오면 취소)
+  const back = () => { if (s?.h) { put(0, 300); later(); } s = null; };
+  $('scroll').addEventListener('touchstart', e => { clearTimeout(clr); s = !busy && e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0 } : null; }, { passive: true });
   $('scroll').addEventListener('touchmove', e => {
     if (!s) return;
     if (drag || press?.armed || Date.now() < suppressUntil) return back(); // 끌어 옮기기 중엔 제외
@@ -2674,15 +2674,16 @@ $('scroll').addEventListener('scroll', () => { followRaf ||= requestAnimationFra
   $('scroll').addEventListener('touchend', () => {
     if (!s?.h) return (s = null);
     const { dx, sign, w } = s, n = cur + sign; s = null;
-    if (Math.abs(dx) < 60 || !w) { put(0, 300); return setTimeout(clear, 310); }
+    if (Math.abs(dx) < 60 || !w || !gs[1]) { put(0, 300); return later(); }
     const ms = Math.round(Math.min(440, Math.max(300, (w - Math.abs(dx)) * 1.1))); // 남은 거리가 길수록 천천히
     busy = true; put(-sign * w, ms);
     setTimeout(() => {
-      const y = gs[1].getBoundingClientRect().top;
-      tab(n)?.click(); $('stops').classList.remove('sw');
-      clear(); put(0, 0);
-      (snap === 'full' ? window : $('scroll')).scrollBy({ top: $('dayWrap').getBoundingClientRect().top - y, behavior: 'instant' }); // 보던 위치 그대로
-      busy = false;
+      try {
+        const y = gs[1]?.getBoundingClientRect().top;
+        tab(n)?.click(); $('stops').classList.remove('sw');
+        clear(); put(0, 0);
+        if (y != null) (snap === 'full' ? window : $('scroll')).scrollBy({ top: $('dayWrap').getBoundingClientRect().top - y, behavior: 'instant' }); // 보던 위치 그대로
+      } finally { clear(); put(0, 0); busy = false; } // 무슨 일이 있어도 화면은 제자리로 (흰 화면에 멈추지 않게)
     }, ms);
   });
 })();
@@ -4960,8 +4961,7 @@ function renderHomeBook() {
       ${people}
       <button class="go">숙소 검색</button></form>`}
     <div class="bres" id="bkRes"></div>
-    ${bk.trip ? '' : `<section class="hsec"><button class="stayb" data-bs="stay">${img('stay-v4', '', '50% 50%', 1)}<span class="cp"><b>여행에 꼭 맞는 숙소</b><em>숙소 둘러보기 →</em></span></button></section>
-    <section class="hsec"><h2>어디로 떠나볼까요?</h2><div class="bd g2" style="grid-template-columns:repeat(3,1fr)">${['도쿄', '다낭', '타이베이'].map(c => `<button class="dcard" data-city="${c}">${cardImg(c)}<b>${c}</b></button>`).join('')}</div></section>`}`;
+    ${bk.trip ? '' : `<section class="hsec"><h2>어디로 떠나볼까요?</h2><div class="bd g2" style="grid-template-columns:repeat(3,1fr)">${['도쿄', '다낭', '타이베이'].map(c => `<button class="dcard" data-city="${c}">${cardImg(c)}<b>${c}</b></button>`).join('')}</div></section>`}`;
   if (!$('apList')) document.body.insertAdjacentHTML('beforeend', `<datalist id="apList">${AIRPORTS.map(a => `<option value="${esc(apText(a.code))}">`).join('')}</datalist>`);
   if (sum || bk.auto) { bk.auto = false; runBk(); }
 }
@@ -5088,19 +5088,15 @@ $('tripSeg').onclick = e => { const b = e.target.closest('[data-ts]'); if (!b) r
 const TAB_ORDER = ['home', 'trips', 'book', 'cafe', 'blog'];
 const paneOf = t => $({ home: 'hHomeWrap', trips: 'hTrips', book: 'hBook', cafe: 'hCafe', blog: 'hBlog' }[t]);
 function slideTo(t) {
-  const from = hTab, home = $('home'), old = paneOf(from);
+  const from = hTab, home = $('home');
   if (t === from) return home.scrollTo({ top: 0, behavior: 'smooth' });
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const top = old.offsetTop - home.scrollTop, dir = TAB_ORDER.indexOf(t) > TAB_ORDER.indexOf(from) ? 1 : -1;
+  const dir = TAB_ORDER.indexOf(t) > TAB_ORDER.indexOf(from) ? 1 : -1;
   homeTab(t); home.scrollTo(0, 0);
   if (still) return;
-  // 나가는 페이지는 보던 자리 그대로 잠깐 남겨 두고 같이 밀어냄
-  old.hidden = false; old.classList.add('pane-out'); old.style.top = top + 'px';
-  const nw2 = paneOf(t), o = { duration: 320, easing: 'cubic-bezier(.25,.8,.3,1)' };
-  nw2.animate([{ transform: `translateX(${dir * 100}%)` }, { transform: 'none' }], o);
-  const done = () => { [old, nw2].forEach(e => e.getAnimations().forEach(x => x.finish())); old.classList.remove('pane-out'); old.style.top = ''; if (hTab !== from) old.hidden = true; };
-  old.animate([{ transform: 'none' }, { transform: `translateX(${-dir * 100}%)` }], o).onfinish = done;
-  setTimeout(done, o.duration + 80); // 화면이 멈춰 onfinish가 안 와도 정리
+  const nw2 = paneOf(t);
+  nw2.animate([{ transform: `translateX(${dir * 100}%)` }, { transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.25,.8,.3,1)' });
+  setTimeout(() => nw2.getAnimations().forEach(x => x.finish()), 380); // 화면이 멈춰도 제자리로
 }
 $('hNav').onclick = e => { const b = e.target.closest('[data-h]'); if (b) slideTo(b.dataset.h); };
 
