@@ -162,7 +162,7 @@
   .ps-head button { width:36px; height:36px; border-radius:50%; background:var(--bg2); font-size:15px; flex:none; }
   .ps-tt { flex:1; min-width:0; display:flex; align-items:center; gap:8px; }
   .ps-tt small { flex:none; padding:3px 9px; border-radius:12px; background:var(--bg2); font-size:12px; font-weight:700; color:var(--fg); white-space:nowrap; }
-  .ps-tt b { font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ps-name { margin:2px 0 12px; font-size:19px; line-height:1.4; font-weight:700; color:#111827; word-break:keep-all; overflow-wrap:anywhere; } /* 긴 이름도 줄바꿈해서 전부 */
   #pside .ps-edit { color:#111827; }
   .ps-acts { display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:8px; margin-top:14px; }
   .ps-acts a { display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; border-radius:12px; border:1px solid var(--line); background:#fff; color:#111827; font-size:14px; font-weight:600; text-decoration:none; }
@@ -1470,7 +1470,7 @@
 </dialog>
 
 <div id="alarmPop" role="alert"><div><b id="aTitle"></b><span id="aBody"></span></div><button id="aOk">확인</button></div>
-<aside id="pside" aria-label="일정 상세"><div class="ps-head"><div class="ps-tt"><small id="psCat"></small><b id="psName"></b></div><button id="psEdit" class="ps-edit">편집</button><button id="psX" aria-label="일정 상세 닫기">✕</button></div><div id="psBody"><div id="psPlace" class="pinfo"></div><div id="psItem"></div></div></aside><div id="psDim" aria-hidden="true"></div>
+<aside id="pside" aria-label="일정 상세"><div class="ps-head"><div class="ps-tt"><small id="psCat"></small></div><button id="psEdit" class="ps-edit">편집</button><button id="psX" aria-label="일정 상세 닫기">✕</button></div><div id="psBody"><h3 id="psName" class="ps-name"></h3><div id="psPlace" class="pinfo"></div><div id="psItem"></div></div></aside><div id="psDim" aria-hidden="true"></div>
 <div id="guide" hidden role="dialog" aria-modal="true" aria-label="손가락 사용법 안내">
   <div class="gd-ph" aria-hidden="true">
     <div class="gd-map">🗺️</div>
@@ -3065,7 +3065,7 @@ function syncPside(p) {
   const chip = (e, t) => t ? `<span class="ps-chip">${e} ${esc(t)}</span>` : '';
   const chips = chip('🕒', p.time) + chip('🚶', p.move && p.move + '로 이동') + chip('⏰', p.alarm ? p.alarm + ' 알람' : '');
   $('psItem').innerHTML = `${chips ? `<div class="ps-chips">${chips}</div>` : ''}
-    ${p.place || p.addr ? `<p class="ps-addr">📍 ${esc(p.place || p.addr)}</p>` : ''}
+    ${p.place || p.addr ? `<p class="ps-addr">🗺️ ${esc(p.place || p.addr)}</p>` : ''}
     <div class="ps-acts">${hasPos(p) ? `<a href="${esc(dirUrl(p))}" target="_blank" rel="noopener">🧭 길찾기</a>` : ''}<a href="${esc(blogUrl(p))}" target="_blank" rel="noopener">📝 블로그 후기</a></div>
     <section class="ps-sec"><h4>메모</h4>${p.memo ? `<p class="ps-memo">${esc(p.memo)}</p>` : '<button type="button" class="ps-empty" data-ps="edit">+ 메모 적기</button>'}</section>
     <section class="ps-sec"><h4>첨부 파일<small>함께 여행하는 사람과 공유돼요</small></h4>
