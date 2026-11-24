@@ -16,6 +16,7 @@ export default {
       if (url.pathname === '/kakao/start') return start(url, env);
       if (url.pathname === '/kakao/callback') return await callback(url, env);
       if (url.pathname === '/flights') return await flights(url, req, env);
+      if (url.pathname === '/files') return await files(url, req, env);
       return new Response('wetrip auth', { status: 200 });
     } catch (e) {
       console.log('auth error', e && e.stack || e);
@@ -119,4 +120,59 @@ async function flights(url, req, env) {
   const airlines = [...seen.values()].slice(0, 6).map(item);
   const out = { exact, list, days, airlines, ...(list[0] || { price: null }) }; // price 등은 옛 화면용
   return new Response(JSON.stringify(out), { headers: h });
+}
+
+// 일정 첨부 파일 (같은 여행 링크를 가진 사람끼리 공유)
+// 앱이 파일을 700KB 조각(base64)으로 나눠 보내면 파이어베이스 tripfiles/{여행}_{파일}_{조각} 에 저장.
+// tripfiles 는 앱(브라우저)에서 직접 못 읽게 규칙에 없음 → 이 서버(관리자 권한)만 읽고 씀.
+// 여행 ID(32자, 추측 불가)를 아는 사람 = 그 여행을 열 수 있는 사람 = 첨부도 볼 수 있음.
+let gTok = null;
+async function gToken(sa) {
+  if (gTok && gTok.exp > Date.now() + 60e3) return gTok.v;
+  const now = Math.floor(Date.now() / 1000);
+  const head = b64uJson({ alg: 'RS256', typ: 'JWT' });
+  const body = b64uJson({ iss: sa.client_email, scope: 'https://www.googleapis.com/auth/datastore', aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600 });
+  const der = Uint8Array.from(atob(sa.private_key.replace(/-----[^-]+-----|\s/g, '')), c => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey('pkcs8', der, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(head + '.' + body));
+  const r = await (await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: head + '.' + body + '.' + b64u(sig) }) })).json();
+  if (!r.access_token) throw new Error('google token: ' + JSON.stringify(r));
+  gTok = { v: r.access_token, exp: Date.now() + (r.expires_in || 3600) * 1000 };
+  return gTok.v;
+}
+const tripOk = new Set(); // 이번 실행에서 있는 것으로 확인한 여행
+async function files(url, req, env) {
+  const o = req.headers.get('Origin') || '';
+  const h = { 'Access-Control-Allow-Origin': ALLOW.includes(o) ? o : ALLOW[0], 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', Vary: 'Origin' };
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
+  const q = url.searchParams, trip = q.get('trip') || '', id = q.get('id') || '', i = +q.get('i'), act = q.get('a') || 'get';
+  if (!/^[0-9a-f]{32}$/.test(trip) || !/^[0-9a-f]{16}$/.test(id) || !Number.isInteger(i) || i < 0 || i >= 20) return new Response('bad', { status: 400, headers: h });
+  const sa = JSON.parse(env.FIREBASE_SA), tok = await gToken(sa);
+  const base = `https://firestore.googleapis.com/v1/projects/${sa.project_id}/databases/default/documents/`;
+  const doc = `${base}tripfiles/${trip}_${id}_${i}`, auth = { Authorization: 'Bearer ' + tok };
+  if (act === 'get' && req.method === 'GET') {
+    const r = await fetch(doc + '?mask.fieldPaths=data', { headers: auth });
+    if (!r.ok) return new Response('not found', { status: 404, headers: h });
+    // 파이어베이스 응답(JSON) 그대로 넘김: 큰 파일을 여기서 풀면 무료 CPU 한도를 넘을 수 있음
+    return new Response(r.body, { headers: { ...h, 'Content-Type': 'application/json', 'Cache-Control': 'private, max-age=86400' } });
+  }
+  if (req.method !== 'POST') return new Response('bad', { status: 405, headers: h });
+  if (!tripOk.has(trip)) {
+    const r = await fetch(`${base}trips/${trip}?mask.fieldPaths=updated`, { headers: auth });
+    if (!r.ok) return new Response('no trip ' + r.status, { status: 404, headers: h });
+    tripOk.add(trip);
+  }
+  if (act === 'put') {
+    const b64 = await req.text();
+    if (!b64 || b64.length > 960000 || !/^[A-Za-z0-9+/]+=*$/.test(b64)) return new Response('bad body', { status: 400, headers: h });
+    const r = await fetch(doc, { method: 'PATCH', headers: { ...auth, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { trip: { stringValue: trip }, data: { bytesValue: b64 } } }) });
+    return new Response(r.ok ? 'ok' : 'fail', { status: r.ok ? 200 : 502, headers: h });
+  }
+  if (act === 'del') { // i = 조각 수
+    await Promise.all(Array.from({ length: i }, (_, k) => fetch(`${base}tripfiles/${trip}_${id}_${k}`, { method: 'DELETE', headers: auth })));
+    return new Response('ok', { headers: h });
+  }
+  return new Response('bad', { status: 400, headers: h });
 }

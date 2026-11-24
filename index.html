@@ -160,6 +160,34 @@
   .ps-head::before { content:''; position:absolute; top:7px; left:50%; width:40px; height:5px; margin-left:-20px; border-radius:3px; background:var(--line); }
   .ps-head b { flex:1; min-width:0; font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .ps-head button { width:36px; height:36px; border-radius:50%; background:var(--bg2); font-size:15px; flex:none; }
+  .ps-tt { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .ps-tt small { font-size:12px; font-weight:600; color:var(--muted); }
+  .ps-tt b { font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #pside .ps-edit { color:#111827; }
+  .ps-acts { display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:8px; margin-top:14px; }
+  .ps-acts a { display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; border-radius:12px; border:1px solid var(--line); background:#fff; color:#111827; font-size:14px; font-weight:600; text-decoration:none; }
+  #psPlace { margin-top:0; color:var(--fg); font-size:14px; line-height:1.5; }
+  .pp-ph { position:relative; display:block; height:190px; border-radius:14px; background:var(--bg2) center/cover; overflow:hidden; }
+  .pp-ph small { position:absolute; right:8px; bottom:8px; padding:2px 8px; border-radius:10px; background:rgba(0,0,0,.45); color:#fff; font-size:10.5px; }
+  .pp-sum { margin:12px 0 0; color:var(--fg); font-size:14px; line-height:1.6; }
+  .pp-rows { list-style:none; margin:12px 0 0; padding:4px 14px; border:1px solid var(--line); border-radius:14px; }
+  .pp-rows li { display:flex; gap:10px; align-items:flex-start; padding:11px 0; }
+  .pp-rows li + li { border-top:1px solid var(--line); }
+  .pp-rows li > div { flex:1; min-width:0; }
+  .pp-i { width:22px; text-align:center; flex:none; }
+  .pp-rows a { color:var(--accent-ink); font-weight:600; text-decoration:none; word-break:break-all; }
+  .pp-sub { color:var(--muted); font-size:13px; }
+  .pp-stars { position:relative; display:inline-block; color:#d9dde5; letter-spacing:1px; font-size:13px; }
+  .pp-stars::before { content:'★★★★★'; position:absolute; left:0; top:0; width:var(--r); overflow:hidden; color:#f5a623; }
+  .pp-rows details summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .pp-rows details summary::-webkit-details-marker { display:none; }
+  .pp-rows details summary::after { content:'⌄'; color:var(--muted); margin-left:auto; }
+  .pp-rows details[open] summary::after { content:'⌃'; }
+  .pp-tag { padding:2px 8px; border-radius:10px; font-size:12px; font-weight:700; }
+  .pp-tag.on { background:#e8f7ee; color:#16a34a; } .pp-tag.off { background:#fdecec; color:#dc2626; }
+  .pp-week { margin-top:8px; font-size:13px; color:var(--muted); }
+  .pp-week p { display:flex; gap:10px; margin:3px 0; } .pp-week span { width:44px; flex:none; color:var(--fg); }
+  #psPlace .gm-btn { margin-top:14px; background:#fff; color:#111827; border:1px solid var(--line); }
   .ps-edit { width:auto !important; padding:0 14px; border-radius:18px !important; font-size:14px !important; font-weight:700; color:var(--accent-ink); }
   .ps-chips { display:flex; flex-wrap:wrap; gap:6px; }
   .ps-chip { padding:5px 10px; border-radius:14px; background:var(--bg2); font-size:13px; }
@@ -167,7 +195,8 @@
   .ps-sec { margin-top:16px; }
   .ps-sec h4, .ps-h { display:flex; align-items:baseline; gap:6px; margin:0 0 8px; font-size:14px; font-weight:700; color:var(--fg); }
   .ps-sec h4 small { font-size:11.5px; font-weight:500; color:var(--muted); }
-  .ps-h { margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+  #psPlace:not([hidden]) + #psItem { margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+  .pp-load { height:190px; border-radius:14px; background:var(--bg2); display:grid; place-items:center; color:var(--muted); font-size:13px; }
   .ps-memo { margin:0; padding:12px 14px; border-radius:12px; background:var(--bg2); font-size:14px; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
   .ps-empty { display:block; width:100%; padding:12px; border:1px dashed var(--line); border-radius:12px; color:var(--accent-ink); font-size:13.5px; font-weight:600; text-align:center; }
   .ps-docs { list-style:none; margin:0 0 8px; padding:0; display:grid; grid-template-columns:repeat(auto-fill, minmax(84px, 1fr)); gap:8px; max-width:420px; }
@@ -636,7 +665,7 @@
   @media (min-width:820px) {
     #sheet { top:0; right:auto; width:400px; height:auto !important; border-radius:0; box-shadow:2px 0 16px rgba(0,0,0,.08); padding-top:76px; }
     #grip { display:none; }
-    .top { left:12px; right:auto; width:376px; }
+    .top { left:12px; right:auto; width:376px; z-index:650; } /* 왼쪽 일정 패널(600)에 가려 뒤로가기를 못 누르던 문제 */
     #tour { left:12px; right:auto; width:376px; }
     #toast { bottom:24px; left:calc(50% + 200px); }
     .leaflet-control-zoom { display:block; }
@@ -1137,7 +1166,7 @@
     <label style="margin-bottom:0">이곳까지 이동 방법</label>
     <div class="chips one" id="iMove"></div>
     <label>알람 (그날 이 시각에 울림)<span class="tbox"><input id="iAlarm" type="time"></span></label>
-    <button type="button" class="btn wide" id="iDocs">📎 첨부 파일 (이 폰에만 저장)</button>
+    <button type="button" class="btn wide" id="iDocs">📎 첨부 파일 (함께 공유)</button>
     <div class="row sticky-act"><button class="btn" value="cancel" formnovalidate>취소</button><button class="btn primary" value="ok">저장</button></div>
   </form>
 </dialog>
@@ -1381,7 +1410,7 @@
       <button type="button" data-m="install"><i>📲</i>홈 화면에 추가</button>
       <button type="button" data-m="help"><i>❓</i>사용법</button>
     </div>
-    <p class="note">⏰ 알람은 이 앱이 열려 있을 때만 울려요. 꼭 받아야 하는 알람은 '캘린더로 내보내기'를 쓰세요.<br>📎 예약 서류는 이 폰에만 저장되고 친구에게 공유되지 않아요.</p>
+    <p class="note">⏰ 알람은 이 앱이 열려 있을 때만 울려요. 꼭 받아야 하는 알람은 '캘린더로 내보내기'를 쓰세요.<br>📎 첨부 파일은 같은 여행 링크를 가진 사람과 공유돼요. 여권 사본처럼 민감한 서류는 올리지 마세요.</p>
     <div class="row"><button class="btn" value="cancel">닫기</button></div>
   </form>
 </dialog>
@@ -1390,7 +1419,7 @@
 <dialog id="docsDlg">
   <form method="dialog">
     <h3 id="dHead">📎 예약 서류함</h3>
-    <p class="note">PDF·사진은 이 폰에만 저장돼요. 친구에게 공유되지 않고, 폰을 바꾸면 옮겨지지 않아요.</p>
+    <p class="note">PDF·사진(10MB까지)은 같은 여행 링크를 가진 사람과 공유돼요. 여권 사본처럼 민감한 서류는 올리지 마세요.</p>
     <ul id="dList"></ul>
     <button type="button" class="btn wide primary" id="dAdd">+ 파일 추가 (PDF·사진)</button>
     <div class="row"><button class="btn" value="cancel">닫기</button></div>
@@ -1441,7 +1470,7 @@
 </dialog>
 
 <div id="alarmPop" role="alert"><div><b id="aTitle"></b><span id="aBody"></span></div><button id="aOk">확인</button></div>
-<aside id="pside" aria-label="일정 상세"><div class="ps-head"><b id="psName"></b><button id="psEdit" class="ps-edit">편집</button><button id="psX" aria-label="일정 상세 닫기">✕</button></div><div id="psBody"><div id="psItem"></div><div id="psPlace" class="pinfo"></div></div></aside><div id="psDim" aria-hidden="true"></div>
+<aside id="pside" aria-label="일정 상세"><div class="ps-head"><div class="ps-tt"><small id="psCat"></small><b id="psName"></b></div><button id="psEdit" class="ps-edit">편집</button><button id="psX" aria-label="일정 상세 닫기">✕</button></div><div id="psBody"><div id="psPlace" class="pinfo"></div><div id="psItem"></div></div></aside><div id="psDim" aria-hidden="true"></div>
 <div id="guide" hidden role="dialog" aria-modal="true" aria-label="손가락 사용법 안내">
   <div class="gd-ph" aria-hidden="true">
     <div class="gd-map">🗺️</div>
@@ -1544,6 +1573,7 @@ const fix = t => {
   if (!Array.isArray(t.members)) t.members = [];
   if (!Array.isArray(t.expenses)) t.expenses = [];
   if (!Array.isArray(t.checklist)) t.checklist = [];
+  if (!Array.isArray(t.files)) t.files = []; // 공유 첨부 파일 목록 (내용은 Worker → tripfiles)
   // 예전 여행은 시간순으로 보여 줬으므로, 직접 순서(드래그)로 바꿀 때 그 순서를 한 번 저장
   if (!t.ordered) { t.days = t.days.map(d => timeSort(Array.isArray(d) ? d : [])); t.ordered = true; }
   return t;
@@ -2463,7 +2493,7 @@ function render() {
   let n = 0, prev = null;
   const myId = me()?.id;
   $('stops').innerHTML = !loaded && tripId ? '<li class="stop skel"><span class="num"></span><div class="card"></div></li>'.repeat(3) : items.length ? items.map(p => {
-    const T = typeOf(p), cnt = docs.filter(x => x.item === key(p)).length, num = hasPos(p) && !p.cand ? ++n : 0;
+    const T = typeOf(p), cnt = filesOf(p).length, num = hasPos(p) && !p.cand ? ++n : 0;
     // 앞 일정에서 이곳까지 직선 거리 (2km 안이면 걷는 시간도)
     let gap = '';
     if (num) { if (prev) { const m = hav(P(prev), P(p));
@@ -2580,7 +2610,7 @@ $('itemAct').onclick = e => {
   const { p, d } = itemAct; $('itemAct').close();
   if (a === 'edit') openItem(p, d);
   if (a === 'map') open(viewUrl(p), '_blank', 'noopener');
-  if (a === 'review') open(`https://m.search.naver.com/search.naver?where=m_blog&query=${encodeURIComponent(p.name)}`, '_blank', 'noopener');
+  if (a === 'review') open(blogUrl(p), '_blank', 'noopener');
   if (a === 'ics') downloadIcs([icsEvent(p, d)], p.name);
   if (a === 'docs') openDocs(p, d);
   if (a === 'move') openMove([key(p)]);
@@ -3027,26 +3057,34 @@ function syncPside(p) {
   if (!p) return;
   if (b.dataset.k !== key(p)) { b.dataset.k = key(p); b.scrollTop = 0; }
   $('psName').textContent = p.name;
-  const T = typeOf(p), fl = docs.filter(d => d.item === key(p)).sort((a, c) => a.added - c.added);
+  const T = typeOf(p), fl = filesOf(p);
+  $('psCat').textContent = `${T.e} ${p.type || '기타'}`;
   const chip = (e, t) => t ? `<span class="ps-chip">${e} ${esc(t)}</span>` : '';
-  $('psItem').innerHTML = `<div class="ps-chips">${chip('🕒', p.time)}${chip(T.e, p.type || '기타')}${chip('🚶', p.move && p.move + '로 이동')}${chip('⏰', p.alarm)}</div>
+  const chips = chip('🕒', p.time) + chip('🚶', p.move && p.move + '로 이동') + chip('⏰', p.alarm ? p.alarm + ' 알람' : '');
+  $('psItem').innerHTML = `${chips ? `<div class="ps-chips">${chips}</div>` : ''}
     ${p.place || p.addr ? `<p class="ps-addr">📍 ${esc(p.place || p.addr)}</p>` : ''}
+    <div class="ps-acts">${hasPos(p) ? `<a href="${esc(dirUrl(p))}" target="_blank" rel="noopener">🧭 길찾기</a>` : ''}<a href="${esc(blogUrl(p))}" target="_blank" rel="noopener">📝 블로그 후기</a></div>
     <section class="ps-sec"><h4>메모</h4>${p.memo ? `<p class="ps-memo">${esc(p.memo)}</p>` : '<button type="button" class="ps-empty" data-ps="edit">+ 메모 적기</button>'}</section>
-    <section class="ps-sec"><h4>첨부 파일<small>이 폰에만 저장</small></h4>
-      ${fl.length ? `<ul class="ps-docs">${fl.map(d => `<li><button type="button" data-doc="${d.id}">${/^image\//.test(d.type) ? `<img src="${blobUrl(d)}" alt="">` : '<span class="pdf">PDF</span>'}<small>${esc(d.name)}</small></button></li>`).join('')}</ul>` : ''}
-      <button type="button" class="ps-empty" data-ps="attach">+ 파일 첨부 (예약 확인서·티켓)</button></section>
-    ${!p.gid && hasPos(p) ? `<a class="gm-btn ps-dir" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">🧭 길찾기</a>` : ''}`;
+    <section class="ps-sec"><h4>첨부 파일<small>함께 여행하는 사람과 공유돼요</small></h4>
+      ${fl.length ? `<ul class="ps-docs">${fl.map(d => `<li><button type="button" data-doc="${d.id}">${/^image\//.test(d.type) ? `<img data-thumb="${d.id}" alt="">` : '<span class="pdf">PDF</span>'}<small>${esc(d.name)}</small></button></li>`).join('')}</ul>` : ''}
+      <button type="button" class="ps-empty" data-ps="attach">${upBusy ? '올리는 중…' : '+ 파일 첨부 (예약 확인서·티켓)'}</button></section>`;
+  fl.filter(d => /^image\//.test(d.type)).forEach(d => fileUrl(d).then(u => { const im = $('psItem').querySelector(`[data-thumb="${d.id}"]`); if (im && u) im.src = u; }));
   if (!p.gid) { pl.hidden = true; pl.dataset.gid = ''; return; }
   pl.hidden = false;
   if (pl.dataset.gid === p.gid) return;
   pl.dataset.gid = p.gid;
-  pl.innerHTML = '<h4 class="ps-h">장소 정보</h4>' + (pinfo.get(p.gid) || '<small class="cr">장소 정보 불러오는 중…</small>');
+  pl.innerHTML = pinfo.get(p.gid) || '<div class="pp-load">장소 정보 불러오는 중…</div>';
   loadPinfo(p.gid);
 }
+const blogUrl = p => `https://m.search.naver.com/search.naver?where=m_blog&query=${encodeURIComponent(p.name)}`;
 const openDoc = d => {
-  const a = document.createElement('a'); a.href = URL.createObjectURL(d.blob); a.target = '_blank'; a.rel = 'noopener';
-  document.body.append(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  if (!d.shared) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(d.blob); a.target = '_blank'; a.rel = 'noopener';
+    document.body.append(a); a.click(); a.remove();
+    return setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  }
+  const w = fileCache.has(d.id) ? null : open('', '_blank');
+  fileUrl(d).then(u => { if (!u) { w?.close(); return toast('파일을 열지 못했어요. 인터넷 연결을 확인해 주세요'); } w ? (w.location.href = u) : open(u, '_blank'); });
 };
 $('psEdit').onclick = () => psP && openItem(psP, cur);
 $('psItem').onclick = e => {
@@ -3059,7 +3097,7 @@ $('psItem').onclick = e => {
 $('psX').onclick = () => { openK = null; render(); };
 // 창 바깥을 누르면 닫힘 (다른 일정 카드를 누르면 그 장소로 바뀜)
 document.addEventListener('click', e => {
-  if (!$('pside').classList.contains('on') || e.target.closest('#pside, .stop, dialog')) return;
+  if (!$('pside').classList.contains('on') || e.target.closest('#pside, .stop, dialog, input')) return;
   e.stopPropagation(); e.preventDefault(); $('psX').click();
 }, true);
 // 아래로 밀어서 닫기 (내용이 맨 위로 스크롤돼 있을 때)
@@ -3094,12 +3132,17 @@ async function loadPinfo(gid) {
     const ph = pl.photos?.[0], au = ph?.authorAttributions?.[0], gm = esc(pl.googleMapsURI || `https://www.google.com/maps/place/?q=place_id:${gid}`);
     const wk = pl.regularOpeningHours?.weekdayDescriptions || [], today = wk[(new Date().getDay() + 6) % 7];
     let open = null; try { open = wk.length ? await pl.isOpen() : null; } catch {}
-    h = (ph ? `<a class="ph" href="${gm}" target="_blank" rel="noopener" aria-label="Google 지도에서 사진 더 보기" style="background-image:url('${esc(ph.getURI({ maxWidth: 800 }))}')"></a><small class="cr">사진: ${au ? `<a href="${esc(au.uri || '#')}" target="_blank" rel="noopener">${esc(au.displayName)}</a>` : 'Google'}</small>` : '')
-      + (pl.editorialSummary ? `<p class="pd">${esc(pl.editorialSummary)}</p>` : '')
-      + (pl.rating ? `<p>⭐ <b>${pl.rating.toFixed(1)}</b> <span class="pd">리뷰 ${(pl.userRatingCount || 0).toLocaleString()}개</span></p>` : '')
-      + (today ? `<details><summary>🕒 ${open === true ? '<span class="open">영업 중</span> · ' : open === false ? '<span class="closed">영업 종료</span> · ' : ''}${esc(today)}</summary><div>${wk.map(esc).join('<br>')}</div></details>` : '')
-      + (pl.nationalPhoneNumber ? `<p>📞 <a href="tel:${esc(pl.nationalPhoneNumber.replace(/[^\d+]/g, ''))}">${esc(pl.nationalPhoneNumber)}</a></p>` : '')
-      + (pl.websiteURI ? `<p>🌐 <a href="${esc(pl.websiteURI)}" target="_blank" rel="noopener">${esc(pl.websiteURI.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '').slice(0, 40))}</a></p>` : '')
+    const hrs = t => esc((t || '').replace(/^[^:]+:\s*/, ''));
+    const row = (i, c) => `<li><span class="pp-i" aria-hidden="true">${i}</span><div>${c}</div></li>`;
+    const stars = r => `<span class="pp-stars" style="--r:${(r / 5 * 100).toFixed(0)}%" aria-hidden="true">★★★★★</span>`;
+    h = (ph ? `<a class="pp-ph" href="${gm}" target="_blank" rel="noopener" aria-label="Google 지도에서 사진 더 보기" style="background-image:url('${esc(ph.getURI({ maxWidth: 800 }))}')"><small>사진: ${au ? esc(au.displayName) : 'Google'}</small></a>` : '')
+      + (pl.editorialSummary ? `<p class="pp-sum">${esc(pl.editorialSummary)}</p>` : '')
+      + '<ul class="pp-rows">'
+      + (pl.rating ? row('⭐', `<b>${pl.rating.toFixed(1)}</b> ${stars(pl.rating)} <span class="pp-sub">리뷰 ${(pl.userRatingCount || 0).toLocaleString()}개</span>`) : '')
+      + (today ? row('🕒', `<details><summary>${open === true ? '<span class="pp-tag on">영업 중</span>' : open === false ? '<span class="pp-tag off">영업 종료</span>' : ''}<span>오늘 ${hrs(today)}</span></summary><div class="pp-week">${wk.map(w => `<p><span>${esc(w.split(':')[0])}</span>${hrs(w)}</p>`).join('')}</div></details>`) : '')
+      + (pl.nationalPhoneNumber ? row('📞', `<a href="tel:${esc(pl.nationalPhoneNumber.replace(/[^\d+]/g, ''))}">${esc(pl.nationalPhoneNumber)}</a>`) : '')
+      + (pl.websiteURI ? row('🌐', `<a href="${esc(pl.websiteURI)}" target="_blank" rel="noopener">${esc(pl.websiteURI.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '').slice(0, 40))}</a>`) : '')
+      + '</ul>'
       + `<a class="gm-btn" href="${gm}" target="_blank" rel="noopener">Google 지도에서 리뷰·사진 더 보기</a>`;
   } catch (err) {
     console.warn('place details', err);
@@ -3107,7 +3150,7 @@ async function loadPinfo(gid) {
     h = `<a class="gm-btn" href="https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(gid)}" target="_blank" rel="noopener">Google 지도에서 장소 정보 보기</a>`;
   }
   if (pinfo.has(gid)) pinfo.set(gid, h);
-  document.querySelectorAll(`.pinfo[data-gid="${CSS.escape(gid)}"]`).forEach(e => e.innerHTML = (e.id === 'psPlace' ? '<h4 class="ps-h">장소 정보</h4>' : '') + h);
+  document.querySelectorAll(`.pinfo[data-gid="${CSS.escape(gid)}"]`).forEach(e => e.innerHTML = h);
 }
 
 /* ---------- 장소 검색 ---------- */
@@ -3793,7 +3836,26 @@ $('flDel').onclick = () => {
 };
 
 /* ---------- 예약 서류 (이 기기의 IndexedDB에만 저장: 친구에게 공유 안 됨) ---------- */
-let docs = [], docsFor = null;
+let docs = [], docsFor = null, upBusy = false;
+// 공유 첨부: 목록은 여행 데이터(trip.files), 내용은 Worker가 700KB 조각으로 파이어베이스에 보관
+const FILES = KAKAO_AUTH + '/files', CHUNK = 700000, fileCache = new Map();
+const sharedDocs = () => (trip.files || []).map(f => ({ ...f, shared: true }));
+const allDocs = () => [...docs, ...sharedDocs()];
+const filesOf = p => allDocs().filter(d => d.item === key(p)).sort((a, b) => a.added - b.added);
+const b64of = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = rej; r.readAsDataURL(blob); });
+function fileUrl(d) {
+  if (!d.shared) return Promise.resolve(blobUrl(d));
+  if (!fileCache.has(d.id)) fileCache.set(d.id, (async () => {
+    const parts = [];
+    for (let i = 0; i < d.n; i++) {
+      const r = await fetch(`${FILES}?trip=${tripId}&id=${d.id}&i=${i}`); if (!r.ok) throw new Error(r.status);
+      const b = (await r.json()).fields?.data?.bytesValue || '';
+      parts.push(Uint8Array.from(atob(b), c => c.charCodeAt(0)));
+    }
+    return URL.createObjectURL(new Blob(parts, { type: d.type }));
+  })().catch(() => { fileCache.delete(d.id); return ''; }));
+  return fileCache.get(d.id);
+}
 const docDb = new Promise((res, rej) => {
   try {
     const r = indexedDB.open('trip-docs', 1);
@@ -3819,9 +3881,19 @@ async function addDocs(files) {
   for (const f of files) {
     if (f.size > 25e6) { toast(`${f.name}: 25MB 이하 파일만 넣을 수 있어요`); continue; }
     const blob = await shrink(f);
-    const d = { id: newId(), trip: tripId, item: key(p), day, itemName: p.name, name: f.name, type: blob.type || f.type, blob, added: Date.now() };
-    try { await req((await docStore('readwrite')).put(d)); docs.push(d); }
-    catch { toast('파일을 저장하지 못했어요 (사생활 보호 모드에서는 안 될 수 있어요)'); return; }
+    if (blob.size > 10e6) { toast(`${f.name}: 10MB 이하 파일만 공유할 수 있어요`); continue; }
+    const id = newId(), n = Math.max(1, Math.ceil(blob.size / CHUNK)), t0 = tripId;
+    upBusy = true; render();
+    try {
+      for (let i = 0; i < n; i++) {
+        const r = await fetch(`${FILES}?trip=${t0}&id=${id}&i=${i}&a=put`, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: await b64of(blob.slice(i * CHUNK, (i + 1) * CHUNK)) });
+        if (!r.ok) throw new Error(r.status);
+      }
+    } catch { upBusy = false; render(); toast('파일을 올리지 못했어요. 인터넷 연결을 확인해 주세요'); return; }
+    upBusy = false;
+    fileCache.set(id, Promise.resolve(URL.createObjectURL(blob)));
+    const meta = { id, item: key(p), day, itemName: p.name.slice(0, 60), name: f.name.slice(0, 80), type: blob.type || f.type, n, size: blob.size, by: me()?.id || '', added: Date.now() };
+    if (tripId === t0) change(t => { t.files = (t.files || []).concat(meta); });
   }
   renderDocs(); render(); toast('파일을 첨부했어요');
 }
@@ -3834,21 +3906,28 @@ function openDocs(p, day) {
   if (!$('docsDlg').open) $('docsDlg').showModal();
 }
 function renderDocs() {
-  const list = (docsFor ? docs.filter(d => d.item === key(docsFor.p)) : docs.slice()).sort((a, b) => a.day - b.day || a.added - b.added);
+  const list = (docsFor ? filesOf(docsFor.p) : allDocs()).sort((a, b) => a.day - b.day || a.added - b.added);
   $('dHead').textContent = docsFor ? `📎 ${docsFor.p.name}` : '📎 예약 서류함';
   $('dAdd').hidden = !docsFor;
   $('dList').innerHTML = list.length ? list.map(d => `<li>
       <button type="button" class="doc" data-open="${d.id}"><span>${d.type === 'application/pdf' ? '📄' : '🖼️'}</span>
-        <span class="t"><b>${esc(d.name)}</b><small>${md(dayDate(d.day))} · ${esc(d.itemName)}</small></span></button>
+        <span class="t"><b>${esc(d.name)}</b><small>${md(dayDate(d.day))} · ${esc(d.itemName)}${d.shared ? '' : ' · 이 폰에만'}</small></span></button>
       <button type="button" class="x" data-del="${d.id}" aria-label="${esc(d.name)} 삭제">✕</button></li>`).join('')
     : `<li class="empty">${docsFor ? '첨부한 파일이 없어요.' : '아직 첨부한 서류가 없어요.<br>일정 카드의 [첨부]에서 항공권·바우처를 추가하세요.'}</li>`;
 }
 $('dList').onclick = async e => {
   const o = e.target.closest('[data-open]'), x = e.target.closest('[data-del]');
-  if (o) { const d = docs.find(v => v.id === o.dataset.open); if (d) openDoc(d); }
+  if (o) { const d = allDocs().find(v => v.id === o.dataset.open); if (d) openDoc(d); }
   if (x && confirm('이 파일을 삭제할까요?')) {
-    try { await req((await docStore('readwrite')).delete(x.dataset.del)); } catch {}
-    docs = docs.filter(v => v.id !== x.dataset.del); renderDocs(); render();
+    const id = x.dataset.del, sh = (trip.files || []).find(f => f.id === id);
+    if (sh) {
+      change(t => { t.files = (t.files || []).filter(f => f.id !== id); });
+      fetch(`${FILES}?trip=${tripId}&id=${id}&i=${sh.n}&a=del`, { method: 'POST' }).catch(() => {});
+    } else {
+      try { await req((await docStore('readwrite')).delete(id)); } catch {}
+      docs = docs.filter(v => v.id !== id);
+    }
+    renderDocs(); render();
   }
 };
 $('dAdd').onclick = () => $('fileDoc').click();
@@ -4096,7 +4175,7 @@ function openMenu() {
   $('mCover').dataset.ph = ok ? '' : placeOf(trip).trim().slice(0, 64);
   $('mCover').style.backgroundImage = ok || auto ? `url('${ok ? trip.cover : auto}')` : '';
   $('mCover').textContent = ok || auto ? '' : '대표 사진 없음';
-  $('mDocs').textContent = docs.length ? `${docs.length}개` : '';
+  $('mDocs').textContent = allDocs().length ? `${allDocs().length}개` : '';
   $('mNotify').textContent = !window.Notification ? '지원 안 됨' : Notification.permission === 'granted' ? '허용됨' : '';
   const myId = me()?.id;
   $('mMembers').innerHTML = trip.members.map(m => `<button type="button" class="m" data-mem="${esc(m.id)}" aria-label="${esc(m.name)}${m.id === myId ? ' (나) 프로필 수정' : ' 빼기'}">${avHtml(m, 40)}${esc(m.name)}${m.id === myId ? ' (나)' : ''}</button>`).join('')
