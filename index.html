@@ -1979,6 +1979,7 @@ function reveal(root) {
 function showHome() {
   unsub?.(); unsub = null; tripId = null; loaded = false; stopTour();
   document.body.classList.add('at-home'); $('invite').classList.remove('on'); renderMe();
+  if (!history.state) history.pushState({ homeGuard: 1 }, ''); // 뒤로가기 한 번은 여기서 받음
   renderTip();
   homeTab(hTab);
   const ended = x => x.end && span(today(), x.end) < 0;
@@ -3521,7 +3522,8 @@ async function loadHotels(ul) {
       : '<li class="msg">평점 있는 숙소를 찾지 못했어요. 아래 사이트에서 찾아 주세요.</li>';
   } catch (e) { console.warn('hotels', e); ul.innerHTML = '<li class="msg">숙소 목록을 불러오지 못했어요. 아래 사이트에서 찾아 주세요.</li>'; }
 }
-$('bookBody').onclick = $('pane').onclick = e => {
+// 예약 탭 숙소 '+ 일정에 추가' (pane은 가계부·준비물 onclick이 있어서 덮어쓰지 않고 더함)
+const hotelAdd = e => {
   const bt = e.target.closest('[data-hk]'); if (!bt) return;
   const ul = bt.closest('.hlist'), x = hotelFound[ul.dataset.city]?.[+bt.dataset.hk], d = +ul.dataset.i; if (!x) return;
   if (loaded && !isMember()) return showInvite();
@@ -3530,6 +3532,7 @@ $('bookBody').onclick = $('pane').onclick = e => {
   bt.disabled = true; bt.textContent = '✓ 일정에 있음';
   toast(`${d + 1}일차에 숙소로 넣었어요`);
 };
+$('bookBody').onclick = hotelAdd; $('pane').addEventListener('click', hotelAdd);
 
 /* ---------- 항공편 ---------- */
 // 출발일이 여행 기간 밖이면 첫날/마지막 날에 보여 줌
@@ -5134,7 +5137,7 @@ document.addEventListener('click', e => {
 // 팝업을 열 때 기록을 하나 쌓고, 뒤로가기(popstate)가 오면 맨 위 팝업만 닫음.
 // 버튼으로 닫을 땐 쌓은 기록을 history.back()으로 정리하는데, 그게 끝나기 전에 다음 팝업이 열리면
 // (예: 메뉴 → 항공편) 새 기록이 같이 지워지지 않도록 back이 끝난 뒤에 쌓음.
-let pendingBack = 0, queuedPush = 0;
+let pendingBack = 0, queuedPush = 0, exitAsk = 0;
 function pushLayer() { if (pendingBack) queuedPush++; else history.pushState({ layer: 1 }, ''); }
 function dropLayer() {
   if (queuedPush) { queuedPush--; return; }
@@ -5156,6 +5159,10 @@ addEventListener('popstate', () => {
   }
   const top = [...document.querySelectorAll('dialog[open]')].pop();
   if (top) { top.dataset.popped = '1'; top.close(); return; }
+  if (document.body.classList.contains('at-home') && !history.state && !$('searchView').classList.contains('on') && !nw) { // 홈에서 뒤로가기
+    if (Date.now() - exitAsk < 2000) return history.back();
+    exitAsk = Date.now(); toast('한 번 더 누르면 나가요'); return history.pushState({ homeGuard: 1 }, '');
+  }
   if (psLayer) { psPopped = true; openK = null; return render(); } // 일정 상세 창
   if ($('searchView').classList.contains('on')) { $('searchView').dataset.popped = '1'; closeSearch(); }
   else if (nw) { nw.popped = true; closeNew(); }
