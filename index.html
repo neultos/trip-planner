@@ -775,13 +775,13 @@
   .hero2.wb { aspect-ratio:1536/830; background:#0b2a5c; container-type:inline-size; }
   .hero2.wb .sl::after { content:none; }
   .hero2.wb img { object-position:center; }
-  .wb .cp { position:absolute; left:7%; top:18%; right:auto; z-index:1; display:flex; flex-direction:column; align-items:flex-start; }
+  .wb .cp { position:absolute; left:7%; top:12%; /* 규정 18% → 12%: 18%면 링크가 절벽·바다(낮)/건물(밤) 위로 내려감 */ right:auto; z-index:1; display:flex; flex-direction:column; align-items:flex-start; }
   .wb .cp b { max-width:58cqw; font-size:clamp(20px, 5.64cqw, 24px); line-height:1.3; font-weight:700; letter-spacing:-.02em; text-shadow:none; white-space:nowrap; }
   .wb .cp b span { display:block; }
   .wb .cp small { margin-top:10px; max-width:72cqw; font-size:clamp(10.5px, 2.95cqw, 12.5px); line-height:1.5; font-weight:400; text-shadow:none; }
-  .wb .cp em { display:inline-flex; align-items:center; min-height:44px; margin-top:0; font-size:clamp(11px, 3.08cqw, 13px); line-height:1.4; font-weight:600; font-style:normal; }
-  .wb .day { color:#081C39; } .wb .day small { color:#152740; } .wb .day em { color:#1557FF; }
-  .wb .night { color:#fff; } .wb .night small { color:rgba(255,255,255,.92); } .wb .night em { color:#fff; }
+  .wb .cp em { display:inline-flex; align-items:center; min-height:44px; margin:-2px 0 -12px; /* 누르는 곳 44px, 보이는 간격은 약 10px (배너 전체도 눌림) */ font-size:clamp(11px, 3.08cqw, 13px); line-height:1.4; font-weight:600; font-style:normal; }
+  .wb .is-day { color:#081C39; } .wb .is-day small { color:#152740; } .wb .is-day em { color:#1557FF; }
+  .wb .is-night { color:#fff; } .wb .is-night small { color:rgba(255,255,255,.92); } .wb .is-night em { color:#fff; }
   .hero2 .pg { position:absolute; right:10px; bottom:10px; z-index:2; display:flex; align-items:center; background:rgba(17,24,39,.55); color:#fff; border-radius:999px; font-size:12px; font-weight:600; }
   .hero2 .pg button { width:40px; height:32px; color:#fff; font-size:15px; }
   .hero2 .pg span { min-width:30px; text-align:center; }
@@ -4621,7 +4621,7 @@ function renderHomeMain() {
     <div class="hero2 wb" aria-roledescription="carousel" aria-label="위트립 소개">
       <div class="track" id="heroTrack">${BANNERS.map(([ph, tone, [t1, t2], sub, cta, act], i) => `<button type="button" class="sl" data-ban="${act}">
         <img src="assets/wetrip/backgrounds/${ph}-800.webp" srcset="assets/wetrip/backgrounds/${ph}-800.webp 800w, assets/wetrip/backgrounds/${ph}-1200.webp 1200w" sizes="(min-width:768px) 560px, 100vw" width="1706" height="922" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async">
-        <span class="cp ${tone}"><b><span>${t1}</span><span>${t2}</span></b><small>${sub}</small><em>${cta}</em></span></button>`).join('')}</div>
+        <span class="cp is-${tone}"><b><span>${t1}</span><span>${t2}</span></b><small>${sub}</small><em>${cta}</em></span></button>`).join('')}</div>
       <div class="pg"><button id="heroPrev" aria-label="이전 배너">‹</button><span id="heroNo">1 / ${BANNERS.length}</span><button id="heroNext" aria-label="다음 배너">›</button></div>
     </div>
     <div class="scut">
