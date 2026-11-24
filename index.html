@@ -775,13 +775,19 @@
   .hero2.wb { aspect-ratio:1536/830; background:#0b2a5c; container-type:inline-size; }
   .hero2.wb .sl::after { content:none; }
   .hero2.wb img { object-position:center; }
-  .wb .cp { position:absolute; left:7%; top:12%; /* 규정 18% → 12%: 18%면 링크가 절벽·바다(낮)/건물(밤) 위로 내려감 */ right:auto; z-index:1; display:flex; flex-direction:column; align-items:flex-start; }
-  .wb .cp b { max-width:58cqw; font-size:clamp(20px, 5.64cqw, 24px); line-height:1.3; font-weight:700; letter-spacing:-.02em; text-shadow:none; white-space:nowrap; }
-  .wb .cp b span { display:block; }
-  .wb .cp small { margin-top:10px; max-width:72cqw; font-size:clamp(10.5px, 2.95cqw, 12.5px); line-height:1.5; font-weight:400; text-shadow:none; }
-  .wb .cp em { display:inline-flex; align-items:center; min-height:44px; margin:-2px 0 -12px; /* 누르는 곳 44px, 보이는 간격은 약 10px (배너 전체도 눌림) */ font-size:clamp(11px, 3.08cqw, 13px); line-height:1.4; font-weight:600; font-style:normal; }
-  .wb .is-day { color:#081C39; } .wb .is-day small { color:#152740; } .wb .is-day em { color:#1557FF; }
-  .wb .is-night { color:#fff; } .wb .is-night small { color:rgba(255,255,255,.92); } .wb .is-night em { color:#fff; }
+  /* 배너 가독성 v3: 폭 350px 기준 제목 20 / 서브 11 / 링크 12px, 배너 폭에 비례(cqw) */
+  .wb .cp { position:absolute; left:7%; top:12%; z-index:1; display:flex; flex-direction:column; align-items:flex-start; max-width:58%; }
+  .wb .cp b { font-size:clamp(18px, 5.714cqw, 24px); line-height:1.3; font-weight:700; letter-spacing:-.02em; text-shadow:none; }
+  .wb .cp b span { display:block; white-space:nowrap; }
+  .wb .cp small { margin-top:12px; font-size:clamp(10px, 3.143cqw, 13px); line-height:1.5; font-weight:400; text-shadow:none; word-break:keep-all; }
+  .wb .cta { position:absolute; left:7%; top:calc(57% - 14px); /* 글자 윗선이 57%, 누르는 곳 44px */ z-index:1; display:flex; align-items:center; min-height:44px; font-size:clamp(11px, 3.429cqw, 14px); line-height:1.4; font-weight:600; font-style:normal; }
+  .wb .is-day, .wb .is-day small { color:#081C39; } .wb .cta.is-day { color:#1244BF; }
+  .wb .is-night, .wb .is-night small, .wb .cta.is-night { color:#fff; opacity:1; }
+  /* 슬라이드 컨트롤: 보이는 높이 28px, 버튼 누르는 곳 44px */
+  .hero2.wb .pg { right:12px; bottom:12px; height:28px; font-size:11.5px; }
+  .hero2.wb .pg button { position:relative; width:26px; height:28px; font-size:13px; }
+  .hero2.wb .pg button::before { content:''; position:absolute; inset:-8px -9px; }
+  .hero2.wb .pg span { min-width:26px; }
   .hero2 .pg { position:absolute; right:10px; bottom:10px; z-index:2; display:flex; align-items:center; background:rgba(17,24,39,.55); color:#fff; border-radius:999px; font-size:12px; font-weight:600; }
   .hero2 .pg button { width:40px; height:32px; color:#fff; font-size:15px; }
   .hero2 .pg span { min-width:30px; text-align:center; }
@@ -4621,7 +4627,7 @@ function renderHomeMain() {
     <div class="hero2 wb" aria-roledescription="carousel" aria-label="위트립 소개">
       <div class="track" id="heroTrack">${BANNERS.map(([ph, tone, [t1, t2], sub, cta, act], i) => `<button type="button" class="sl" data-ban="${act}">
         <img src="assets/wetrip/backgrounds/${ph}-800.webp" srcset="assets/wetrip/backgrounds/${ph}-800.webp 800w, assets/wetrip/backgrounds/${ph}-1200.webp 1200w" sizes="(min-width:768px) 560px, 100vw" width="1706" height="922" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'} decoding="async">
-        <span class="cp is-${tone}"><b><span>${t1}</span><span>${t2}</span></b><small>${sub}</small><em>${cta}</em></span></button>`).join('')}</div>
+        <span class="cp is-${tone}"><b><span>${t1}</span><span>${t2}</span></b><small>${sub}</small></span><em class="cta is-${tone}">${cta}</em></button>`).join('')}</div>
       <div class="pg"><button id="heroPrev" aria-label="이전 배너">‹</button><span id="heroNo">1 / ${BANNERS.length}</span><button id="heroNext" aria-label="다음 배너">›</button></div>
     </div>
     <div class="scut">
