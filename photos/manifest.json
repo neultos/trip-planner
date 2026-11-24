@@ -1,314 +1,80 @@
 [
- {
-  "name": "hongkong-harbour-night",
-  "files": [
-   {
-    "file": "hongkong-harbour-night-1400.webp",
-    "w": 1400,
-    "h": 790,
-    "kb": 207
-   },
-   {
-    "file": "hongkong-harbour-night-800.webp",
-    "w": 800,
-    "h": 452,
-    "kb": 68
-   }
-  ],
-  "use": "홈 히어로",
-  "place": "홍콩 빅토리아 하버",
-  "source": "https://commons.wikimedia.org/wiki/File:Vista_del_Puerto_de_Victoria_desde_Sky100,_Hong_Kong,_2013-08-09,_DD_11.JPG",
-  "commons_title": "Vista del Puerto de Victoria desde Sky100, Hong Kong, 2013-08-09, DD 11.JPG",
-  "author": "Diego Delso",
-  "license": "CC BY-SA 3.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-  "attribution_required": true,
-  "focal": "62% 50%"
- },
- {
-  "name": "danang-beach",
-  "files": [
-   {
-    "file": "danang-beach-1400.webp",
-    "w": 1400,
-    "h": 1050,
-    "kb": 261
-   },
-   {
-    "file": "danang-beach-800.webp",
-    "w": 800,
-    "h": 600,
-    "kb": 97
-   }
-  ],
-  "use": "홈 히어로·도시 카드",
-  "place": "베트남 다낭 미케 해변",
-  "source": "https://commons.wikimedia.org/wiki/File:My_Khe_Beach_Danang_Coastline.jpg",
-  "commons_title": "My Khe Beach Danang Coastline.jpg",
-  "author": "Jpatokal",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "attribution_required": true,
-  "focal": "50% 60%"
- },
- {
-  "name": "jeju-seongsan",
-  "files": [
-   {
-    "file": "jeju-seongsan-1400.webp",
-    "w": 1400,
-    "h": 875,
-    "kb": 203
-   },
-   {
-    "file": "jeju-seongsan-800.webp",
-    "w": 800,
-    "h": 500,
-    "kb": 65
-   }
-  ],
-  "use": "홈 히어로·도시 카드",
-  "place": "제주 성산일출봉",
-  "source": "https://commons.wikimedia.org/wiki/File:Hydrangea_macrophylla_in_front_of_Seongsan_Ilchulbong_volcano_at_blue_hour_in_Jeju_Island_South_Korea.jpg",
-  "commons_title": "Hydrangea macrophylla in front of Seongsan Ilchulbong volcano at blue hour in Jeju Island South Korea.jpg",
-  "author": "Basile Morin",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "attribution_required": true,
-  "focal": "50% 45%"
- },
- {
-  "name": "osaka-castle",
-  "files": [
-   {
-    "file": "osaka-castle-800.webp",
-    "w": 800,
-    "h": 533,
-    "kb": 115
-   },
-   {
-    "file": "osaka-castle-480.webp",
-    "w": 480,
-    "h": 320,
-    "kb": 50
-   }
-  ],
-  "use": "도시 카드",
-  "place": "일본 오사카성",
-  "source": "https://commons.wikimedia.org/wiki/File:Osaka-Castle-cherry-blossom-2018-Luka-Peternel.jpg",
-  "commons_title": "Osaka-Castle-cherry-blossom-2018-Luka-Peternel.jpg",
-  "author": "Luka Peternel",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "attribution_required": true,
-  "focal": "55% 40%"
- },
- {
-  "name": "taipei-skyline",
-  "files": [
-   {
-    "file": "taipei-skyline-800.webp",
-    "w": 800,
-    "h": 533,
-    "kb": 47
-   },
-   {
-    "file": "taipei-skyline-480.webp",
-    "w": 480,
-    "h": 320,
-    "kb": 17
-   }
-  ],
-  "use": "도시 카드",
-  "place": "대만 타이베이 101",
-  "source": "https://commons.wikimedia.org/wiki/File:Taipei_skyline_at_sunset_20190922.jpg",
-  "commons_title": "Taipei skyline at sunset 20190922.jpg",
-  "author": "Nico Kaiser from Vienna, Austria",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "attribution_required": true,
-  "focal": "55% 55%"
- },
- {
-  "name": "tokyo-skyline",
-  "files": [
-   {
-    "file": "tokyo-skyline-800.webp",
-    "w": 800,
-    "h": 450,
-    "kb": 65
-   },
-   {
-    "file": "tokyo-skyline-480.webp",
-    "w": 480,
-    "h": 270,
-    "kb": 23
-   }
-  ],
-  "use": "도시 카드",
-  "place": "일본 도쿄 도심과 도쿄 타워",
-  "source": "https://commons.wikimedia.org/wiki/File:Minato_City,_Tokyo,_Japan.jpg",
-  "commons_title": "Minato City, Tokyo, Japan.jpg",
-  "author": "David Kernan",
-  "license": "CC BY 4.0",
-  "license_url": "https://creativecommons.org/licenses/by/4.0",
-  "attribution_required": true,
-  "focal": "45% 50%"
- },
- {
-  "name": "busan-gwangan",
-  "files": [
-   {
-    "file": "busan-gwangan-800.webp",
-    "w": 800,
-    "h": 478,
-    "kb": 55
-   },
-   {
-    "file": "busan-gwangan-480.webp",
-    "w": 480,
-    "h": 286,
-    "kb": 20
-   }
-  ],
-  "use": "도시 카드",
-  "place": "부산 광안대교",
-  "source": "https://commons.wikimedia.org/wiki/File:Gwangan_Bridge_and_Gwangalli_Beach_-_Gwangalli2721.jpg",
-  "commons_title": "Gwangan Bridge and Gwangalli Beach - Gwangalli2721.jpg",
-  "author": "lumoplank",
-  "license": "CC0",
-  "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-  "attribution_required": false,
-  "focal": "55% 50%"
- },
- {
-  "name": "theme-city-walk",
-  "files": [
-   {
-    "file": "theme-city-walk-800.webp",
-    "w": 800,
-    "h": 600,
-    "kb": 100
-   },
-   {
-    "file": "theme-city-walk-480.webp",
-    "w": 480,
-    "h": 360,
-    "kb": 33
-   }
-  ],
-  "use": "취향 테마: 도시 산책",
-  "place": "일본 도쿄 나카메구로",
-  "source": "https://commons.wikimedia.org/wiki/File:Nakameguro_at_hanami_season_10.jpg",
-  "commons_title": "Nakameguro at hanami season 10.jpg",
-  "author": "Syced",
-  "license": "CC0",
-  "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-  "attribution_required": false,
-  "focal": "50% 55%"
- },
- {
-  "name": "theme-beach",
-  "files": [
-   {
-    "file": "theme-beach-800.webp",
-    "w": 800,
-    "h": 532,
-    "kb": 78
-   },
-   {
-    "file": "theme-beach-480.webp",
-    "w": 480,
-    "h": 320,
-    "kb": 25
-   }
-  ],
-  "use": "취향 테마: 휴양과 쉼",
-  "place": "태국 해변",
-  "source": "https://commons.wikimedia.org/wiki/File:DZ6_3527_Quiet_morning_stroll_along_the_palm-fringed_shore_at_Klaeng_Kachet_Rayong_Province_Thailand.jpg",
-  "commons_title": "DZ6 3527 Quiet morning stroll along the palm-fringed shore at Klaeng Kachet Rayong Province Thailand.jpg",
-  "author": "PattayaPatrol",
-  "license": "CC BY-SA 4.0",
-  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-  "attribution_required": true,
-  "focal": "50% 50%"
- },
- {
-  "name": "theme-food",
-  "files": [
-   {
-    "file": "theme-food-800.webp",
-    "w": 800,
-    "h": 600,
-    "kb": 23
-   },
-   {
-    "file": "theme-food-480.webp",
-    "w": 480,
-    "h": 360,
-    "kb": 11
-   }
-  ],
-  "use": "취향 테마: 맛있는 여행",
-  "place": "딤섬(하가우)",
-  "source": "https://commons.wikimedia.org/wiki/File:Three_dim_sum_in_steamer_basket.jpg",
-  "commons_title": "Three dim sum in steamer basket.jpg",
-  "author": "Mshuang2",
-  "license": "CC0",
-  "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-  "attribution_required": false,
-  "focal": "50% 45%"
- },
- {
-  "name": "theme-nature",
-  "files": [
-   {
-    "file": "theme-nature-800.webp",
-    "w": 800,
-    "h": 500,
-    "kb": 87
-   },
-   {
-    "file": "theme-nature-480.webp",
-    "w": 480,
-    "h": 300,
-    "kb": 30
-   }
-  ],
-  "use": "취향 테마: 자연 속으로",
-  "place": "캐나다 밴프 모레인 호수",
-  "source": "https://commons.wikimedia.org/wiki/File:Lake_Moraine-Banff_National_Park.jpg",
-  "commons_title": "Lake Moraine-Banff National Park.jpg",
-  "author": "Florian Fuchs",
-  "license": "CC BY 3.0",
-  "license_url": "https://creativecommons.org/licenses/by/3.0",
-  "attribution_required": true,
-  "focal": "50% 50%"
- },
- {
-  "name": "stay-resort",
-  "files": [
-   {
-    "file": "stay-resort-1400.webp",
-    "w": 1400,
-    "h": 915,
-    "kb": 306
-   },
-   {
-    "file": "stay-resort-800.webp",
-    "w": 800,
-    "h": 523,
-    "kb": 111
-   }
-  ],
-  "use": "숙소 배너",
-  "place": "베트남 다낭 해변 리조트 수영장",
-  "source": "https://commons.wikimedia.org/wiki/File:My_Khe_Beach,_Da_Nang,_Vietnam.jpg",
-  "commons_title": "My Khe Beach, Da Nang, Vietnam.jpg",
-  "author": ". Ray in Manila",
-  "license": "CC BY 2.0",
-  "license_url": "https://creativecommons.org/licenses/by/2.0",
-  "attribution_required": true,
-  "focal": "60% 55%"
- }
+  {
+    "name": "hongkong-harbour-night",
+    "files": [
+      {
+        "file": "hongkong-harbour-night-1400.webp",
+        "w": 1400,
+        "h": 790,
+        "kb": 207
+      },
+      {
+        "file": "hongkong-harbour-night-800.webp",
+        "w": 800,
+        "h": 452,
+        "kb": 68
+      }
+    ],
+    "use": "홈 히어로",
+    "place": "홍콩 빅토리아 하버",
+    "source": "https://commons.wikimedia.org/wiki/File:Vista_del_Puerto_de_Victoria_desde_Sky100,_Hong_Kong,_2013-08-09,_DD_11.JPG",
+    "commons_title": "Vista del Puerto de Victoria desde Sky100, Hong Kong, 2013-08-09, DD 11.JPG",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "attribution_required": true,
+    "focal": "62% 50%"
+  },
+  {
+    "name": "danang-beach",
+    "files": [
+      {
+        "file": "danang-beach-1400.webp",
+        "w": 1400,
+        "h": 1050,
+        "kb": 261
+      },
+      {
+        "file": "danang-beach-800.webp",
+        "w": 800,
+        "h": 600,
+        "kb": 97
+      }
+    ],
+    "use": "홈 히어로·도시 카드",
+    "place": "베트남 다낭 미케 해변",
+    "source": "https://commons.wikimedia.org/wiki/File:My_Khe_Beach_Danang_Coastline.jpg",
+    "commons_title": "My Khe Beach Danang Coastline.jpg",
+    "author": "Jpatokal",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attribution_required": true,
+    "focal": "50% 60%"
+  },
+  {
+    "name": "jeju-seongsan",
+    "files": [
+      {
+        "file": "jeju-seongsan-1400.webp",
+        "w": 1400,
+        "h": 875,
+        "kb": 203
+      },
+      {
+        "file": "jeju-seongsan-800.webp",
+        "w": 800,
+        "h": 500,
+        "kb": 65
+      }
+    ],
+    "use": "홈 히어로·도시 카드",
+    "place": "제주 성산일출봉",
+    "source": "https://commons.wikimedia.org/wiki/File:Hydrangea_macrophylla_in_front_of_Seongsan_Ilchulbong_volcano_at_blue_hour_in_Jeju_Island_South_Korea.jpg",
+    "commons_title": "Hydrangea macrophylla in front of Seongsan Ilchulbong volcano at blue hour in Jeju Island South Korea.jpg",
+    "author": "Basile Morin",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attribution_required": true,
+    "focal": "50% 45%"
+  }
 ]

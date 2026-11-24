@@ -840,12 +840,11 @@
   #hCafe > .sec:first-child, #hBlog > .sec:first-child { font-size:24px; line-height:32px; font-weight:700; }
   .share-empty img { width:96px; height:96px; margin:0 auto 16px; }
   .pband em { margin-top:8px; font-style:normal; font-size:14px; font-weight:600; color:var(--wt-brand); }
-  .stayb { position:relative; display:block; width:100%; aspect-ratio:350/180; border-radius:16px; overflow:hidden; padding:0; text-align:left; color:#fff; }
+  .stayb { position:relative; display:block; width:100%; aspect-ratio:350/180; border-radius:16px; overflow:hidden; padding:0; text-align:left; color:#081C39; container-type:inline-size; }
   .stayb img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-  .stayb::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,.45), rgba(0,0,0,.04) 70%); }
-  .stayb .cp { position:absolute; left:20px; top:20px; right:30%; z-index:1; }
-  .stayb b { display:block; font-size:24px; line-height:32px; font-weight:700; letter-spacing:-.02em; text-shadow:0 1px 8px rgba(0,0,0,.3); }
-  .stayb em { display:inline-block; margin-top:8px; font-style:normal; font-size:14px; font-weight:600; }
+  .stayb .cp { position:absolute; left:7%; top:18%; max-width:52%; z-index:1; }
+  .stayb b { display:block; font-size:clamp(18px, 5.714cqw, 24px); line-height:1.3; font-weight:700; letter-spacing:-.02em; }
+  .stayb em { display:inline-flex; align-items:center; min-height:44px; margin-top:2px; font-style:normal; font-size:clamp(11px, 3.429cqw, 14px); line-height:1.4; font-weight:600; color:#1244BF; }
   .pnote { margin:8px 0 0; text-align:center; font-size:12px; line-height:18px; color:var(--wt-sub); }
   .story { display:block; width:100%; text-align:left; padding:0; }
   .story .im { display:block; aspect-ratio:350/198; border-radius:12px; overflow:hidden; background:var(--wt-soft); }
@@ -1326,7 +1325,7 @@
 
 <!-- 숙소·항공권 찾기: 여행 날짜·도시를 채워 비교 사이트로 -->
 <dialog id="cityDlg" class="city-dlg" aria-labelledby="cdName"><div id="cdBody"></div></dialog>
-<dialog id="creditDlg"><form method="dialog"><h3>사진 출처</h3><p class="note">홈 화면 사진은 위키미디어 공용(Wikimedia Commons)의 자유 이용 사진이에요.</p><ul class="credits" id="creditList"></ul><div class="row"><button class="btn" value="cancel">닫기</button></div></form></dialog>
+<dialog id="creditDlg"><form method="dialog"><h3>사진 출처</h3><p class="note">아래 사진은 위키미디어 공용(Wikimedia Commons)의 자유 이용 사진이에요. 그 밖의 홈 화면 사진은 위트립이 만든 분위기 이미지예요.</p><ul class="credits" id="creditList"></ul><div class="row"><button class="btn" value="cancel">닫기</button></div></form></dialog>
 <dialog id="bookDlg">
   <form method="dialog">
     <h3>🏨 숙소 · ✈️ 항공권 찾기</h3>
@@ -4600,10 +4599,10 @@ const DEST = {
   홍콩: { country: '홍콩', air: 'HKG', abroad: 1, ph: 'hongkong-harbour-night', big: 1, pos: '62% 50%', line: '낮부터 밤까지 새로운 발견' },
   다낭: { country: '베트남', air: 'DAD', abroad: 1, ph: 'danang-beach', big: 1, pos: '50% 60%', line: '바다와 휴식이 가까운 도시' },
   제주: { country: '대한민국', air: 'CJU', abroad: 0, ph: 'jeju-seongsan', big: 1, pos: '50% 45%', line: '바다와 오름을 함께 걷는 섬' },
-  오사카: { country: '일본', air: 'KIX', abroad: 1, ph: 'osaka-castle', pos: '55% 40%', line: '깊고 다채로운 매력의 도시' },
-  타이베이: { country: '대만', air: 'TPE', abroad: 1, ph: 'taipei-skyline', pos: '55% 55%', line: '미식과 감성이 가득한 여행' },
-  도쿄: { country: '일본', air: 'NRT', abroad: 1, ph: 'tokyo-skyline', pos: '45% 50%', line: '걸을수록 새로운 골목과 전망' },
-  부산: { country: '대한민국', air: 'PUS', abroad: 0, ph: 'busan-gwangan', pos: '55% 50%', line: '바다 위 야경과 시장 골목' },
+  오사카: { country: '일본', air: 'KIX', abroad: 1, ph: 'dest-osaka', pos: '62% 45%', line: '깊고 다채로운 매력의 도시' },
+  타이베이: { country: '대만', air: 'TPE', abroad: 1, ph: 'dest-taipei', pos: '62% 50%', line: '미식과 감성이 가득한 여행' },
+  도쿄: { country: '일본', air: 'NRT', abroad: 1, ph: 'dest-tokyo', pos: '62% 50%', line: '걸을수록 새로운 골목과 전망' },
+  부산: { country: '대한민국', air: 'PUS', abroad: 0, ph: 'dest-busan', pos: '58% 50%', line: '바다 위 야경과 시장 골목' },
 };
 // 히어로 문구는 장마다 다르게 [큰 글씨, 작은 글씨]
 // 메인 배너 (CLAUDE_PROMPT v2): [사진, 글자색, 제목 두 줄, 보조, 링크, 누르면]
@@ -4612,10 +4611,10 @@ const BANNERS = [
   ['banner-night', 'night', ['같이 떠나서,', '더 특별한 여행'], '친구를 초대하고, 하나의 일정으로', '함께 여행 만들기 →', 'invite'],
 ];
 const THEMES = [
-  ['도시 산책', 'theme-city-walk', '50% 55%', ['도쿄', '오사카', '타이베이', '홍콩']],
-  ['휴양과 쉼', 'theme-beach', '50% 50%', ['다낭', '제주']],
-  ['맛있는 여행', 'theme-food', '50% 45%', ['홍콩', '오사카', '타이베이', '부산']],
-  ['자연 속으로', 'theme-nature', '50% 50%', ['제주', '다낭']],
+  ['도시 산책', 'theme-city-v4', '50% 50%', ['도쿄', '오사카', '타이베이', '홍콩']],
+  ['휴양과 쉼', 'theme-relax-v4', '50% 50%', ['다낭', '제주']],
+  ['맛있는 여행', 'theme-food-v4', '40% 50%', ['홍콩', '오사카', '타이베이', '부산']],
+  ['자연 속으로', 'theme-nature-v4', '50% 50%', ['제주', '다낭']],
 ];
 const img = (name, alt, pos, big, eager) => `<img src="photos/${name}-800.webp" srcset="photos/${name}-${big ? '800' : '480'}.webp ${big ? 800 : 480}w, photos/${name}-${big ? '1400' : '800'}.webp ${big ? 1400 : 800}w"
   sizes="(min-width:768px) 560px, 100vw" alt="${esc(alt)}" style="object-position:${pos}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="this.style.visibility='hidden'">`;
@@ -4653,7 +4652,7 @@ function renderHomeMain() {
       <div class="bd g2">${THEMES.map(([t, ph, pos], i) => `<button class="dcard" data-theme="${i}"><span class="im t">${img(ph, `${t} 테마 사진`, pos)}</span><b>${t}</b></button>`).join('')}</div></section>
     <section class="hsec" id="hStory" hidden></section>
     <section class="hsec"><h2>머무는 순간까지 특별하게</h2><p class="sub">여행에 어울리는 숙소를 찾아보세요</p>
-      <div class="bd"><button class="stayb" data-sc="stayA">${img('stay-resort', '해변 리조트 수영장 풍경', '60% 55%', 1)}<span class="cp"><b>일상에서 멀리,<br>바다 가까이</b><em>숙소 찾아보기 →</em></span></button>
+      <div class="bd"><button class="stayb" data-sc="stayA">${img('stay-v4', '', '50% 50%', 1)}<span class="cp"><b>일상에서 멀리,<br>바다 가까이</b><em>숙소 찾아보기 →</em></span></button>
       <p class="pnote">ⓘ 예약은 제휴 파트너에서 진행돼요</p></div></section>
     <button class="pband" data-sc="new"><span class="tx"><b>가고 싶은 곳을<br>하나의 일정으로</b><em>새 여행 만들기 →</em></span><img src="assets/wetrip/web/planning-360.png" width="112" height="112" alt="" loading="lazy"></button>`;
   renderStories(); startHero();
@@ -4786,7 +4785,7 @@ function renderHomeBook() {
       <label>인원<select id="bkN">${[1, 2, 3, 4, 5, 6, 7, 8].map(k => `<option value="${k}"${k === bk.n ? ' selected' : ''}>성인 ${k}명</option>`).join('')}</select></label>
       <button class="go">숙소 검색</button></form>`}
     <div class="bres" id="bkRes"></div>
-    ${bk.trip ? '' : `<section class="hsec"><button class="stayb" data-bs="stay">${img('stay-resort', '해변 리조트 수영장 풍경', '60% 55%', 1)}<span class="cp"><b>여행에 꼭 맞는 숙소</b><em>숙소 둘러보기 →</em></span></button></section>
+    ${bk.trip ? '' : `<section class="hsec"><button class="stayb" data-bs="stay">${img('stay-v4', '', '50% 50%', 1)}<span class="cp"><b>여행에 꼭 맞는 숙소</b><em>숙소 둘러보기 →</em></span></button></section>
     <section class="hsec"><h2>어디로 떠나볼까요?</h2><div class="bd g2" style="grid-template-columns:repeat(3,1fr)">${['도쿄', '다낭', '타이베이'].map(c => `<button class="dcard" data-city="${c}">${cardImg(c)}<b>${c}</b></button>`).join('')}</div></section>`}`;
   if (!$('apList')) document.body.insertAdjacentHTML('beforeend', `<datalist id="apList">${AIRPORTS.map(a => `<option value="${esc(apText(a.code))}">`).join('')}</datalist>`);
   if (sum || bk.auto) { bk.auto = false; runBk(); }
