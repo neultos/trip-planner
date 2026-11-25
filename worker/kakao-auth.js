@@ -90,6 +90,7 @@ async function flights(url, req, env) {
   const h = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': ALLOW.includes(o) ? o : ALLOW[0], 'Cache-Control': 'public, max-age=3600', Vary: 'Origin' };
   const q = url.searchParams, from = q.get('from') || '', to = q.get('to') || '', a = q.get('a') || '', b = q.get('b') || '';
   const iata = /^[A-Z]{3}$/, day = /^\d{4}-\d{2}-\d{2}$/;
+  if (q.has('m')) return await calendar(q, h, env, iata); // 달력: 한 달 날짜별 최저 참고가
   if (!iata.test(from) || !iata.test(to) || !day.test(a) || (b && !day.test(b))) return new Response('{"error":"bad"}', { status: 400, headers: h });
   const ask = async (d1, d2, limit) => {
     const p = new URLSearchParams({ origin: from, destination: to, departure_at: d1, currency: 'krw', sorting: 'price', limit: String(limit), one_way: String(!d2) });
@@ -103,7 +104,7 @@ async function flights(url, req, env) {
   const months = [...new Set([shift(a, -3), a, shift(a, 3)].map(d => d.slice(0, 7)))];
   const [exactList, ...monthLists] = await Promise.all([ask(a, b, 5), ...months.map(m => ask(m, b ? shift(m + '-15', nights).slice(0, 7) : '', 1000))]);
   const all = monthLists.flat();
-  const item = x => ({ price: x.price, airline: x.airline, no: x.flight_number || '', transfers: x.transfers, back: x.return_transfers ?? null, duration: x.duration_to || x.duration || 0,
+  const item = x => ({ price: x.price, airline: x.airline, no: x.flight_number || '', transfers: x.transfers, back: x.return_transfers ?? null, duration: x.duration_to || x.duration || 0, durBack: x.duration_back || 0,
     depart: x.departure_at, ret: x.return_at || '', link: 'https://www.aviasales.com' + x.link + (x.link.includes('?') ? '&' : '?') + 'marker=605632' });
   const exact = !!exactList.length;
   const gap = x => Math.abs(Date.parse(x.departure_at.slice(0, 10)) - Date.parse(a)); // 고른 출발일에 가까운 편부터
@@ -176,4 +177,26 @@ async function files(url, req, env) {
     return new Response('ok', { headers: h });
   }
   return new Response('bad', { status: 400, headers: h });
+}
+
+// /flights?from=ICN&to=HKG&m=2026-12&n=5  (n 없으면 편도) → { days: { '2026-12-02': { p: 320000, same: true } } }
+// 출발일마다 최저가. 왕복이면 같은 박수(n박) 값을 먼저, 없으면 박수가 다른 값(same:false)
+async function calendar(q, h, env, iata) {
+  const from = q.get('from') || '', to = q.get('to') || '', m = q.get('m') || '', n = q.get('n') || '';
+  if (!iata.test(from) || !iata.test(to) || !/^\d{4}-\d{2}$/.test(m) || (n && !/^\d{1,2}$/.test(n))) return new Response('{"error":"bad"}', { status: 400, headers: h });
+  const shift = (d, k) => { const t = new Date(d + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + k); return t.toISOString().slice(0, 10); };
+  // 귀국이 다음 달로 넘어가는 표도 받도록 귀국 달은 두 개 물어봄
+  const rets = n ? [...new Set([shift(m + '-01', +n), shift(m + '-28', +n)].map(d => d.slice(0, 7)))] : [''];
+  const lists = await Promise.all(rets.map(async r => {
+    const p = new URLSearchParams({ origin: from, destination: to, departure_at: m, currency: 'krw', sorting: 'price', limit: '1000', one_way: String(!n) });
+    if (r) p.set('return_at', r);
+    const res = await fetch('https://api.travelpayouts.com/aviasales/v3/prices_for_dates?' + p, { headers: { 'X-Access-Token': env.TP_TOKEN }, cf: { cacheTtl: 3600, cacheEverything: true } });
+    return (await res.json()).data || [];
+  }));
+  const days = {};
+  for (const x of lists.flat()) {
+    const d = x.departure_at.slice(0, 10), same = !n || (x.return_at || '').slice(0, 10) === shift(d, +n), o = days[d];
+    if (!o || (same && !o.same) || (same === o.same && x.price < o.p)) days[d] = { p: x.price, same };
+  }
+  return new Response(JSON.stringify({ days }), { headers: h });
 }
