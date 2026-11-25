@@ -395,6 +395,12 @@
   .cal-d.s span, .cal-d.e span { background:var(--accent); color:#fff; }
   .cal-d.past { opacity:.35; }
   .cal-sum { text-align:center; font-weight:700; margin:14px 0 6px; min-height:22px; }
+  /* 항공권 달력: 날짜 아래 1인 참고가 */
+  .cal-grid.px .cal-d { height:58px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:1px; }
+  .cal-grid.px .cal-d small { font-size:10.5px; font-weight:500; color:var(--wt-sub, #6b7280); line-height:13px; min-height:13px; }
+  .cal-grid.px .cal-d small.alt { opacity:.55; }
+  .cal-grid.px .cal-d.lo small { color:#e5484d; font-weight:700; }
+  .cal-note { margin:10px 2px 0; font-size:12px; line-height:18px; color:var(--wt-sub, #6b7280); }
 
   /* 일정 추가 선택 */
   .pick button { display:flex; gap:14px; align-items:center; width:100%; padding:16px; border-radius:16px; background:var(--bg2); margin-bottom:10px; text-align:left; }
@@ -1029,6 +1035,35 @@
   .fprice a { grid-template-columns:auto 1fr auto; background:var(--wt-soft); border-radius:12px; padding:12px 14px; }
   .fp-p { display:flex; flex-direction:column; align-items:flex-end; } .fp-p b { font-size:17px; color:var(--wt-ink); } .fp-p small { font-size:11.5px; color:var(--wt-sub); }
   .pinfo { margin:12px 0 0; font-size:13px; line-height:20px; color:var(--wt-sub); }
+  /* 예약 탭 항공권 결과 (선택한 날짜의 항공권) */
+  .fly-f { display:flex; align-items:center; gap:8px; margin:12px 0; }
+  .fly-f button { height:36px; padding:0 14px; border-radius:999px; border:1px solid var(--wt-line); background:#fff; font-size:14px; font-weight:600; color:var(--wt-ink); }
+  .fly-f button[aria-pressed="true"] { background:var(--wt-blue-soft); border-color:var(--wt-brand); color:var(--wt-brand); }
+  .fly-f span { margin-left:auto; font-size:12.5px; color:var(--wt-sub); }
+  .fcard { border:1px solid var(--wt-line); border-radius:16px; background:#fff; overflow:hidden; margin-bottom:12px; }
+  .fcard.best { border:1.5px solid var(--wt-brand); }
+  .fleg { padding:12px 14px 10px; }
+  .fleg + .fleg { border-top:1px solid var(--wt-line); }
+  .fleg > p { display:flex; align-items:center; gap:6px; margin:0 0 8px; padding:4px 8px; border-radius:8px; background:var(--wt-soft); font-size:13px; font-weight:700; color:var(--wt-ink); }
+  .fleg > p svg { width:16px; height:16px; color:var(--wt-brand); }
+  .fl-a { display:grid; grid-template-columns:32px 1fr; column-gap:10px; align-items:center; }
+  .fl-a img, .fl-a i { grid-row:span 3; width:32px; height:32px; border-radius:8px; object-fit:contain; background:var(--wt-soft); }
+  .fl-a small { font-size:13px; color:var(--wt-ink); }
+  .fl-a b { font-size:16px; font-weight:700; color:var(--wt-ink); }
+  .fl-a b span { font-weight:500; font-size:14px; }
+  .fl-a em { font-style:normal; font-size:12px; color:var(--wt-sub); }
+  .ftot { display:flex; align-items:center; gap:12px; padding:12px 14px 14px; background:var(--wt-soft); }
+  .ftot > div { flex:1; min-width:0; }
+  .ftot small { display:block; font-size:12px; color:var(--wt-sub); line-height:18px; }
+  .ftot b { display:block; font-size:22px; line-height:30px; font-weight:800; color:var(--wt-ink); }
+  .ftot a { flex:none; display:flex; align-items:center; min-height:44px; padding:0 14px; border-radius:12px; background:var(--wt-brand); color:#fff; font-size:14px; font-weight:700; text-decoration:none; }
+  .fcard.mini a.fm { display:block; padding:12px 14px; color:inherit; text-decoration:none; }
+  .fm-r { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--wt-ink); margin-bottom:4px; }
+  .fm-r img, .fm-r i { width:20px; height:20px; border-radius:5px; object-fit:contain; background:var(--wt-soft); flex:none; }
+  .fm-r em { font-style:normal; color:var(--wt-sub); }
+  .fm-t { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--wt-line); }
+  .fm-t b { font-size:18px; font-weight:800; color:var(--wt-ink); } .fm-t small { font-size:12px; color:var(--wt-sub); }
+  .fly-none { padding:14px; border-radius:14px; background:var(--wt-soft); font-size:13.5px; line-height:20px; color:var(--wt-sub); margin:12px 0 0; }
   .hsec p.sub + .m-tiles { margin-top:12px; }
   .m-tiles.pt { grid-template-columns:1fr 1fr; gap:8px; }
   .m-tiles.pt a { flex-direction:row; justify-content:space-between; align-items:center; min-height:48px; padding:0 14px; border-radius:12px; background:#fff; border:1px solid var(--wt-line); font-size:14px; font-weight:600; color:var(--wt-ink); text-align:left; }
@@ -1398,6 +1433,7 @@
   <form method="dialog">
     <div class="cal-head"><button type="button" id="calPrev" aria-label="이전 달">‹</button><b id="calTitle"></b><button type="button" id="calNext" aria-label="다음 달">›</button></div>
     <div class="cal-grid" id="calGrid"></div>
+    <p class="cal-note" id="calNote" hidden></p>
     <div class="cal-sum" id="calSum"></div>
     <div class="row"><button class="btn" value="cancel">취소</button><button class="btn primary" id="calOk" value="ok">확인</button></div>
   </form>
@@ -3626,7 +3662,6 @@ async function loadPrice(el) {
       <span class="fp-p"><b>${Math.round(f.price).toLocaleString('ko-KR')}원</b><small>1인 참고가</small></span></a></li>`).join('')}</ul>`;
     // 날짜별 최저가 (예약 탭에서는 눌러서 그 날짜로 다시 검색)
     const qs = new URLSearchParams(el.dataset.q), a0 = qs.get('a'), live = !!el.closest('#bkRes');
-    const man = v => `${(v / 10000).toFixed(v < 100000 ? 1 : 0)}만`;
     if (x.days?.some(d => d.price)) el.insertAdjacentHTML('afterbegin', `<div class="fdays"><p class="fd-h">날짜별 최저가 · 1인<small>${qs.get('b') ? '같은 일정 길이 우선' : '편도'}</small></p><div class="fd-row">${x.days.map(d => {
       const dt = new Date(d.d + 'T00:00'), on = d.d === a0, tag = live && d.price && !on ? 'button' : 'span';
       return `<${tag} class="fd${on ? ' on' : ''}${d.price ? '' : ' none'}"${tag === 'button' ? ` data-day="${d.d}" aria-label="${md(dt)} 출발로 다시 찾기"` : ''}><small>${md(dt)} (${WD[dt.getDay()]})</small><b>${d.price ? man(d.price) : '–'}</b></${tag}>`; }).join('')}</div></div>`);
@@ -3634,6 +3669,48 @@ async function loadPrice(el) {
     if (x.airlines?.length > 1) el.insertAdjacentHTML('beforeend', `<p class="fd-h" style="margin-top:16px">항공사별 최저가<small>${x.exact ? '여행 날짜 기준' : '같은 달 기준'}</small></p><ul class="fair">${x.airlines.map(f => `<li><a href="${esc(f.link)}" target="_blank" rel="noopener">
       <span class="fp-a"><b>${esc(airlineOf(f.airline) || f.airline)}</b><small>${t(f.depart).split(' ').slice(0, 2).join(' ')} 출발 · ${stop(f.transfers)}</small></span><span class="fp-p"><b>${Math.round(f.price).toLocaleString('ko-KR')}원</b></span></a></li>`).join('')}</ul>`);
   } catch { el.remove(); }
+}
+// 예약 탭 항공권 결과: 가장 싼 편을 크게(가는 편·오는 편), 나머지는 작은 카드. 금액은 1인 참고가 × 인원
+// shortcut: 도착 시각은 도착지 시간대를 몰라 안 보여 줌(비행 시간만), 실시간 API 승인되면 붙임
+async function loadFly(el) {
+  const q = el.dataset.q, n = +el.dataset.n || 1, qs = new URLSearchParams(q), a0 = qs.get('a'), rt = qs.has('b');
+  let x;
+  try {
+    if (!priceCache.has(q)) priceCache.set(q, fetch(`${KAKAO_AUTH}/flights?${q}`, { signal: AbortSignal.timeout(8000) })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status)).catch(e => { priceCache.delete(q); throw e; }));
+    x = await priceCache.get(q);
+  } catch { x = {}; }
+  if (!el.isConnected) return;
+  // 고른 날짜 편 + 항공사별 최저가 (겹치는 것 빼고 싼 순)
+  // 고른 날짜에 가까운 편부터 (출발일 차이 + 박수 차이), 같으면 싼 순
+  const b0 = qs.get('b'), off = f => Math.abs(span(a0, f.depart.slice(0, 10))) + (rt && f.ret ? Math.abs(span(f.depart.slice(0, 10), f.ret.slice(0, 10)) - span(a0, b0)) : 0);
+  const seen = new Set(), all = [...(x.list || []), ...(x.airlines || [])].filter(f => !seen.has(f.link) && seen.add(f.link)).sort((p, q2) => off(p) - off(q2) || p.price - q2.price);
+  el.closest('.fsec')?.querySelector('.badge-y')?.toggleAttribute('hidden', !!x.exact || !all.length);
+  const won = v => Math.round(v).toLocaleString('ko-KR') + '원';
+  const day = s => { const d = new Date(s.slice(0, 10) + 'T00:00'); return `${md(d)} ${WD[d.getDay()]}`; };
+  const dur = m => m ? `${Math.floor(m / 60)}시간${m % 60 ? ` ${m % 60}분` : ''}` : '';
+  const stop = k => k == null ? '' : k ? `경유 ${k}회` : '직항';
+  const logo = (c, w) => `<img src="https://pics.avs.io/${w * 2}/${w * 2}/${esc(c)}.png" alt="" width="${w}" height="${w}" loading="lazy" onerror="this.replaceWith(document.createElement('i'))">`;
+  const name = c => esc(airlineOf(c) || c);
+  const leg = (lab, when, c, from, to, m, k) => `<div class="fleg"><p>${SVG(IC.plane)}${lab} · ${day(when)}</p><div class="fl-a">${logo(c, 32)}<small>${name(c)}</small>
+    <b>${when.slice(11, 16)} ${esc(from)} <span>→ ${esc(to)}</span></b><em>${[stop(k), dur(m)].filter(Boolean).join(' · ')} · 출발 현지 시각</em></div></div>`;
+  const draw = () => {
+    const direct = el.dataset.direct === '1', list = all.filter(f => !direct || (f.transfers === 0 && (!rt || !f.back)));
+    const bar = `<div class="fly-f"><button type="button" data-direct aria-pressed="${direct}">직항만</button><span>${n}명 ${rt ? '왕복' : '편도'} 총액 기준</span></div>`;
+    if (!list.length) return el.innerHTML = (all.length ? bar : '') + `<p class="fly-none">${all.length ? '직항 참고 요금이 없어요. ' : '이 날짜 근처의 참고 요금이 아직 없어요. '}아래 예약처에서 실시간 요금을 확인해 주세요.</p>`;
+    const [f, ...rest] = list;
+    const tot = g => `<small>성인 ${n}명 ${rt ? '왕복' : '편도'} 총액</small><b>${won(g.price * n)}</b><small>1인 ${won(g.price)} × ${n}명 · 세금·수수료 포함 여부는 예약처 확인</small>`;
+    el.innerHTML = bar + `<div class="fcard best">${leg('가는 편', f.depart, f.airline, qs.get('from'), qs.get('to'), f.duration, f.transfers)}${f.ret ? leg('오는 편', f.ret, f.airline, qs.get('to'), qs.get('from'), f.durBack, f.back) : ''}
+      <div class="ftot"><div>${tot(f)}</div><a href="${esc(f.link)}" target="_blank" rel="noopener">예약처에서 확인 ↗</a></div></div>`
+      + rest.slice(0, 4).map(g => `<div class="fcard mini"><a class="fm" href="${esc(g.link)}" target="_blank" rel="noopener">
+        <div class="fm-r">${logo(g.airline, 20)}<b>${name(g.airline)}</b><em>가는 편 · ${day(g.depart)} ${g.depart.slice(11, 16)}${g.transfers != null ? ' · ' + stop(g.transfers) : ''}</em></div>
+        ${g.ret ? `<div class="fm-r"><i style="visibility:hidden"></i><em>오는 편 · ${day(g.ret)} ${g.ret.slice(11, 16)}${g.back != null ? ' · ' + stop(g.back) : ''}</em></div>` : ''}
+        <div class="fm-t"><b>${won(g.price * n)}</b><small>1인 ${won(g.price)} × ${n}명 ↗</small></div></a></div>`).join('');
+    const legs = el.querySelectorAll('.fcard.best .fleg > p');
+    [[f.depart, a0], [f.ret, b0]].forEach(([w, want], i) => { if (w && want && w.slice(0, 10) !== want) legs[i]?.insertAdjacentHTML('beforeend', ' <span class="badge-y">다른 날짜</span>'); });
+  };
+  el.onclick = e => { if (e.target.closest('[data-direct]')) { el.dataset.direct = el.dataset.direct === '1' ? '0' : '1'; draw(); } };
+  draw();
 }
 // 투어·입장권: 도시 이름으로 검색 연결
 // shortcut: 제휴 ID 없이 검색 링크만, 제휴 승인되면 링크에 ID를 붙임
@@ -4256,8 +4333,24 @@ function rangeText(a, b) {
   return `${fmtDate(a)} – ${fmtDate(b)} · ${n ? `${n}박 ${n + 1}일` : '당일치기'}`;
 }
 let cal = null;
-function openCal(mode, start, end, done) {
-  cal = { mode, start: start || '', end: mode === 'range' ? end || '' : '', done };
+const man = v => `${(v / 10000).toFixed(v < 100000 ? 1 : 0)}만`;
+// 항공권 달력 참고가: 달마다 한 번 Worker에 물어봄
+const calPxCache = new Map();
+function calPxKey() { const { from, to, n } = cal.px; return new URLSearchParams({ from, to, m: `${cal.y}-${String(cal.m + 1).padStart(2, '0')}`, ...(n ? { n } : {}) }).toString(); }
+function calPxLoad() { // 받는 중이면 true
+  const k = calPxKey(), v = calPxCache.get(k);
+  if (v) return v === 'wait';
+  calPxCache.set(k, 'wait');
+  fetch(`${KAKAO_AUTH}/flights?${k}`, { signal: AbortSignal.timeout(8000) }).then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(j => { const ds = j.days || {}, low = Math.min(...Object.values(ds).map(x => x.p)); for (const d in ds) ds[d].lo = ds[d].p === low; calPxCache.set(k, ds); })
+    .catch(() => calPxCache.delete(k))
+    .finally(() => { if (cal?.px && $('calDlg').open && calPxKey() === k) drawCal(); });
+  return true;
+}
+function calPx(s) { const v = calPxCache.get(calPxKey()); return v && v !== 'wait' ? v[s] || null : null; }
+// px: { from, to, n } 이면 날짜 아래에 항공권 1인 참고가를 붙임 (n = 박수, 0이면 편도)
+function openCal(mode, start, end, done, px = null) {
+  cal = { mode, start: start || '', end: mode === 'range' ? end || '' : '', done, px };
   const base = new Date((cal.start || today()) + 'T00:00');
   cal.y = base.getFullYear(); cal.m = base.getMonth();
   drawCal();
@@ -4273,8 +4366,13 @@ function drawCal() {
     const c = ['cal-d', wd === 0 ? 'sun' : wd === 6 ? 'sat' : '', s === t ? 'today' : '', s < t ? 'past' : '',
       s === cal.start ? 's' : '', s === cal.end ? 'e' : '', cal.end && s > cal.start && s < cal.end ? 'in' : '',
       s === cal.start && cal.end && cal.end !== cal.start ? 'has-e' : ''].filter(Boolean).join(' ');
-    h += `<button type="button" class="${c}" data-d="${s}" aria-label="${fmtDate(s)}"><span>${d}</span></button>`;
+    const pr = cal.px && s >= t ? calPx(s) : null;
+    h += `<button type="button" class="${c}${pr?.lo ? ' lo' : ''}" data-d="${s}" aria-label="${fmtDate(s)}${pr ? ` 1인 참고가 ${pr.p.toLocaleString('ko-KR')}원` : ''}"><span>${d}</span>${cal.px ? `<small${pr && !pr.same ? ' class="alt"' : ''}>${pr ? man(pr.p) : ''}</small>` : ''}</button>`;
   }
+  $('calGrid').classList.toggle('px', !!cal.px);
+  $('calNote').hidden = !cal.px;
+  if (cal.px) $('calNote').textContent = calPxLoad() ? '가격 정보를 불러오는 중…'
+    : cal.px.n ? `날짜 아래 금액은 그날 출발하는 1인 왕복(${cal.px.n}박) 최근 최저 참고가예요. 흐린 금액은 일정 길이가 다르고, 빈 날은 정보가 없어요.` : '날짜 아래 금액은 1인 편도 최근 최저 참고가예요. 빈 날은 정보가 없어요.';
   $('calGrid').innerHTML = h;
   $('calSum').textContent = cal.mode === 'range'
     ? (!cal.start ? '가는 날을 눌러 주세요' : !cal.end ? `${fmtDate(cal.start)} – 오는 날을 눌러 주세요` : rangeText(cal.start, cal.end))
@@ -5011,7 +5109,8 @@ function bkPick(k) {
     done: v => { const x = upTrips().find(t => t.id === v); if (x) bkFromTrip(x); else { bk.trip = ''; bk.edit = false; } renderHomeBook(); } });
   if (k === 'dates') {
     const single = bk.seg === 'fly' && !bk.rt;
-    return openCal(single ? 'single' : 'range', bk.a, single ? '' : bk.b, (a, b) => { const len = bk.b ? span(bk.a, bk.b) : 3; bk.a = a; bk.b = single ? (bk.b && bk.b > a ? bk.b : addDays(a, Math.max(1, len))) : b; renderHomeBook(); });
+    const px = bk.seg === 'fly' && bk.from && bk.to && bk.from !== bk.to ? { from: bk.from, to: bk.to, n: single ? 0 : Math.max(1, span(bk.a, bk.b || bk.a)) } : null;
+    return openCal(single ? 'single' : 'range', bk.a, single ? '' : bk.b, (a, b) => { const len = bk.b ? span(bk.a, bk.b) : 3; bk.a = a; bk.b = single ? (bk.b && bk.b > a ? bk.b : addDays(a, Math.max(1, len))) : b; renderHomeBook(); }, px);
   }
 }
 let pk = null;
@@ -5040,12 +5139,12 @@ function runBk() {
     if (bk.from === bk.to) return err('출발과 도착이 같아요');
     const kr = airportOf(bk.from)?.cc === 'KR' && airportOf(bk.to)?.cc === 'KR', dc = Object.keys(DEST).find(c => airportOf(bk.to)?.city.includes(c)), d = s => md(new Date(s + 'T00:00'));
     $('bkRes').innerHTML = (dc ? `<div class="qband">${img(DEST[dc].ph, `${dc} 풍경`, DEST[dc].pos, DEST[dc].big)}<span class="cp"><b>${ro(dc)} 떠나는<br>첫걸음</b></span></div>` : '')
-      + `<section class="fsec"><div class="h3r"><h3>항공권 참고 가격</h3><span class="badge-y" hidden>여행 날짜와 다른 참고가</span></div>
-      <div class="fprice" data-head="0" data-q="${esc(new URLSearchParams({ from: bk.from, to: bk.to, a: bk.a, ...(b ? { b } : {}) }))}"><small>참고 가격 찾는 중…</small></div>
-      <p class="pinfo">ⓘ ${bk.trip ? '선택한 여행' : '고른'} 일정은 ${d(bk.a)}${b ? ' – ' + d(b) : ''}이에요.<br>최근 검색된 가격으로 실제와 다를 수 있어요.</p></section>
+      + `<section class="fsec"><div class="h3r"><h3>선택한 날짜의 항공권</h3><span class="badge-y" hidden>여행 날짜와 다른 참고가</span></div>
+      <div class="fly" data-n="${bk.n}" data-q="${esc(new URLSearchParams({ from: bk.from, to: bk.to, a: bk.a, ...(b ? { b } : {}) }))}"><p class="fly-none">항공권 찾는 중…</p></div>
+      <p class="pinfo">ⓘ 최근 검색된 참고 요금이에요. 실제 요금과 좌석은 예약처에서 확인해요.</p></section>
       <section class="hsec"><h2 class="h3">항공권 비교하고 예약하기</h2><p class="sub">선택한 파트너에서 조건과 최종 금액을 확인하세요.</p>`
       + bookTiles(FLY_SITES.map(([s, u]) => [s, u(bk.from, bk.to, bk.a, b, bk.n, kr)])) + '</section>';
-    $('bkRes').querySelectorAll('.fprice').forEach(loadPrice);
+    $('bkRes').querySelectorAll('.fly').forEach(loadFly);
   } else {
     if (!bk.city) return err('도시를 넣어 주세요');
     const c = encodeURIComponent(bk.city);
