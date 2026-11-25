@@ -5091,8 +5091,10 @@ $('tripSeg').onclick = e => { const b = e.target.closest('[data-ts]'); if (!b) r
 // 하단 메뉴: 메뉴 순서대로 페이지가 옆으로 밀려 넘어감 (헤더 포함, 메뉴는 고정)
 const TAB_ORDER = ['home', 'trips', 'book', 'cafe', 'blog'];
 const paneOf = t => $({ home: 'hHomeWrap', trips: 'hTrips', book: 'hBook', cafe: 'hCafe', blog: 'hBlog' }[t]);
+let slideEnd = null; // 진행 중인 넘김을 끝내는 함수
 function slideTo(t) {
   const from = hTab, home = $('home');
+  slideEnd?.(); // 빠르게 연달아 누르면 앞 넘김을 바로 끝내고 시작 (안 그러면 앞 복사본이 위에 남아 덮여 보임)
   if (t === from) return home.scrollTo({ top: 0, behavior: 'smooth' });
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const dir = TAB_ORDER.indexOf(t) > TAB_ORDER.indexOf(from) ? 1 : -1;
@@ -5108,7 +5110,9 @@ function slideTo(t) {
   const o = { duration: 300, easing: 'cubic-bezier(.25,.8,.3,1)' };
   home.animate([{ transform: `translateX(${dir * 100}%)` }, { transform: 'none' }], o);
   // 끝난 자리(화면 밖)에 그대로 멈춰 있다가 지움: 끝나자마자 제자리로 튀어 돌아와 잠깐 보이던 문제
-  const end = () => { ghost.remove(); home.getAnimations().forEach(x => x.finish()); };
+  // 늦게 오는 앞 넘김의 정리가 지금 넘김을 끊지 않도록, 자기 차례일 때만 원본 움직임을 끝냄
+  const end = () => { ghost.remove(); if (slideEnd === end) { slideEnd = null; home.getAnimations().forEach(x => x.finish()); } };
+  slideEnd = end;
   ghost.animate([{ transform: 'none' }, { transform: `translateX(${-dir * 100}%)` }], { ...o, fill: 'forwards' }).onfinish = end;
   setTimeout(end, o.duration + 200); // 화면이 멈춰 onfinish가 안 와도 정리
 }
