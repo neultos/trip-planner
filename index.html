@@ -1881,11 +1881,11 @@ console.assert(findCountries('홍콩')[0].code === 'HK' && findCountries('홍')[
   && findCountries('일본')[0].code === 'JP' && flag('KR') === '🇰🇷', 'country search broken');
 
 /* ---------- 여행지 사진: 위키데이터 대표 사진(키·비용 없음), 이름별로 기기에 기억 ---------- */
-try { localStorage.removeItem('cityPh'); localStorage.removeItem('ph2'); localStorage.removeItem('ph3'); } catch {} // 예전 방식(지도·로고가 섞여 나옴) 기록 지우기
+try { localStorage.removeItem('cityPh'); localStorage.removeItem('ph2'); localStorage.removeItem('ph3'); localStorage.removeItem('ph4'); } catch {} // 예전 방식(지도·로고가 섞여 나옴) 기록 지우기
 const phWait = new Set(); // 찾는 중인 이름
 // 사진이 없다고 확인된 자리(찾는 중이면 연회색 상자만)
 const noPhoto = name => !photoOf(name) && !phWait.has((name || '').trim().slice(0, 64));
-let phCache = (() => { try { return JSON.parse(readLocal('ph4')) || {}; } catch { return {}; } })();
+let phCache = (() => { try { return JSON.parse(readLocal('ph5')) || {}; } catch { return {}; } })();
 // 사진 찾을 이름(차례로 시도): 첫 도시 → 여행 이름 첫 단어 → 나라의 대표 도시
 // 나라 이름('일본' 등)의 위키 대표 사진은 칼·지도 같은 게 많아서 그 나라 대표 도시로 바꿔 찾음
 const NATION_ALIAS = /^(한국|국내|미국|USA|UK|터키|UAE|남아공)$/;
@@ -1901,10 +1901,10 @@ async function findPhoto(names) {
 // 도시별로 직접 고른 사진 (위키미디어 공용 파일 이름). '' = 이 이름으로는 사진 없이 다음 이름으로 넘어감
 const CITY_PH = {
   "부산": "Colorful houses in Gamcheon Culture Village at sunset in Busan South Korea.jpg",
-  "강릉": "Namdae stream water reflection of colorful clouds from Wolhwagyo bridge in Gangneung South Korea.jpg",
+  "강릉": "Gyeongpo Lake Cherry Blossoms.JPG",
   "경주": "Illuminated Woljeonggyo Bridge at blue hour in Gyeongju South Korea.jpg",
-  "속초": "View of Sokcho 01.jpg",
-  "도쿄": "Skyscrapers of Shinjuku 2009 January (revised).jpg",
+  "속초": "Ferry in Sokcho.jpg",
+  "도쿄": "Tokyo Shibuya Scramble Crossing 2018-10-09.jpg",
   "교토": "Kinkaku3402CBcropped.jpg",
   "삿포로": "Sapporo beer museum-20091012-RM-211854.jpg",
   "오키나와": "Naha Shuri Castle16s5s3200.jpg",
@@ -1914,7 +1914,7 @@ const CITY_PH = {
   "가나자와": "131109 Kenrokuen Kanazawa Ishikawa pref Japan01s3.jpg",
   "시즈오카": "JRE-Series-E261 RS2.jpg",
   "다카마쓰": "Takamatsu castle09s3872.jpg",
-  "호치민": "Vista de Ciudad Ho Chi Minh desde Bitexco Financial Tower, Vietnam, 2013-08-14, DD 13.JPG",
+  "호치민": "Parque Tao Dan, Ciudad Ho Chi Minh, Vietnam, 2013-08-15, DD 05.JPG",
   "하롱베이": "Halong ensemble (colour corrected).jpg",
   "호이안": "Hoi An (I).jpg",
   "푸켓": "Unnamed island, Cheow Lan Lake.jpg",
@@ -1923,32 +1923,32 @@ const CITY_PH = {
   "타이난": "Tainan Taiwan Fort-Provintia-01.jpg",
   "지우펀": "180124 Jiufen, Taiwan 九份.jpg",
   "하와이": "Waimea Canyon, Kauaʻi.jpg",
-  "라스베이거스": "Las Vegas Strip from Resorts World February 2023 HDR 1.jpg",
+  "라스베이거스": "Welcome to Fabulous Las Vegas.jpg",
   "마이애미": "Lifeguard stand, Miami Beach.jpg",
-  "홍콩": "Hong Kong Harbour Night 2019-06-11.jpg",
+  "홍콩": "Hong Kong skyscrapers in a night of typhoon.jpg",
   "팔라완": "Island lagoon in Bacuit Bay, El Nido, Palawan, Philippines.jpg",
-  "청두": "Anshun Bridge Jin River Chengdu night 2026 dllu.jpg",
-  "싱가포르": "1 singapore city skyline dusk panorama 2011.jpg",
+  "청두": "Chengdu-pandas-d10.jpg",
+  "싱가포르": "2016 Singapur, Downtown Core, Marina Bay Sands (02).jpg",
   "몽생미셸": "Mont St Michel at sunrise.jpg",
   "베네치아": "Canal Grande Chiesa della Salute e Dogana dal ponte dell Accademia.jpg",
   "베니스": "Canal Grande Chiesa della Salute e Dogana dal ponte dell Accademia.jpg",
   "아말피": "VIew of Amalfi.jpg",
   "돌로미티": "Passo Pordoi-bops 01.jpg",
-  "바르셀로나": "Evening light over Barcelona.jpg",
+  "바르셀로나": "Casa Milà - Barcelona, Spain - Jan 2007.jpg",
   "세비야": "Plaza Virgen de los Reyes, Seville, Spain - Sep 2009.jpg",
   "그라나다": "Alhambra in the evening.jpg",
   "에든버러": "00 3331 Edinburgh - Schottland.jpg",
   "마카오": "Lago Nam Van, Macao, 2013-08-08, DD 05.jpg",
-  "쿠알라룸푸르": "Kl-skyline-at-night-2022.jpg",
+  "쿠알라룸푸르": "2016 Kuala Lumpur, Petronas Towers (26).jpg",
   "코타키나발루": "KotaKinabalu Sabah CityMosque-00.jpg",
-  "자카르타": "Jakarta Panorama.jpg",
+  "자카르타": "Jakarta Car Free Day.jpg",
   "롬복": "Lombok Island and Mount Rinjani from Gili Meno Island, Indonesia.jpg",
   "족자카르타": "Yogyakarta Indonesia Prambanan-temple-complex-02.jpg",
-  "인터라켄": "Unterseen from above 140622.jpg",
+  "인터라켄": "Interlaken01.JPG",
   "제네바": "Pont des Bergues et Mouette.jpg",
   "루체른": "CH.LU.Luzern Kapellbrücke 01 16x9-R 16384x9216.jpg",
-  "베를린": "Berlin Mitte June 2023 01.jpg",
-  "프랑크푸르트": "Frankfurt Skyline 2022 bei Nacht.jpg",
+  "베를린": "Reloj Mundial, Berlín, Alemania, 2016-04-22, DD 46-48 HDR.jpg",
+  "프랑크푸르트": "Frankfurt am Main, Römer -- 2015 -- 6732.jpg",
   "함부르크": "Alsterblick Hamburg.jpg",
   "프라하": "Vltava river in Prague.jpg",
   "잘츠부르크": "Salzburg (48489551981).jpg",
@@ -1962,24 +1962,24 @@ const CITY_PH = {
   "카파도키아": "Cappadociasunrise.jpg",
   "안탈리아": "Yivli Minaret Mosque Antalya.jpg",
   "마라케시": "Marrakesh, Morocco (8141914885).jpg",
-  "케이프타운": "Cape-town-port-boats.jpg",
+  "케이프타운": "CapeTown CityHall.jpg",
   "퀘벡": "Chateau Frontenac illuminated at night in Quebec City.jpg",
   "밴프": "Moraine Lake-Banff NP.JPG",
   "칸쿤": "Cancun Beach.jpg",
-  "쿠스코": "99 - Machu Picchu - Juin 2009.edit3.jpg",
-  "루앙프라방": "View of Mount Phou Si and Mekong bank at sunset seen from Wat Chomphet in Luang Prabang Laos.jpg",
+  "쿠스코": "Machu Picchu, Perú, 2015-07-30, DD 60.JPG",
+  "루앙프라방": "Rainbow over stupa at Wat Phone Sa Ath Phatiya Moungkoun bouddhist temple in Luang Prabang Laos.jpg",
   "시엠레아프": "2016 Angkor, Banteay Kdei (27).jpg",
   "울란바토르": "Zespół klasztoru Gandan (12).jpg",
   "몰디브": "Diamonds Thudufushi Beach and Water Villas, May 2017 -09.jpg",
   "알마티": "Zenkov Cathedral, Almaty.jpg",
-  "대전": "Daejeon Expo Bridge arches.jpg",
-  "하노이": "Tháp Rùa - NKS.jpg",
+  "대전": "Expo Bridge in Daejeon.jpg",
+  "하노이": "Hanoi Opera House, 24 December 2016.jpg",
   "타이베이": "Taipei Taiwan Taipei-101-Tower-01.jpg",
   "알래스카": "Aurora borealis over Eielson Air Force Base, Alaska.jpg",
   "하얼빈": "哈尔滨圣索菲亚教堂侧面仰视图.jpg",
   "마드리드": "Palacio de Comunicaciones - 47.jpg",
   "랑카위": "Langkawi Malaysia Langkawi-Cable-Car-03.jpg",
-  "시드니": "Sydney Opera House and Harbour Bridge Dusk (2) 2019-06-21.jpg",
+  "시드니": "Sydneyoperahouse at night.jpg",
   "케언스": "Cairns Esplanade - Pier (Shangrila Hotel).jpg",
   "크라이스트처치": "NZL-christchurch-peac-f-arts-c.jpg",
   "융프라우": "Gimmelwald-Grütschalp 29.07.2009 16-04-06.JPG",
@@ -1990,8 +1990,8 @@ const CITY_PH = {
   "하코네": "LakeAshi and MtFuji Hakone.JPG",
   "치앙마이": "Chiang-Mai Thailand Buddhist-Manuscript-Library-and-Museum-01.jpg",
   "시애틀": "SeattleI5Skyline.jpg",
-  "상하이": "Pudong Shanghai November 2017 panorama.jpg",
-  "니스": "Nice from Castle Hill 01.jpg",
+  "상하이": "Shanghai skyline waterfront pudong 5166168 69 70.jpg",
+  "니스": "Nice port.jpg",
   "피렌체": "Florence Cathedral seen from Piazzale Michelangelo night dllu.jpg",
   "퀸스타운": "Queenstown NZ 08.jpg",
   "크라쿠프": "Barbakan przed wschodem słońca.jpg",
@@ -2033,7 +2033,7 @@ function photoOf(name) {
   phCache[name] = '';
   phWait.add(name);
   findPhoto(name).then(u => {
-    phCache[name] = u; phWait.delete(name); writeLocal('ph4', JSON.stringify(phCache));
+    phCache[name] = u; phWait.delete(name); writeLocal('ph5', JSON.stringify(phCache));
     if (u) { const im = new Image(); im.onload = () => showPhoto(name, u); im.src = u; }
     else document.querySelectorAll('[data-ph]').forEach(el => el.dataset.ph === name && el.classList.add('noph'));
   }, () => { delete phCache[name]; phWait.delete(name); }); // 인터넷이 안 될 때는 다음에 다시 찾음
@@ -4760,8 +4760,8 @@ const IC = {
 };
 // 여행지: 사진이 있는 도시만 (사진 없는 도시는 회색 박스로 채우지 않음)
 const DEST = {
-  홍콩: { country: '홍콩', air: 'HKG', abroad: 1, ph: 'hongkong-harbour-night', big: 1, pos: '62% 50%', line: '낮부터 밤까지 새로운 발견' },
-  다낭: { country: '베트남', air: 'DAD', abroad: 1, ph: 'danang-beach', big: 1, pos: '50% 60%', line: '바다와 휴식이 가까운 도시' },
+  홍콩: { country: '홍콩', air: 'HKG', abroad: 1, ph: 'hongkong-ifc-night', big: 1, pos: '40% 60%', line: '낮부터 밤까지 새로운 발견' },
+  다낭: { country: '베트남', air: 'DAD', abroad: 1, ph: 'danang-coracles', big: 1, pos: '50% 65%', line: '바다와 휴식이 가까운 도시' },
   제주: { country: '대한민국', air: 'CJU', abroad: 0, ph: 'jeju-seongsan', big: 1, pos: '50% 45%', line: '바다와 오름을 함께 걷는 섬' },
   오사카: { country: '일본', air: 'KIX', abroad: 1, ph: 'dest-osaka', pos: '62% 45%', line: '깊고 다채로운 매력의 도시' },
   타이베이: { country: '대만', air: 'TPE', abroad: 1, ph: 'dest-taipei', pos: '62% 50%', line: '미식과 감성이 가득한 여행' },
