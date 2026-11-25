@@ -2138,7 +2138,10 @@ function reveal(root) {
 function showHome() {
   unsub?.(); unsub = null; tripId = null; loaded = false; stopTour();
   document.body.classList.add('at-home'); $('invite').classList.remove('on'); renderMe();
-  if (navigator.userActivation?.isActive) setTimeout(() => armGuard?.(), 0); // 버튼을 눌러 홈으로 왔으면 바로 한 번 막아 둠
+  // 버튼을 눌러 홈으로 왔거나 앱을 막 켰으면 바로 한 번 막아 둠. 켜자마자 쌓은 기록은 크롬이 건너뛰지만, 화면을 한 번이라도 누르면 다시 살려 줌
+  if (!showHome.ran && history.state?.layer) history.replaceState(null, ''); // 지난번에 남은 팝업 기록이면 지움 (있으면 홈 보호가 안 걸림)
+  if (navigator.userActivation?.isActive || !showHome.ran) setTimeout(() => armGuard?.(), 0);
+  showHome.ran = 1;
   renderTip();
   homeTab(hTab);
   const ended = x => x.end && span(today(), x.end) < 0;
