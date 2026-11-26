@@ -1,10 +1,11 @@
 <resources>
-    <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">#FFFFFF</item>
+    <!-- 켤 때 바탕은 웹 스플래시와 같은 남색 (흰 화면 없이 바로 이어지게) -->
+    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#06162F</item>
         <item name="android:colorAccent">#1557FF</item>
-        <item name="android:statusBarColor">#FFFFFF</item>
-        <item name="android:navigationBarColor">#FFFFFF</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">#06162F</item>
+        <item name="android:navigationBarColor">#06162F</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
     <style name="ConfigTheme" parent="android:style/Theme.Material.Light.Dialog.NoActionBar" />
 </resources>

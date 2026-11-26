@@ -17,6 +17,8 @@ import android.widget.*;
 public final class MainActivity extends Activity {
     static final String HOME = "https://neultos.github.io/trip-planner/";
     private static final int PICK_FILE = 41;
+    private static final int SPLASH = 0xFF06162F; // 웹 스플래시 바탕(#06162F)
+    private boolean lightBars;
     private WebView web;
     private FrameLayout root;
     private View errorView;
@@ -26,15 +28,13 @@ public final class MainActivity extends Activity {
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
-        getWindow().setStatusBarColor(Color.WHITE);
-        getWindow().setNavigationBarColor(Color.WHITE);
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        if (Build.VERSION.SDK_INT >= 31) getSplashScreen().setOnExitAnimationListener(v -> v.remove()); // 시스템 스플래시는 애니메이션 없이 바로 걷음
         root = new FrameLayout(this);
-        root.setBackgroundColor(Color.WHITE);
+        root.setBackgroundColor(SPLASH);
         root.setFitsSystemWindows(true);
         setContentView(root);
         web = new WebView(this);
-        web.setBackgroundColor(Color.WHITE);
+        web.setBackgroundColor(SPLASH); // 웹 스플래시가 그려지기 전에도 같은 남색
         root.addView(web, new FrameLayout.LayoutParams(-1, -1));
 
         WebSettings s = web.getSettings();
@@ -51,7 +51,7 @@ public final class MainActivity extends Activity {
             @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
                 return r.isForMainFrame() && route(r.getUrl().toString());
             }
-            @Override public void onPageFinished(WebView v, String url) { syncTrips(); }
+            @Override public void onPageFinished(WebView v, String url) { syncTrips(); watchSplash(0); }
             @Override public void doUpdateVisitedHistory(WebView v, String url, boolean reload) { exitAt = -1; }
             @Override public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) {
                 if (r.isForMainFrame()) showError();
@@ -118,6 +118,23 @@ public final class MainActivity extends Activity {
         catch (ActivityNotFoundException e) { Toast.makeText(this, "열 수 있는 앱이 없어요", Toast.LENGTH_SHORT).show(); }
     }
 
+    /** 웹 스플래시가 사라지면 상태바·아래 버튼 줄을 웹 화면처럼 흰색으로 */
+    private void watchSplash(int tries) {
+        if (lightBars || web == null) return;
+        web.evaluateJavascript("!!document.querySelector('#splash:not(.out)')", v -> {
+            if ("true".equals(v) && tries < 40) web.postDelayed(() -> watchSplash(tries + 1), 150);
+            else lightBars();
+        });
+    }
+
+    private void lightBars() {
+        lightBars = true;
+        getWindow().setStatusBarColor(Color.WHITE);
+        getWindow().setNavigationBarColor(Color.WHITE);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        root.setBackgroundColor(Color.WHITE);
+    }
+
     /** 웹이 기기에 저장한 여행 목록(localStorage 'trips')을 위젯용으로 복사 */
     private void syncTrips() {
         if (web == null || web.getUrl() == null || !web.getUrl().startsWith(HOME)) return;
@@ -151,6 +168,7 @@ public final class MainActivity extends Activity {
 
     private void showError() {
         if (errorView != null) return;
+        lightBars();
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setGravity(Gravity.CENTER);

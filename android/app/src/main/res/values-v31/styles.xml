@@ -1,0 +1,13 @@
+<resources>
+    <!-- 안드로이드 12+ 시스템 스플래시: 아이콘 없이 남색만 (곧바로 웹 스플래시로) -->
+    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#06162F</item>
+        <item name="android:colorAccent">#1557FF</item>
+        <item name="android:statusBarColor">#06162F</item>
+        <item name="android:navigationBarColor">#06162F</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowSplashScreenBackground">#06162F</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/blank</item>
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
+    </style>
+</resources>
