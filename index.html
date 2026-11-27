@@ -3263,12 +3263,12 @@ const tapSheet = () => userSheet(snap === 'high' || snap === 'full' ? 'mid' : 'h
   });
   g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tapSheet(); } };
 
-  // 위쪽(탭·날짜·도시 줄)을 위아래로 밀면 높이 조절. 일정 목록 안에서 밀면 목록만 스크롤
+  // 위쪽(탭·날짜·도시 줄)을 위아래로 밀면 높이 조절. 목록 안에서는 맨 위에서 더 내릴 때 줄이고, 가장 작을 때 올리면 키움. 그 밖엔 목록만 스크롤
   const wide = matchMedia('(min-width:820px)');
   let t = null;
   sh.addEventListener('touchstart', e => {
     t = null;
-    if (wide.matches || e.touches.length > 1 || drag || e.target.closest('#grip, #scroll, #pane, #selBar, #addPlace, input, textarea, select')) return;
+    if (wide.matches || e.touches.length > 1 || drag || e.target.closest('#grip, #selBar, #addPlace, input, textarea, select')) return;
     t = { y0: e.touches[0].clientY, x0: e.touches[0].clientX, y: e.touches[0].clientY, h: sh.offsetHeight, s: e.target.closest('#scroll, #pane'), mode: '' };
   }, { passive: true });
   sh.addEventListener('touchmove', e => {
@@ -3278,7 +3278,7 @@ const tapSheet = () => userSheet(snap === 'high' || snap === 'full' ? 'mid' : 'h
     if (!t.mode) {
       if (Math.abs(dy) < 6 || Math.abs(dy) < Math.abs(dx)) return;
       const atTop = snap === 'full' ? scrollY <= 0 : !t.s || t.s.scrollTop <= 0;
-      t.mode = (dy < 0 ? snap !== 'full' : atTop && snap !== 'low') ? 'sheet' : 'scroll';
+      t.mode = (dy < 0 ? (t.s ? snap === 'low' : snap !== 'full') : atTop && snap !== 'low') ? 'sheet' : 'scroll';
       if (t.mode === 'sheet') { t.h = sheetH(); sh.classList.add('dragging'); }
     }
     if (t.mode !== 'sheet') return;
